@@ -1,0 +1,156 @@
+package github.alexzhirkevich.studentbsuby.ui.screens.drawer.about
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.google.accompanist.insets.statusBarsHeight
+import github.alexzhirkevich.studentbsuby.R
+import github.alexzhirkevich.studentbsuby.ui.common.BurgerMenuButton
+import github.alexzhirkevich.studentbsuby.ui.theme.StudentbsubyTheme
+import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
+import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import me.onebone.toolbar.*
+
+@Preview
+@Composable
+private fun aboutPrev() {
+
+    StudentbsubyTheme() {
+        AboutScreen {
+
+        }
+    }
+}
+
+@ExperimentalToolbarApi
+@Composable
+fun AboutScreen(onMenuClicked : () -> Unit) {
+
+    val scaffoldState = rememberCollapsingToolbarScaffoldState(
+        toolbarState = rememberCollapsingToolbarState(0)
+    )
+
+    LaunchedEffect(Unit){
+        scaffoldState.toolbarState.collapse(0)
+        scaffoldState.toolbarState.expand(500)
+    }
+
+    CollapsingToolbarScaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background),
+        toolbarModifier = Modifier
+            .background(MaterialTheme.colors.secondary),
+        state = scaffoldState,
+        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+        toolbar = {
+            Column() {
+                Spacer(modifier = Modifier.statusBarsHeight())
+                TopAppBar(
+                    elevation = 0.dp,
+                    backgroundColor = Color.Transparent
+                ) {
+                    BurgerMenuButton(onClick = onMenuClicked)
+                    AnimatedVisibility(visible = scaffoldState.toolbarState.progress == 0f) {
+                        Text(
+                            text = stringResource(id = R.string.about),
+                            style = MaterialTheme.typography.subtitle1
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = stringResource(id = R.string.app_name)
+//                    .replace(' ','\n')
+                ,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h2,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .parallax(0.5f)
+                    .animatedSquaresBackground(
+                        color = MaterialTheme.colors.primary.copy(alpha = .05f),
+                        count = 10,
+                        size = 200.dp
+                    )
+                    .alpha(scaffoldState.toolbarState.progress)
+                    .padding(
+                        vertical = 60.dp,
+                        horizontal = 50.dp
+                    )
+            )
+        }) {
+
+        Column(
+            Modifier
+                .bsuBackgroundPattern(
+                    color = MaterialTheme.colors.primary.copy(alpha = .05f)
+                )
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp)
+
+
+        ) {
+
+            Card(
+                elevation = 3.dp
+            ) {
+                Text(
+                    text = stringResource(R.string.about_text),
+                    style = MaterialTheme.typography.body1,
+                    textAlign = TextAlign.Justify,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "E-mail",
+                        tint = MaterialTheme.colors.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                IconButton(onClick = { }) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_telegram),
+                        contentDescription = "Telegram",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        }
+    }
+}

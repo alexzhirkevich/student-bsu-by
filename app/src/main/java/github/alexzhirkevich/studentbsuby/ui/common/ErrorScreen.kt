@@ -1,0 +1,105 @@
+package github.alexzhirkevich.studentbsuby.ui.common
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Updater
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.statusBarsHeight
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import github.alexzhirkevich.studentbsuby.R
+import github.alexzhirkevich.studentbsuby.util.Updatable
+
+@Composable
+fun ErrorScreen(
+    toolbarText: String,
+    error: String,
+    updater: Updatable,
+    title: String = stringResource(id = R.string.something_gone_wrong),
+    onMenuClicked: () -> Unit = {}
+) {
+    Column(
+        Modifier
+            .background(MaterialTheme.colors.secondary)
+            .zIndex(2f)
+    ) {
+        Spacer(modifier = Modifier.statusBarsHeight())
+        TopAppBar(
+            elevation = 0.dp,
+            backgroundColor = Color.Transparent
+        ) {
+            BurgerMenuButton(onMenuClicked)
+            Text(
+                text = toolbarText,
+                style = MaterialTheme.typography.subtitle1
+            )
+        }
+    }
+
+    val status = LocalWindowInsets.current.statusBars.bottom
+    with(LocalDensity.current) {
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(
+                isRefreshing = updater.isUpdating.value
+            ),
+            indicatorPadding = PaddingValues(top = status.toDp() + 75.dp),
+            onRefresh = updater::update
+        ) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .background(MaterialTheme.colors.background)
+            ) {
+                ErrorWidget(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = 30.dp),
+                    title = title,
+                    error = error
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ErrorWidget(title : String, error : String, modifier: Modifier = Modifier) {
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.error),
+            contentDescription = ""
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.h2,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = error,
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center
+
+        )
+    }
+}

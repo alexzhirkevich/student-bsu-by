@@ -1,0 +1,91 @@
+<resources>
+    <string name="app_name">Кабинет студента БГУ</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="btn_login">Войти</string>
+    <string name="captcha">Текст с картинки</string>
+    <string name="fbml">Автокапча powered by Firebase ML</string>
+    <string name="error_connection">Не удается установить соединение</string>
+    <string name="cant_login">Не удается войти?</string>
+    <string name="autologin">входить автоматически</string>
+    <string name="settings">Настройки</string>
+    <string name="dark_theme">Темная тема</string>
+    <string name="about">О приложении</string>
+    <string name="logout">Выйти</string>
+    <string name="subjects">Предметы</string>
+    <string name="zachet">Зачет</string>
+    <string name="exam">Экзамен</string>
+    <string name="loading_captcha">Загружаем капчу</string>
+    <string name="restoring_session">Восстанавливаем старую сессию</string>
+    <string name="recognizing_captcha">Распознаем капчу</string>
+    <string name="trying_to_singin">Пытаемся войти</string>
+    <string name="semester">%d сем.</string>
+    <string name="lectures">Лекц.</string>
+    <string name="pract">Практ.</string>
+    <string name="labs">Лаб.</string>
+    <string name="seminars">Сем.</string>
+    <string name="facults">Факул.</string>
+    <string name="ksr">Кср</string>
+    <string name="with_credit">С зачетом</string>
+    <string name="with_exam">С экзаменом</string>
+    <string name="subjects_not_found_for_day">Предметы на этот день не найдены</string>
+    <string name="audience">Аудитория</string>
+    <string name="type">Тип</string>
+    <string name="teacher">Препод.</string>
+    <string name="timetable">Расписание</string>
+    <string name="error_load_timetable">Не удалось загрузить расписание</string>
+    <string name="about_text">"Приложение позволяет получить доступ к личному кабинету студента БГУ. Оно является неофициальным и открытым, исходный код доступен на github. \n\nЕсли какие-то функции не работают или работают неправильно, пожалуйста, свяжитесь с разработчиком любым удобным способом из указанных ниже, либо создайте issue на github."</string>
+    <string name="error_load_hostel">Не удалось получить информацию про общежитие</string>
+    <string name="hostel">Общежитие</string>
+    <string name="hostel_provided">Вам предоставлено общежитие</string>
+    <string name="show_on_map">Показать на карте</string>
+    <string name="unknown_adress">Адрес не указан</string>
+    <string name="conditions">Условия</string>
+    <string name="price">Стоимость</string>
+    <string name="note">Примечание</string>
+    <string name="hostel_not_provided">Вам не предоставлено общежитие</string>
+    <string name="hostel_not_provided_ext">Возможно, если Вы подали заявление, общежитие будет предоставлено позднее. Также Вы можете присмотреть себе вариант жилья из этого списка.</string>
+    <string name="close">Закрыть</string>
+    <string name="phone">Телефон</string>
+    <string name="something_gone_wrong">Что-то пошло не так…</string>
+    <string name="timetable_empty_for_day">Расписание на этот день не найдено</string>
+    <string name="empty">Пусто...</string>
+    <string name="timetable_empty">Не удалось найти расписание</string>
+    <string name="subjects_empty">Список предметов пуст</string>
+    <string name="error_load_subjects">Не удалось загрузить список предметов</string>
+    <string name="error_username_not_found">Не найдено имя пользователя. Попробуйте перезайти в аккаунт</string>
+
+    <string-array name="months">
+        <item>Январь</item>
+        <item>Февраль</item>
+        <item>Март</item>
+        <item>Апрель</item>
+        <item>Май</item>
+        <item>Июнь</item>
+        <item>Июль</item>
+        <item>Август</item>
+        <item>Сентябрь</item>
+        <item>Октябрь</item>
+        <item>Ноябрь</item>
+        <item>Декабрь</item>
+    </string-array>
+
+    <string-array name="weekdays">
+        <item>Понедельник</item>
+        <item>Вторник</item>
+        <item>Среда</item>
+        <item>Четверг</item>
+        <item>Пятница</item>
+        <item>Суббота</item>
+        <item>Воскресенье</item>
+    </string-array>
+    <string-array name="weekdays_short">
+        <item>Пн.</item>
+        <item>Вт.</item>
+        <item>Ср.</item>
+        <item>Чт.</item>
+        <item>Пт.</item>
+        <item>Сб.</item>
+        <item>Вс.</item>
+    </string-array>
+</resources>
