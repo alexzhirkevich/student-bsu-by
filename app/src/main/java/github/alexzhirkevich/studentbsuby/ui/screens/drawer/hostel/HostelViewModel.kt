@@ -94,16 +94,18 @@ class HostelViewModel @Inject constructor(
             if (_hostelState.value is DataState.Loading)
                 _hostelState.value = DataState.Error(R.string.error_load_hostel)
         }.onFailure {
-            _hostelState.tryEmit(
-                DataState.Error(
-                    message = when (it) {
-                        is UsernameNotFoundException ->
-                            R.string.error_username_not_found
-                        else -> R.string.error_load_hostel
-                    },
-                    error = it
+            if (_hostelState.value !is DataState.Success) {
+                _hostelState.tryEmit(
+                    DataState.Error(
+                        message = when (it) {
+                            is UsernameNotFoundException ->
+                                R.string.error_username_not_found
+                            else -> R.string.error_load_hostel
+                        },
+                        error = it
+                    )
                 )
-            )
+            }
             logger.log(
                 "Failed to load hostel state",
                 tag = javaClass.simpleName,

@@ -4,6 +4,8 @@ import github.alexzhirkevich.studentbsuby.api.TimetableApi
 import github.alexzhirkevich.studentbsuby.api.dayOfWeek
 import github.alexzhirkevich.studentbsuby.dao.LessonsDao
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
+import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
+import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.internal.toImmutableList
@@ -31,59 +33,59 @@ class TimetableRepository @Inject constructor(
     }
 
     private suspend fun getTimetableFromWeb(): List<List<Lesson>> {
-        return kotlin.runCatching {
 
-            val username = loginRepository.cachedLogin.takeIf(String::isNotBlank)
-                ?: return@runCatching emptyList()
+        val username = loginRepository.cachedLogin.takeIf(String::isNotBlank)
+            ?: throw UsernameNotFoundException()
 
-            coroutineScope {
-                (0..6).map { day ->
-                    async {
-                        val resp = timetableApi.timetable(timetableApi.dayOfWeek(day))
-                        if (!resp.isSuccessful)
-                            return@async emptyList()
-                        val bytes = resp.body()?.byteStream()?.readBytes() ?: return@async emptyList()
-                        val html =
-                            '<' + String(bytes).substringAfter('<').substringBeforeLast('>') + '>'
-                        val jsoup = Jsoup.parse(html)
+        return coroutineScope {
+            (0..6).map { day ->
+                async {
+                    val resp = timetableApi.timetable(timetableApi.dayOfWeek(day))
+                    if (!resp.isSuccessful)
+                        throw FailResponseException()
+                    val bytes = resp.body()?.byteStream()?.readBytes() ?: return@async emptyList()
+                    val html =
+                        '<' + String(bytes).substringAfter('<').substringBeforeLast('>') + '>'
+                    val jsoup = Jsoup.parse(html)
 
-                        val numbers = jsoup.getElementsByClass("styleNumber").mapNotNull {
-                            it.text().toIntOrNull() to (it.attr("rowspan").toIntOrNull() ?: 1)
-                        }
-                        val timesStart = jsoup.getElementsByClass("styleTimeIn").map {
-                            it.text().orEmpty()
-                        }
-                        val timesEnd = jsoup.getElementsByClass("styleTimeOut").map {
-                            it.text().orEmpty()
-                        }
-                        val names = jsoup.getElementsByClass("styleLesson").map {
-                            it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
-                        }
-                        val types = jsoup.getElementsByClass("styleKindLesson").map {
-                            it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
-                        }
-                        val audiences = jsoup.getElementsByClass("styleHall").map {
-                            it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
-                        }
-                        val teachers = jsoup.getElementsByClass("styleTeacher").map {
-                            it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
-                        }
+                    val numbers = jsoup.getElementsByClass("styleNumber").mapNotNull {
+                        it.text().toIntOrNull() to (it.attr("rowspan").toIntOrNull() ?: 1)
+                    }
+                    val timesStart = jsoup.getElementsByClass("styleTimeIn").map {
+                        it.text().orEmpty()
+                    }
+                    val timesEnd = jsoup.getElementsByClass("styleTimeOut").map {
+                        it.text().orEmpty()
+                    }
+                    val names = jsoup.getElementsByClass("styleLesson").map {
+                        it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
+                    }
+                    val types = jsoup.getElementsByClass("styleKindLesson").map {
+                        it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
+                    }
+                    val audiences = jsoup.getElementsByClass("styleHall").map {
+                        it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
+                    }
+                    val teachers = jsoup.getElementsByClass("styleTeacher").map {
+                        it.text().orEmpty() to (it.attr("rowspan").toIntOrNull() ?: 1)
+                    }
 
-                        val spans = numbers.map { it.second }
+                    val spans = numbers.map { it.second }
 
-                        val chunkedNames = chunk(spans,names).map {
-                            it.joinToString(separator = " \\ ")
-                        }
-                        val chunkedTypes = chunk(spans,types).map {
-                            it.joinToString(separator = " \\ ")
-                        }
-                        val chunkedAudiences = chunk(spans,audiences).map {
-                            it.joinToString(separator = " \\ ")
-                        }
-                        val chunkedTeachers = chunk(spans,teachers).map {
-                            it.joinToString(separator = " \\ ")
-                        }
+                    val chunkedNames = chunk(spans, names).map {
+                        it.joinToString(separator = " \\ ")
+                    }
+                    val chunkedTypes = chunk(spans, types).map {
+                        it.joinToString(separator = " \\ ")
+                    }
+                    val chunkedAudiences = chunk(spans, audiences).map {
+                        it.joinToString(separator = " \\ ")
+                    }
+                    val chunkedTeachers = chunk(spans, teachers).map {
+                        it.joinToString(separator = " \\ ")
+                    }
 
+                    kotlin.runCatching {
                         numbers.indices.mapNotNull {
                             if (it in chunkedNames.indices && chunkedNames[it].isNotEmpty()) {
                                 Lesson(
@@ -106,17 +108,17 @@ class TimetableRepository @Inject constructor(
                                 )
                             } else null
                         }
+                    }.getOrNull() ?: emptyList()
+                }
+            }.awaitAll().take(6).let {
+                if (it.size == 6) it else it.toMutableList().apply {
+                    repeat(6 - it.size) {
+                        add(emptyList())
                     }
-                }.awaitAll().take(6).let {
-                    if (it.size == 6) it else it.toMutableList().apply {
-                        repeat(6-it.size){
-                            add(emptyList())
-                        }
-                        it.toImmutableList()
-                    }
+                    it.toImmutableList()
                 }
             }
-        }.getOrNull() ?: emptyList()
+        }
     }
 
     private fun <T> chunk(spans : List<Int>, values : List<Pair<T,Int>>) : List<List<T>> {

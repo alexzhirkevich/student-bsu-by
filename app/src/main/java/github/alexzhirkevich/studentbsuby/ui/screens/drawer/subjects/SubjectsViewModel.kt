@@ -140,15 +140,18 @@ class SubjectsViewModel @Inject constructor(
                 applySubjectFilter()
             }
         }.onFailure {
-            _subjects.tryEmit(
-               DataState.Error(
-                   message = when(it) {
-                       is UsernameNotFoundException ->
-                           R.string.error_username_not_found
-                       else ->R.string.error_load_subjects
-                   },
-                   error = it
-               ))
+            if (_subjects.value !is DataState.Success) {
+                _subjects.tryEmit(
+                    DataState.Error(
+                        message = when (it) {
+                            is UsernameNotFoundException ->
+                                R.string.error_username_not_found
+                            else -> R.string.error_load_subjects
+                        },
+                        error = it
+                    )
+                )
+            }
             logger.log(
                 msg = "Failed to get current semester",
                 tag = javaClass.simpleName,

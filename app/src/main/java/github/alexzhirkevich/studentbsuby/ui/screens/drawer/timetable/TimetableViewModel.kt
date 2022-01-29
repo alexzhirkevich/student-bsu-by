@@ -114,7 +114,9 @@ class TimetableViewModel @Inject constructor(
                 )
             }
         }.onFailure {
-            _timetable.tryEmit(DataState.Error(R.string.error_load_timetable, it))
+            if (_timetable.value !is DataState.Success) {
+                _timetable.tryEmit(DataState.Error(R.string.error_load_timetable, it))
+            }
         }
     }
 
