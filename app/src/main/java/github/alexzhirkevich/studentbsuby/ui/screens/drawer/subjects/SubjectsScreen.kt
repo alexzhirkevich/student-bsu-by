@@ -35,10 +35,7 @@ import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Subject
-import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
-import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBarSwipeRefreshIndicator
-import github.alexzhirkevich.studentbsuby.ui.common.BurgerMenuButton
-import github.alexzhirkevich.studentbsuby.ui.common.ErrorWidget
+import github.alexzhirkevich.studentbsuby.ui.common.*
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
@@ -68,68 +65,77 @@ fun SubjectsScreen(
     val visibleSubjects by subjectsViewModel.visibleSubjects.collectAsState()
     val currentSemester by subjectsViewModel.currentSemester
 
-    Column {
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.secondary)
-                .statusBarsHeight()
-                .zIndex(2f)
-        )
-        CollapsingToolbarScaffold(
-            modifier = Modifier
-                .zIndex(1f)
-                .bsuBackgroundPattern(
-                    color = MaterialTheme.colors.primary.copy(alpha = .05f),
-                    clip = true
-                ),
-            state = scaffoldState,
-            enabled = refreshState.indicatorOffset == 0f,
-            scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
-            toolbar = {
-                Toolbar(
-                    viewModel = subjectsViewModel,
-                    toolbarState = scaffoldState.toolbarState,
-                    onMenuClicked = onMenuClicked
+
+    when (subjects) {
+        is DataState.Success<*>, is DataState.Loading -> {
+            Column {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.secondary)
+                        .statusBarsHeight()
+                        .zIndex(2f)
                 )
-            })
-        {
-
-            when (subjects) {
-                is DataState.Success<*> -> {
-                    Body(
-                        initialSemester = currentSemester,
-                        visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
-                        subjects = subjects.valueOrNull()!!,
-                        updater = subjectsViewModel,
-                        refreshState = refreshState,
-                    )
-                }
-                is DataState.Loading -> Box(
+                CollapsingToolbarScaffold(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .zIndex(1f)
+                        .bsuBackgroundPattern(
+                            color = MaterialTheme.colors.primary.copy(alpha = .05f),
+                            clip = true
+                        ),
+                    state = scaffoldState,
+                    enabled = refreshState.indicatorOffset == 0f,
+                    scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
+                    toolbar = {
+                        Toolbar(
+                            viewModel = subjectsViewModel,
+                            toolbarState = scaffoldState.toolbarState,
+                            onMenuClicked = onMenuClicked
+                        )
+                    })
+                {
+                    if (subjects is DataState.Success) {
+                        Body(
+                            initialSemester = currentSemester,
+                            visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
+                            subjects = subjects.valueOrNull()!!,
+                            updater = subjectsViewModel,
+                            refreshState = refreshState,
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
 
-                ) {
-                    BsuProgressBar(
-                        Modifier.align(Alignment.Center),
-                        size = 100.dp,
-                        tint = MaterialTheme.colors.primary
-                    )
-                }
-                is DataState.Empty, is DataState.Error -> Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    ErrorWidget(
-                        modifier = Modifier
-                            .align(Alignment.Center),
-                        title = stringResource(id = if (subjects is DataState.Empty)
-                            R.string.empty else R.string.something_gone_wrong),
-                        error = stringResource(id = if (subjects is DataState.Empty)
-                            R.string.subjects_empty else (subjects as DataState.Error).message),
-                    )
+                        ) {
+                            BsuProgressBar(
+                                Modifier.align(Alignment.Center),
+                                size = 100.dp,
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    }
                 }
             }
+        }
+        is DataState.Empty, is DataState.Error -> Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+
+            ErrorScreen(
+                toolbarText = stringResource(id = R.string.subjects),
+                title = stringResource(
+                    id = if (subjects is DataState.Empty)
+                        R.string.empty else R.string.something_gone_wrong
+                ),
+                error = stringResource(
+                    id = if (subjects is DataState.Empty)
+                        R.string.subjects_empty else (subjects as DataState.Error).message
+                ),
+                updater = subjectsViewModel,
+                onMenuClicked = onMenuClicked
+            )
         }
     }
 }
