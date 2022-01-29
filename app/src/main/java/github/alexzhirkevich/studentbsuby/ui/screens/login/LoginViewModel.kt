@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import kotlin.math.log
 
 
 @HiltViewModel
@@ -108,20 +109,33 @@ class LoginViewModel @Inject constructor(
     fun login() {
         _loggedIn.value = DataState.Loading
 
-        viewModelScope.launch(Dispatchers.IO) {
-            val res = loginRepository.login(
-                loginText.value,
-                passwordText.value,
-                captchaText.value
-            )
-            setState {
-                _loggedIn.value = DataState.Success(res.loggedIn)
 
-                if (res.loggedIn) {
-                    loginRepository.autoLogin = autoLogin.value
-                } else {
-                    _shouldShowSplashScreen.value = false
+        viewModelScope.launch(Dispatchers.IO) {
+            kotlin.runCatching {
+                val res = loginRepository.login(
+                    loginText.value,
+                    passwordText.value,
+                    captchaText.value
+                )
+                setState {
+                    _loggedIn.value = DataState.Success(res.loggedIn)
+
+                    if (res.loggedIn) {
+                        loginRepository.autoLogin = autoLogin.value
+                    } else {
+                        updateCaptcha()
+                        _shouldShowSplashScreen.value = false
+                    }
                 }
+            }.onFailure {
+                _loggedIn.value = DataState.Error(R.string.error_login,it)
+                updateCaptcha()
+                logger.log(
+                    "Failed to log in",
+                    tag = javaClass.simpleName,
+                    logLevel = Logger.LogLevel.Error,
+                    cause = it
+                )
             }
         }
     }

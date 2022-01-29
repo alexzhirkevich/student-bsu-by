@@ -54,6 +54,7 @@
     <string name="subjects_empty">Список предметов пуст</string>
     <string name="error_load_subjects">Не удалось загрузить список предметов</string>
     <string name="error_username_not_found">Не найдено имя пользователя. Попробуйте перезайти в аккаунт</string>
+    <string name="error_login">Не удалось выполнить вход</string>
 
     <string-array name="months">
         <item>Январь</item>
