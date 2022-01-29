@@ -26,7 +26,7 @@ class LoginRepository @Inject constructor(
     data class LoginResponse(
         val success: Boolean,
         val loggedIn: Boolean,
-        val loginResult : String
+        val loginResult : String?
     )
 
     var autoLogin : Boolean
@@ -46,10 +46,17 @@ class LoginRepository @Inject constructor(
         try {
             val resp = api.initialize()
 
-            val result = resp.body()?.byteStream()?.readBytes()?.let {
+
+            val jsoup = resp.body()?.byteStream()?.readBytes()?.let {
                 Jsoup.parse(String(it))
-                    .getElementById("ctl00_ContentPlaceHolder0_lbLoginResult")?.text()
             }
+            val result = jsoup
+                ?.getElementById("ctl00_ContentPlaceHolder0_lbLoginResult")
+                ?.text()
+            val logout = jsoup
+                ?.getElementById("ctl00_ContentPlaceHolder0_LoginStatus1")
+                ?.text()
+
 
             val expired = resp.code() == 400
             val successful = resp.isSuccessful || expired
@@ -60,10 +67,11 @@ class LoginRepository @Inject constructor(
             }
             return LoginResponse(
                 successful,
-                result?.contains("вошли") == true,
-                result.orEmpty())
+            result?.contains("вошли",true) == true ||
+                    logout?.contains("logout",true) == true,
+                result)
         } catch (t: Throwable) {
-            return LoginResponse(false,false,"")
+            return LoginResponse(false,false,null)
         }
     }
 
@@ -88,18 +96,22 @@ class LoginRepository @Inject constructor(
                     .putString(PREF_LOGIN, login)
                     .putString(PREF_PW, password)
                     .apply()
-                ""
+                null
             } else{
-                val result = res.body()?.byteStream()?.readBytes()?.let {
-                    Jsoup.parse(String(it))
-                        .getElementById("ctl00_ContentPlaceHolder0_lbLoginResult").text()
+                res.body()?.byteStream()?.readBytes()?.let {
+                    Jsoup.parse(String(it)).let {
+                        it.getElementById("ctl00_ContentPlaceHolder0_lbLoginResult")?.text()
+                            ?.takeIf(String::isNotBlank)
+                            ?: it.getElementsByClass("style1")
+                                ?.lastOrNull()
+                                ?.text()?.takeIf(String::isNotBlank)
+                    }
                 }
-                result.orEmpty()
             }
             return LoginResponse(res.isSuccessful, logged,loginResult)
 
         } catch (t: Throwable) {
-            LoginResponse(false,false,"")
+            LoginResponse(false,false,null)
         }
     }
 

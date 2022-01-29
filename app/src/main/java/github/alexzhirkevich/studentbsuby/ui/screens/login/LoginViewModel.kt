@@ -125,7 +125,10 @@ class LoginViewModel @Inject constructor(
                         loginRepository.autoLogin = autoLogin.value
                     } else {
                         _loggedIn.value = DataState.Error(
-                            R.string.error_login, LoginException(res.loginResult)
+                            R.string.error_login,
+                            res.loginResult?.let {
+                                LoginException(it)
+                            }
                         )
                         updateCaptcha()
                         _shouldShowSplashScreen.value = false
