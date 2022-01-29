@@ -321,6 +321,7 @@ private fun LoginForm(
                         contentScale = ContentScale.Crop,
                         modifier = capchaModifier
                     )
+                    else -> Spacer(modifier = capchaModifier)
                 }
                 Spacer(
                     modifier = Modifier
