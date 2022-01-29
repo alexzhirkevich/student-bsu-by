@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.repo.LoginRepository
 import github.alexzhirkevich.studentbsuby.util.DataState
+import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import github.alexzhirkevich.studentbsuby.util.setState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
@@ -118,17 +119,21 @@ class LoginViewModel @Inject constructor(
                     captchaText.value
                 )
                 setState {
-                    _loggedIn.value = DataState.Success(res.loggedIn)
 
                     if (res.loggedIn) {
+                        _loggedIn.value = DataState.Success(true)
                         loginRepository.autoLogin = autoLogin.value
                     } else {
+                        _loggedIn.value = DataState.Error(
+                            R.string.error_login, LoginException(res.loginResult)
+                        )
                         updateCaptcha()
                         _shouldShowSplashScreen.value = false
                     }
                 }
             }.onFailure {
-                _loggedIn.value = DataState.Error(R.string.error_login,it)
+                _loggedIn.value = DataState.Error(
+                    R.string.error_login,it)
                 updateCaptcha()
                 logger.log(
                     "Failed to log in",

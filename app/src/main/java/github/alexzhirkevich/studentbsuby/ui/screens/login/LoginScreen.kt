@@ -22,6 +22,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -37,14 +38,17 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.accompanist.insets.statusBarsPadding
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.navigation.Route
 import github.alexzhirkevich.studentbsuby.navigation.navigate
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @ExperimentalComposeUiApi
 @Composable
@@ -128,9 +132,41 @@ fun SplashScreen(text : String = "") {
 private fun LoginWidget(
     loginViewModel: LoginViewModel
 ) {
+
+    val loginState by loginViewModel.loggedIn
+
+    val scaffoldState = rememberScaffoldState()
+    val context = LocalContext.current
+
+    LaunchedEffect(key1 = loginState) {
+        (loginState as? DataState.Error)?.let {
+            val message = (it.error as? LoginException)?.message
+                    ?: context.getString(it.message)
+            scaffoldState.snackbarHostState.showSnackbar(message)
+        }
+    }
+
+
+
     Scaffold(
+        scaffoldState = scaffoldState,
         modifier = Modifier.fillMaxSize(),
         backgroundColor = MaterialTheme.colors.background,
+        snackbarHost = { snack ->
+            SnackbarHost(
+                snack,
+                modifier = Modifier
+                    .navigationBarsWithImePadding()
+
+            ) {
+                Snackbar(
+                    snackbarData = it,
+                    backgroundColor = MaterialTheme.colors.secondary,
+                    contentColor = MaterialTheme.colors.primary,
+                    actionColor = MaterialTheme.colors.primary
+                )
+            }
+        }
     ) {
         Box(
             Modifier
