@@ -1,6 +1,7 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable
 
 import androidx.annotation.IntRange
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -11,13 +12,11 @@ import github.alexzhirkevich.studentbsuby.data.models.Lesson
 import github.alexzhirkevich.studentbsuby.repo.TimetableRepository
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
+import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import github.alexzhirkevich.studentbsuby.util.setState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -33,17 +32,18 @@ typealias Timetable = List<List<Pair<Lesson,LessonState>>>
 @FlowPreview
 @HiltViewModel
 class TimetableViewModel @Inject constructor(
-    private val timetableRepository: TimetableRepository
+    private val timetableRepository: TimetableRepository,
+    private val logger: Logger
 ):  ViewModel(), Updatable {
 
     private val _timetable = MutableStateFlow<DataState<Timetable>>(DataState.Loading)
-    val timetable : StateFlow<DataState<Timetable>> = _timetable.asStateFlow()
+    val timetable: StateFlow<DataState<Timetable>> = _timetable.asStateFlow()
 
     @IntRange(from = 1, to = 31)
     val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
     @IntRange(from = 0, to = 6)
-    val currentDayOfWeek = when(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)){
+    val currentDayOfWeek = when (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
         Calendar.MONDAY -> 0
         Calendar.TUESDAY -> 1
         Calendar.WEDNESDAY -> 2
@@ -52,13 +52,15 @@ class TimetableViewModel @Inject constructor(
         Calendar.SATURDAY -> 5
         else -> 6
     }
+
     @IntRange(from = 0, to = 11)
     val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
 
     val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-    @IntRange(from= 0, to = 5) val displayDayOfWeek =
-        when(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
+    @IntRange(from = 0, to = 5)
+    val displayDayOfWeek =
+        when (Calendar.getInstance().get(Calendar.DAY_OF_WEEK)) {
             Calendar.TUESDAY -> 1
             Calendar.WEDNESDAY -> 2
             Calendar.THURSDAY -> 3
@@ -79,19 +81,21 @@ class TimetableViewModel @Inject constructor(
 
     override fun update() {
         _isUpdating.value = true
-        kotlin.runCatching {
-            viewModelScope.launch(Dispatchers.IO) {
-                updateTimeTable(true)
-                setState {
-                    _isUpdating.value = false
-                }
-            }
-        }.onFailure { _isUpdating.value = false }
+        updateTimeTable(true)
     }
 
-    private suspend fun updateTimeTable(fromWebOnly : Boolean = false) {
-        kotlin.runCatching {
-            timetableRepository.getTimetable(fromWebOnly).collectLatest {
+    private fun updateTimeTable(fromWebOnly: Boolean = false) =
+        timetableRepository
+            .getTimetable(fromWebOnly)
+            .onEmpty {
+                if (_timetable.value !is DataState.Success){
+                    _timetable.value is DataState.Empty
+                }
+            }
+            .onCompletion {
+                _isUpdating.value = false
+            }
+            .onEach {
                 _timetable.tryEmit(
                     if (it.flatten().isNotEmpty())
                         DataState.Success(
@@ -113,12 +117,17 @@ class TimetableViewModel @Inject constructor(
                     else DataState.Empty
                 )
             }
-        }.onFailure {
-            if (_timetable.value !is DataState.Success) {
-                _timetable.tryEmit(DataState.Error(R.string.error_load_timetable, it))
+            .catch {
+                if (_timetable.value !is DataState.Success) {
+                    _timetable.tryEmit(DataState.Error(R.string.error_load_timetable, it))
+                }
+                logger.log(
+                    "Failed to get timetable",
+                    this@TimetableViewModel.javaClass.simpleName
+                )
             }
-        }
-    }
+            .launchIn(viewModelScope)
+
 
     private fun currentTime() : String{
         return Calendar.getInstance().let {

@@ -37,11 +37,10 @@ class HostelViewModel @Inject constructor(
         get() = _isUpdating
 
     private val _hostelState = MutableStateFlow<DataState<HostelState>>(DataState.Loading)
-    val hostelState : StateFlow<DataState<HostelState>> = _hostelState.asStateFlow()
+    val hostelState: StateFlow<DataState<HostelState>> = _hostelState.asStateFlow()
+
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            updateHostelState()
-        }
+        updateHostelState()
     }
 
     fun call(hostelAdvert: HostelAdvert) {
@@ -70,49 +69,48 @@ class HostelViewModel @Inject constructor(
         }
     }
 
-    fun getHostelImage(ad : HostelState.Provided) : String = hostelRepository.getImageForHostel(
+    fun getHostelImage(ad: HostelState.Provided): String = hostelRepository.getImageForHostel(
         hostelRepository.getHostelNumber(ad.address)
     )
 
     override fun update() {
         _isUpdating.value = true
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                updateHostelState()
-            }
-            _isUpdating.value = false
-        }
+        updateHostelState()
     }
 
-    private suspend fun updateHostelState() {
-        kotlin.runCatching {
-            if (_hostelState.value is DataState.Error)
-                _hostelState.tryEmit(DataState.Loading)
-            hostelRepository.getHostelState().collectLatest {
+    private fun updateHostelState() {
+        if (_hostelState.value is DataState.Error)
+            _hostelState.tryEmit(DataState.Loading)
+
+        hostelRepository
+            .getHostelState()
+            .onEmpty { _hostelState.tryEmit(DataState.Empty) }
+            .onEach {
                 _hostelState.tryEmit(DataState.Success(it))
+            }.onCompletion {
+                _isUpdating.value = false
             }
-            if (_hostelState.value is DataState.Loading)
-                _hostelState.value = DataState.Error(R.string.error_load_hostel)
-        }.onFailure {
-            if (_hostelState.value !is DataState.Success) {
-                _hostelState.tryEmit(
-                    DataState.Error(
-                        message = when (it) {
-                            is UsernameNotFoundException ->
-                                R.string.error_username_not_found
-                            else -> R.string.error_load_hostel
-                        },
-                        error = it
+            .catch {
+                if (_hostelState.value !is DataState.Success) {
+                    _hostelState.tryEmit(
+                        DataState.Error(
+                            message = when (it) {
+                                is UsernameNotFoundException ->
+                                    R.string.error_username_not_found
+                                else -> R.string.error_load_hostel
+                            },
+                            error = it
+                        )
                     )
+                }
+                logger.log(
+                    "Failed to load hostel state",
+                    tag = javaClass.simpleName,
+                    logLevel = Logger.LogLevel.Error,
+                    cause = it
                 )
             }
-            logger.log(
-                "Failed to load hostel state",
-                tag = javaClass.simpleName,
-                logLevel = Logger.LogLevel.Error,
-                cause = it
-            )
-        }
+            .launchIn(viewModelScope)
     }
 
     private fun showOnMap(address : String){

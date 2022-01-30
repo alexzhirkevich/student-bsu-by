@@ -45,7 +45,7 @@ class ProfileRepository @Inject constructor(
 
     @FlowPreview
     @ExperimentalCoroutinesApi
-    suspend fun photo(): Flow<Bitmap> = flowOf(
+    fun photo(): Flow<Bitmap> = flowOf(
         flow {
             getPhotoFromCache().getOrNull()?.let {
                 emit(it)
