@@ -2,9 +2,11 @@ package github.alexzhirkevich.studentbsuby.repo
 
 import github.alexzhirkevich.studentbsuby.api.TimetableApi
 import github.alexzhirkevich.studentbsuby.api.dayOfWeek
+import github.alexzhirkevich.studentbsuby.api.isSessionExpired
 import github.alexzhirkevich.studentbsuby.dao.LessonsDao
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
 import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
+import github.alexzhirkevich.studentbsuby.util.exceptions.SessionExpiredException
 import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -42,7 +44,11 @@ class TimetableRepository @Inject constructor(
                 async {
                     val resp = timetableApi.timetable(timetableApi.dayOfWeek(day))
                     if (!resp.isSuccessful)
-                        throw FailResponseException()
+                        throw FailResponseException(resp.code())
+
+                    if (resp.body()?.isSessionExpired == true)
+                        throw SessionExpiredException()
+
                     val bytes = resp.body()?.byteStream()?.readBytes() ?: return@async emptyList()
                     val html =
                         '<' + String(bytes).substringAfter('<').substringBeforeLast('>') + '>'

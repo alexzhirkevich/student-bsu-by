@@ -3,12 +3,10 @@ package github.alexzhirkevich.studentbsuby.repo
 import android.content.SharedPreferences
 import github.alexzhirkevich.studentbsuby.api.AllSubjectsRequest
 import github.alexzhirkevich.studentbsuby.api.ProfileApi
+import github.alexzhirkevich.studentbsuby.api.isSessionExpired
 import github.alexzhirkevich.studentbsuby.dao.SubjectsDao
 import github.alexzhirkevich.studentbsuby.data.models.Subject
-import github.alexzhirkevich.studentbsuby.util.exceptions.EmptyResponseException
-import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
-import github.alexzhirkevich.studentbsuby.util.exceptions.IncorrectResponseException
-import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
+import github.alexzhirkevich.studentbsuby.util.exceptions.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -69,7 +67,7 @@ class SubjectsRepository @Inject constructor(
 
         val resp = profileApi.subjects(profileApi.AllSubjectsRequest)
         if (!resp.isSuccessful)
-            throw FailResponseException()
+            throw FailResponseException(resp.code())
 
         val bytes = resp.body()?.byteStream()?.readBytes()
             ?: throw EmptyResponseException()
@@ -192,8 +190,14 @@ class SubjectsRepository @Inject constructor(
 
         val resp = profileApi.studProgress()
         if (!resp.isSuccessful)
-            return null
-        val bytes = resp.body()?.byteStream()?.readBytes() ?: return null
+            throw FailResponseException(resp.code())
+
+        if (resp.body()?.isSessionExpired == true)
+            throw SessionExpiredException()
+
+
+        val bytes = resp.body()?.byteStream()?.readBytes()
+            ?: throw EmptyResponseException()
         val string = String(bytes)
         val semesterId = "ctl00_ctl00_ContentPlaceHolder0_ContentPlaceHolder1_ctlStudProgress1_selSemester"
         val jsoup = Jsoup.parse(string)

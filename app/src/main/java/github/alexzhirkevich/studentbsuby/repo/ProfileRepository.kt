@@ -6,8 +6,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.api.ProfileApi
+import github.alexzhirkevich.studentbsuby.api.isSessionExpired
 import github.alexzhirkevich.studentbsuby.dao.UsersDao
 import github.alexzhirkevich.studentbsuby.data.models.User
+import github.alexzhirkevich.studentbsuby.util.exceptions.EmptyResponseException
+import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
+import github.alexzhirkevich.studentbsuby.util.exceptions.SessionExpiredException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -68,7 +72,11 @@ class ProfileRepository @Inject constructor(
     private suspend fun getUserFromWeb() = kotlin.runCatching {
         val resp = profileApi.studProgress()
         if (!resp.isSuccessful)
-            return@runCatching null
+            throw FailResponseException(resp.code())
+
+        if (resp.body()?.isSessionExpired == true)
+            throw SessionExpiredException()
+
 
         val bytes = resp.body()?.byteStream()?.readBytes()
             ?: return@runCatching null
@@ -104,8 +112,18 @@ class ProfileRepository @Inject constructor(
     }
 
     private suspend fun getPhotoFromWeb() = kotlin.runCatching {
-        val body = profileApi.photo().body()?.byteStream()?.readBytes()
-            ?: return@runCatching null
+
+        val resp = profileApi.photo()
+
+        if (!resp.isSuccessful)
+            throw FailResponseException(resp.code())
+
+        if (resp.body()?.isSessionExpired == true)
+            throw SessionExpiredException()
+
+
+        val body = resp.body()?.byteStream()?.readBytes()
+            ?: throw EmptyResponseException()
         return@runCatching (BitmapFactory.decodeByteArray(body, 0, body.size))
     }
 

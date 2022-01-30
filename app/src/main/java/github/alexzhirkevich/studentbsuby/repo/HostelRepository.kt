@@ -3,11 +3,13 @@ package github.alexzhirkevich.studentbsuby.repo
 import android.content.SharedPreferences
 import androidx.annotation.IntRange
 import github.alexzhirkevich.studentbsuby.api.ProfileApi
+import github.alexzhirkevich.studentbsuby.api.isSessionExpired
 import github.alexzhirkevich.studentbsuby.dao.HostelDao
 import github.alexzhirkevich.studentbsuby.data.models.HostelAdvert
 import github.alexzhirkevich.studentbsuby.util.exceptions.EmptyResponseException
 import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
 import github.alexzhirkevich.studentbsuby.util.exceptions.IncorrectResponseException
+import github.alexzhirkevich.studentbsuby.util.exceptions.SessionExpiredException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -77,7 +79,11 @@ class HostelRepository @Inject constructor(
     private suspend fun getFromWeb() : HostelState{
         val resp = profileApi.hostel()
         if (!resp.isSuccessful)
-            throw FailResponseException()
+            throw FailResponseException(resp.code())
+
+        if (resp.body()?.isSessionExpired == true)
+            throw SessionExpiredException()
+
         val bytes = resp.body()?.byteStream()?.readBytes()
             ?: throw EmptyResponseException()
 

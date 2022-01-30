@@ -6,6 +6,7 @@ import okhttp3.internal.http.RealResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
+import java.nio.charset.Charset
 import kotlin.math.log
 
 fun LoginApi.createLoginData(
@@ -40,3 +41,11 @@ interface LoginApi {
         @FieldMap(encoded = true) body : FormUrlEncodedBody
     ) : Response<ResponseBody>
 }
+
+val ResponseBody.isSessionExpired
+    get() = source().apply {
+        request(Long.MAX_VALUE)
+    }.buffer.clone().readString(Charset.forName("UTF-8")).let {
+        it.contains("ctl00_ContentPlaceHolder0_cmdLogIn") ||
+                it.contains("ctl00\$ContentPlaceHolder0\$btnLogon")
+    }
