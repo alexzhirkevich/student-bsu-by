@@ -166,71 +166,35 @@ private fun Toolbar(
                 backgroundColor = MaterialTheme.colors.secondary
             ) {
                 BurgerMenuButton(onClick = onMenuClicked)
-                Row(
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .weight(1f)
-                        .background(MaterialTheme.colors.background),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Box(
-                        modifier = Modifier.padding(
-                            top = 10.dp,
-                            start = 14.dp,
-                            bottom = 10.dp,
-                            end = 10.dp
-                        )
-                    ) {
+                DefaultTextInput(value = viewModel.searchText.value,
+                    onValueChange = viewModel::search,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.body1,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(end = 10.dp),
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
+                    leadingIcon = {
                         if (viewModel.searchText.value.isEmpty()) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search",
                                 modifier = Modifier
-//                                    .size(20.dp)
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Close",
                                 modifier = Modifier
-//                                    .size(20.dp)
                                     .clip(CircleShape)
                                     .clickable {
                                         viewModel.search("")
                                     }
                             )
                         }
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        BasicTextField(
-                            value = viewModel.searchText.value,
-                            onValueChange = viewModel::search,
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.body1,
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Sentences
-                            )
-                        )
-                        if (viewModel.searchText.value.isEmpty()) {
-                            Text(
-                                text = stringResource(id = R.string.subjects),
-                            )
-                        }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .padding(
-                                top = 10.dp,
-                                start = 10.dp,
-                                bottom = 10.dp,
-                                end = 15.dp
-                            )
-
-                    ) {
+                    },
+                    trailingIcon = {
 
                         Icon(
                             painter = painterResource(
@@ -239,11 +203,14 @@ private fun Toolbar(
                             ),
                             contentDescription = "Search",
                             modifier = Modifier
-//                                .size(30.dp)
+                                .clip(CircleShape)
                                 .clickable { filtersVisible = !filtersVisible }
                         )
+                    },
+                    placeholder = {
+                        Text(text = stringResource(id = R.string.subjects))
                     }
-                }
+                )
             }
             AnimatedVisibility(visible = filtersVisible) {
 

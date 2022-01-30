@@ -1,5 +1,8 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.login
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -32,6 +43,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,12 +57,16 @@ import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.navigation.Route
 import github.alexzhirkevich.studentbsuby.navigation.navigate
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
+import github.alexzhirkevich.studentbsuby.ui.common.DefaultTextInput
+import github.alexzhirkevich.studentbsuby.ui.theme.values.Colors
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private const val ButtonWidth = 200
 
 @ExperimentalComposeUiApi
 @Composable
@@ -72,12 +90,16 @@ fun LoginScreen(
         }
     }
 
-    if (loginViewModel.shouldShowSplashScreen.value) {
+
+    LoginWidget(
+        loginViewModel = loginViewModel
+    )
+    AnimatedVisibility(
+        visible = loginViewModel.shouldShowSplashScreen.value,
+        enter = EnterTransition.None,
+        exit = fadeOut()
+    ) {
         SplashScreen(loginViewModel.splashText.value)
-    } else {
-        LoginWidget(
-            loginViewModel = loginViewModel
-        )
     }
 }
 
@@ -141,12 +163,10 @@ private fun LoginWidget(
     LaunchedEffect(key1 = loginState) {
         (loginState as? DataState.Error)?.let {
             val message = (it.error as? LoginException)?.message
-                    ?: context.getString(it.message)
+                ?: context.getString(it.message)
             scaffoldState.snackbarHostState.showSnackbar(message)
         }
     }
-
-
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -168,6 +188,7 @@ private fun LoginWidget(
             }
         }
     ) {
+
         Box(
             Modifier
                 .fillMaxSize()
@@ -180,6 +201,7 @@ private fun LoginWidget(
 
             Column(
                 Modifier
+                    .widthIn(max = 400.dp)
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 20.dp)
                     .navigationBarsWithImePadding()
@@ -187,7 +209,7 @@ private fun LoginWidget(
             ) {
                 Spacer(
                     modifier = Modifier
-                        .height(125.dp)
+                        .height(150.dp)
                 )
 
                 Box {
@@ -197,7 +219,7 @@ private fun LoginWidget(
                             .absoluteOffset(y = (-40).dp)
                             .size(80.dp)
                             .zIndex(2f),
-                        elevation = 5.dp,
+                        elevation = 3.dp,
                         shape = CircleShape
                     ) {
                         Box(
@@ -206,7 +228,7 @@ private fun LoginWidget(
                                 .clip(CircleShape)
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.Person,
+                                painter = painterResource(id = R.drawable.logo),
                                 contentDescription = "Login",
                                 tint = MaterialTheme.colors.primary,
                                 modifier = Modifier.fillMaxSize()
@@ -214,31 +236,111 @@ private fun LoginWidget(
                         }
                     }
                     Card(
-                        elevation = 5.dp,
+                        elevation = 3.dp,
+                        backgroundColor = MaterialTheme.colors.background,
                         modifier = Modifier
                             .padding(horizontal = 35.dp)
                             .zIndex(1f)
                     ) {
-
-                        Box(
-                            Modifier.padding(
-                                top = 80.dp,
-                                bottom = 20.dp,
-                                start = 25.dp,
-                                end = 25.dp
-                            )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            LoginForm(
-                                loginViewModel = loginViewModel
-                            )
+                            Card(
+                                elevation = 2.dp,
+                                shape = object : Shape {
+
+                                    override fun createOutline(
+                                        size: Size,
+                                        layoutDirection: LayoutDirection,
+                                        density: Density
+                                    ): Outline {
+                                        val cr = CornerRadius(
+                                            (size.width-ButtonWidth*density.density*0.75f)/2,
+                                            size.height/2)
+                                        return Outline.Rounded(
+                                            RoundRect(
+                                                top = 0f, left = 0f,
+                                                bottom = size.height, right = size.width,
+                                                bottomLeftCornerRadius = cr,
+                                                bottomRightCornerRadius = cr
+                                            )
+                                        )
+                                    }
+                                }
+                            ) {
+
+                                Box(
+                                    Modifier
+                                        .padding(
+                                            top = 80.dp,
+                                            bottom = 20.dp,
+                                            start = 25.dp,
+                                            end = 25.dp
+                                        )
+                                ) {
+                                    LoginForm(
+                                        loginViewModel = loginViewModel
+                                    )
+                                }
+                            }
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+//                                    .background(MaterialTheme.colors.background)
+                                    .padding(vertical = 10.dp)
+                            ) {
+                                CompositionLocalProvider(
+                                    LocalTextStyle provides MaterialTheme.typography.caption
+                                ) {
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Checkbox(
+                                            checked = loginViewModel.autoLogin.value,
+                                            enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+                                            onCheckedChange = loginViewModel::setAutoLogin,
+                                            colors = CheckboxDefaults.colors(
+                                                checkedColor = MaterialTheme.colors.primary
+                                            )
+                                        )
+
+                                        Text(text = stringResource(id = R.string.autologin))
+                                    }
+
+                                }
+
+                                val keyboard = LocalSoftwareKeyboardController.current
+                                Button(
+                                    onClick = {
+                                        loginViewModel.login()
+                                        keyboard?.hide()
+
+                                    },
+                                    enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+                                    modifier = Modifier
+                                        .width(ButtonWidth.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                ) {
+                                    Text(text = stringResource(id = R.string.btn_login))
+                                }
+
+                                Spacer(modifier = Modifier.height(3.dp))
+
+                                ClickableText(
+                                    style = MaterialTheme.typography.caption
+                                        .copy(color = MaterialTheme.colors.primary),
+                                    text = AnnotatedString(stringResource(R.string.cant_login))
+                                ) {}
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 }
-
 
 @ExperimentalComposeUiApi
 @Composable
@@ -252,7 +354,7 @@ private fun LoginForm(
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
+        DefaultTextInput(
             value = loginViewModel.loginText.value,
             onValueChange = loginViewModel::setLoginText,
             singleLine = true,
@@ -269,21 +371,19 @@ private fun LoginForm(
                     text = stringResource(id = R.string.login),
                 )
             },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.login),
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(.5.dp, MaterialTheme.colors.primary, MaterialTheme.shapes.medium)
+
         )
         
-        Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
 
         var passwordVisible by rememberSaveable {
             mutableStateOf(false)
         }
-        OutlinedTextField(
+        DefaultTextInput(
             value = loginViewModel.passwordText.value,
             onValueChange = loginViewModel::setPasswordText,
             singleLine = true,
@@ -292,18 +392,17 @@ private fun LoginForm(
                 Icon(imageVector = Icons.Outlined.VpnKey, contentDescription = "Password")
             },
             trailingIcon = {
-                IconButton(onClick = {
-                    passwordVisible = !passwordVisible
-                },
-                    modifier = Modifier.padding(5.dp)
-                ) {
-                    Icon(
-                        imageVector = if (passwordVisible)
-                            Icons.Default.VisibilityOff
-                        else Icons.Default.Visibility,
-                        contentDescription = "Show password",
-                    )
-                }
+                Icon(
+                    imageVector = if (passwordVisible)
+                        Icons.Default.VisibilityOff
+                    else Icons.Default.Visibility,
+                    contentDescription = "Show password",
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable {
+                            passwordVisible = !passwordVisible
+                        }
+                )
             },
             enabled = loginViewModel.loggedIn.value !is DataState.Loading,
             keyboardOptions = KeyboardOptions(
@@ -317,37 +416,36 @@ private fun LoginForm(
                     text = stringResource(id = R.string.password),
                 )
             },
-            label = {
-                Text(
-                    text = stringResource(id = R.string.password),
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(.5.dp, MaterialTheme.colors.primary, MaterialTheme.shapes.medium)
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         val capcha by loginViewModel.captchaBitmap.collectAsState()
 
-        Box() {
+        Box(Modifier.background(MaterialTheme.colors.background)) {
             if (capcha is DataState.Loading) {
                 BsuProgressBar(
                     Modifier.align(Alignment.Center),
-                    tint = MaterialTheme.colors.primary
+                    tint = MaterialTheme.colors.primary,
+                    size = 40.dp
                 )
             }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.small)
-                    .border(1.dp, MaterialTheme.colors.primary, MaterialTheme.shapes.small),
+//                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.medium)
+                    .border(.5.dp, MaterialTheme.colors.primary, MaterialTheme.shapes.medium),
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
                 val capchaModifier = remember {
                     Modifier
-                        .aspectRatio(4f)
-                        .weight(1f)
+                        .height(44.dp)
+                        .width((ButtonWidth - 44).dp)
+//
                 }
 
                 when (capcha) {
@@ -359,41 +457,39 @@ private fun LoginForm(
                     )
                     else -> Spacer(modifier = capchaModifier)
                 }
-                Spacer(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .background(MaterialTheme.colors.primary)
-                )
-
-                IconButton(
-                    onClick = loginViewModel::updateCaptcha,
-                    enabled = capcha !is DataState.Loading,
-                    modifier = Modifier.padding(3.dp)
+                Box(
+                    Modifier
+                        .clickable(onClick = loginViewModel::updateCaptcha)
+                        .padding(10.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Update captcha"
+                        contentDescription = "Update captcha",
+                        modifier = Modifier
                     )
                 }
+
             }
         }
 
-        Spacer(modifier = Modifier.height(5.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         val keyboardController = LocalSoftwareKeyboardController.current
-        OutlinedTextField(
+        DefaultTextInput(
             value = loginViewModel.captchaText.collectAsState().value,
             onValueChange = loginViewModel::setCaptchaText,
             singleLine = true,
             enabled = loginViewModel.loggedIn.value !is DataState.Loading,
-            label = {
-                Text(
-                    text = stringResource(id = R.string.captcha),
-                )
-            },
+//            label = {
+//                Text(
+//                    text = stringResource(id = R.string.captcha),
+//                )
+//            },
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.captcha),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             },
             keyboardOptions = KeyboardOptions(
@@ -402,54 +498,12 @@ private fun LoginForm(
             keyboardActions = KeyboardActions {
                 keyboardController?.hide()
             },
-
-            modifier = Modifier.width(200.dp)
-        )
-        Spacer(modifier = Modifier.height(3.dp))
-
-
-        CompositionLocalProvider(
-            LocalTextStyle provides MaterialTheme.typography.caption
-        ) {
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = loginViewModel.autoLogin.value,
-                    enabled = loginViewModel.loggedIn.value !is DataState.Loading,
-                    onCheckedChange = loginViewModel::setAutoLogin,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colors.primary
-                    )
-                )
-
-                Text(text = stringResource(id = R.string.autologin))
-            }
-
-        }
-
-        val keyboard = LocalSoftwareKeyboardController.current
-        Button(
-            onClick = {
-                loginViewModel.login()
-                keyboard?.hide()
-
-            },
-            enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+            maxLines = 1,
             modifier = Modifier
-                .width(200.dp)
-                .clip(RoundedCornerShape(10.dp))
-        ) {
-            Text(text = stringResource(id =R.string.btn_login))
-        }
+                .width(ButtonWidth.dp)
+                .heightIn(min = 44.dp)
+                .border(.5.dp, MaterialTheme.colors.primary, MaterialTheme.shapes.medium)
 
-        Spacer(modifier = Modifier.height(3.dp))
-
-        ClickableText(
-            style = MaterialTheme.typography.caption
-                .copy(color = MaterialTheme.colors.primary),
-            text = AnnotatedString(stringResource(R.string.cant_login))
-        ){}
+        )
     }
 }

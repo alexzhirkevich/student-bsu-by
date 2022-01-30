@@ -1,4 +1,4 @@
-package github.alexzhirkevich.studentbsuby.ui.theme
+package github.alexzhirkevich.studentbsuby.ui.theme.values
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes
