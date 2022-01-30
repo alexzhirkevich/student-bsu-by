@@ -17,11 +17,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.statusBarsHeight
+import de.charlex.compose.HtmlText
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.ui.common.BurgerMenuButton
 import github.alexzhirkevich.studentbsuby.ui.theme.StudentbsubyTheme
@@ -117,11 +120,15 @@ fun AboutScreen(onMenuClicked : () -> Unit) {
             Card(
                 elevation = 3.dp
             ) {
-                Text(
-                    text = stringResource(R.string.about_text),
+                HtmlText(
+                    textId = R.string.about_text,
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Justify,
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier.padding(10.dp),
+                    urlSpanStyle = SpanStyle(
+                        color = MaterialTheme.colors.primary,
+                        textDecoration = TextDecoration.Underline
+                    )
                 )
             }
 

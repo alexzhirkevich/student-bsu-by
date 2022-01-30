@@ -127,6 +127,7 @@ dependencies {
 
     implementation "me.onebone:toolbar-compose:2.3.0"
 
+    implementation 'de.charlex.compose:html-text:1.0.0'
 
     implementation "com.google.accompanist:accompanist-pager:0.22.0-rc"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.22.0-rc"
