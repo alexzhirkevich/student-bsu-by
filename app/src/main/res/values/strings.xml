@@ -18,7 +18,8 @@
     <string name="restoring_session">Восстанавливаем старую сессию</string>
     <string name="recognizing_captcha">Распознаем капчу</string>
     <string name="trying_to_singin">Пытаемся войти</string>
-    <string name="semester">%d сем.</string>
+    <string name="semester_short">%d сем.</string>
+    <string name="semester">%d семестр</string>
     <string name="lectures">Лекц.</string>
     <string name="pract">Практ.</string>
     <string name="labs">Лаб.</string>
@@ -27,7 +28,7 @@
     <string name="ksr">Кср</string>
     <string name="with_credit">С зачетом</string>
     <string name="with_exam">С экзаменом</string>
-    <string name="subjects_not_found_for_day">Предметы на этот день не найдены</string>
+    <string name="subjects_not_found">Предметы на этот семестр не найдены</string>
     <string name="audience">Аудитория</string>
     <string name="type">Тип</string>
     <string name="teacher">Препод.</string>
@@ -58,6 +59,7 @@
     <string name="error_load_user">Не удалось получить данные профиля</string>
     <string name="error_load_timetable">Не удалось загрузить расписание</string>
     <string name="error_load_hostel">Не удалось получить информацию об общежитии</string>
+    <string name="subjects_not_found_search">Предметы по этому запросу не найдены</string>
 
 
     <string-array name="months">

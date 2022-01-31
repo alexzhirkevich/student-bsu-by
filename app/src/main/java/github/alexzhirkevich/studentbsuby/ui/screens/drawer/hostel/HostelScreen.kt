@@ -136,13 +136,13 @@ private fun ProvidedHostelScreen(
         scaffoldState.toolbarState.expand(500)
     }
 
-    CollapsingToolbarScaffold(
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        state = scaffoldState,
-        enabled = refreshState.indicatorOffset == 0f,
-        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-        toolbarModifier = Modifier.background(MaterialTheme.colors.secondary),
-        toolbar = {
+//        state = scaffoldState,
+//        enabled = refreshState.indicatorOffset == 0f,
+//        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+//        toolbarModifier = Modifier.background(MaterialTheme.colors.secondary),
+        topBar = {
             Column(Modifier.zIndex(2f)) {
                 Spacer(modifier = Modifier.statusBarsHeight())
                 TopAppBar(
@@ -163,7 +163,7 @@ private fun ProvidedHostelScreen(
                     imageModel = it,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .parallax()
+//                        .parallax()
                         .aspectRatio(1.4f)
                         .alpha(scaffoldState.toolbarState.progress)
                 )
@@ -192,10 +192,11 @@ private fun ProvidedHostelScreen(
             ) {
 
                 Card(
-                    modifier = Modifier.padding(
-                        horizontal = 30.dp,
-                        vertical = 20.dp
-                    ),
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 30.dp,
+                            vertical = 30.dp)
+                        .widthIn(max = 400.dp),
                     elevation = 3.dp
                 ) {
                     Column(

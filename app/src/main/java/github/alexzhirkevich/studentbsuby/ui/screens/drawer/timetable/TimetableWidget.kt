@@ -1,5 +1,6 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,67 +22,10 @@ import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.insets.navigationBarsHeight
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
 
-@ExperimentalMaterialApi
-@Preview()
-@Composable
-fun prev(modifier: Modifier = Modifier) {
-    TimetableWidget(
-        modifier = Modifier.fillMaxSize(),
-        list = listOf(
-            Lesson(
-                0,
-                "",
-                0,
-                1,
-                "Методы оптимизации",
-                "607, ул. Ленинградская 8",
-                "лабораторные занятия",
-                "Преподовате Л.Ь.",
-                "8.15",
-                "9.35"
-            ) to LessonState.PASSED,
-            Lesson(
-                1,
-                "",
-                0,
-                2,
-                "Арифметические и алгебраические основы криптографии",
-                "604",
-                "лекции",
-                "Преподовате Л.Ь.",
-                "9.45",
-                "11.05"
-            ) to LessonState.PASSED,
-            Lesson(
-                2,
-                "",
-                0,
-                3,
-                "Криптографические методы",
-                "604",
-                "лекции",
-                "Преподовате Л.Ь.",
-                "11.15",
-                "12.35"
-            ) to LessonState.RUNNING,
-            Lesson(
-                3,
-                "",
-                0,
-                4,
-                "Криптографические методы",
-                "604",
-                "лекции",
-                "Преподовате Л.Ь.",
-                "13.00",
-                "14.20"
-            ) to LessonState.INCOMING,
-        )
-    )
-}
 
 private const val HorizontalPadding = 10
 @ExperimentalMaterialApi
@@ -107,14 +51,16 @@ fun TimetableWidget(
         state = state,
         modifier = modifier
             .let {
-                if (list.size>1){
+                if (list.size > 1) {
                     it.drawBehind {
                         drawLine(
                             color = lineColor,
                             strokeWidth = 1 * density,
                             start = Offset(
                                 x = density * (LessonTimeLineOffsetX + HorizontalPadding),
-                                y = timelineStart
+                                y = if (state.firstVisibleItemIndex == 0)
+                                    timelineStart - state.firstVisibleItemScrollOffset
+                                else 0f
                             ),
                             end = Offset(
                                 x = density * (LessonTimeLineOffsetX + HorizontalPadding),
@@ -124,7 +70,6 @@ fun TimetableWidget(
                     }
                 } else it
             }
-            .navigationBarsWithImePadding()
     ) {
 
         items(list.size){ idx ->
@@ -147,6 +92,9 @@ fun TimetableWidget(
                     }
                 }
             )
+        }
+        item {
+            Spacer(modifier = Modifier.navigationBarsHeight())
         }
     }
 }

@@ -77,6 +77,8 @@ fun SuccessTimetableScreen(
         isRefreshing = timetableViewModel.isUpdating.value
     )
 
+    val pagerState = rememberPagerState()
+
     LaunchedEffect(Unit) {
         scaffoldState.toolbarState.collapse(0)
         scaffoldState.toolbarState.expand(500)
@@ -88,8 +90,7 @@ fun SuccessTimetableScreen(
             .bsuBackgroundPattern(
                 MaterialTheme.colors.primary.copy(alpha = .05f),
                 true
-            )
-            .zIndex(1f),
+            ),
         state = scaffoldState,
         enabled = swipeRefreshState.indicatorOffset == 0f,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
@@ -97,32 +98,38 @@ fun SuccessTimetableScreen(
             Toolbar(
                 toolbarState = scaffoldState.toolbarState,
                 viewModel = timetableViewModel,
-                onMenuClicked = onMenuClicked
+                onMenuClicked = onMenuClicked,
+                pagerState = pagerState,
             )
         }
     ) {
         Body(
             viewModel = timetableViewModel,
             refreshState = swipeRefreshState,
-            swipeEnabled = scaffoldState.toolbarState.progress == 1f
+            swipeEnabled = scaffoldState.toolbarState.progress == 1f,
+            pagerState = pagerState
         )
     }
 }
 
+@ExperimentalPagerApi
 @FlowPreview
 @Composable
 private fun CollapsingToolbarScope.Toolbar(
     toolbarState: CollapsingToolbarState,
+    pagerState: PagerState,
     viewModel: TimetableViewModel,
     onMenuClicked: () -> Unit
 ) {
 
-    Spacer(modifier = Modifier.statusBarsHeight(TabsHeight.dp))
+    val scope = rememberCoroutineScope()
+
+    val timetable by viewModel.timetable.collectAsState()
 
     TopAppBar(
         elevation = 0.dp,
         modifier = Modifier
-            .zIndex(2f)
+            .zIndex(1f)
             .statusBarsPadding(),
         backgroundColor = Color.Transparent
     ) {
@@ -141,9 +148,8 @@ private fun CollapsingToolbarScope.Toolbar(
 
     Box(
         Modifier
-            .zIndex(1f)
             .fillMaxWidth()
-            .parallax(.6f)
+            .parallax(.5f)
             .background(MaterialTheme.colors.secondary)
             .alpha(toolbarState.progress)
             .animatedSquaresBackground(
@@ -155,7 +161,7 @@ private fun CollapsingToolbarScope.Toolbar(
         Row(
             Modifier
                 .align(Alignment.Center)
-                .padding(top = 40.dp, bottom = 40.dp + TabsHeight.dp / 2),
+                .padding(top = 30.dp + TabsHeight.dp / 2, bottom = 30.dp + TabsHeight.dp / 2),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -182,34 +188,23 @@ private fun CollapsingToolbarScope.Toolbar(
             }
         }
     }
-}
 
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
-@FlowPreview
-@Composable
-private fun Body(
-    swipeEnabled : Boolean,
-    refreshState: SwipeRefreshState,
-    viewModel: TimetableViewModel,
-) {
+    Box(
+        Modifier
+            .road(
+                whenExpanded = Alignment.BottomCenter,
+                whenCollapsed = Alignment.BottomCenter
+            )
 
-    val pagerState = rememberPagerState(viewModel.displayDayOfWeek)
-    val scope = rememberCoroutineScope()
-    val timetable by viewModel.timetable.collectAsState()
-
-
-    Column(
-        modifier = Modifier
-            .offset(y = -TabsHeight.dp)
-            .zIndex(3f)
     ) {
+
+        Spacer(modifier = Modifier.statusBarsHeight(TabsHeight.dp))
         TabRow(
             modifier = Modifier
-                .height(TabsHeight.dp),
+                .height(TabsHeight.dp)
+                .align(Alignment.BottomCenter),
             selectedTabIndex = pagerState.currentPage,
             backgroundColor = Color.Transparent,
-//                edgePadding = 0.dp,
             indicator = { tabs ->
                 Box {
                     Spacer(
@@ -237,11 +232,30 @@ private fun Body(
                     }) {
                     Text(
                         text = weekdays[i],
-//                            modifier = Modifier.padding(vertical = 10.dp)
                     )
                 }
             }
         }
+    }
+
+}
+
+@ExperimentalMaterialApi
+@ExperimentalPagerApi
+@FlowPreview
+@Composable
+private fun Body(
+    swipeEnabled: Boolean,
+    refreshState: SwipeRefreshState,
+    viewModel: TimetableViewModel,
+    pagerState: PagerState,
+) {
+
+    val timetable by viewModel.timetable.collectAsState()
+
+
+    Column{
+
         when (val tt = timetable) {
             is DataState.Success,is DataState.Empty -> {
                 SwipeRefresh(

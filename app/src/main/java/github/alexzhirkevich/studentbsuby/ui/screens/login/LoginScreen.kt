@@ -202,6 +202,7 @@ private fun LoginWidget(
             Column(
                 Modifier
                     .widthIn(max = 400.dp)
+                    .align(Alignment.Center)
                     .verticalScroll(rememberScrollState())
                     .padding(bottom = 20.dp)
                     .navigationBarsWithImePadding()
@@ -209,14 +210,14 @@ private fun LoginWidget(
             ) {
                 Spacer(
                     modifier = Modifier
-                        .height(150.dp)
+                        .height(40.dp)
                 )
 
                 Box {
                     Card(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .absoluteOffset(y = (-40).dp)
+                            .offset(y = (-40).dp)
                             .size(80.dp)
                             .zIndex(2f),
                         elevation = 3.dp,
@@ -425,7 +426,11 @@ private fun LoginForm(
 
         val capcha by loginViewModel.captchaBitmap.collectAsState()
 
-        Box(Modifier.background(MaterialTheme.colors.background)) {
+        Box(Modifier
+            .background(
+                color = MaterialTheme.colors.background,
+                shape = MaterialTheme.shapes.medium)
+        ) {
             if (capcha is DataState.Loading) {
                 BsuProgressBar(
                     Modifier.align(Alignment.Center),
