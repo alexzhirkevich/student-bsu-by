@@ -36,9 +36,8 @@ import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 @Composable
 fun SubjectWidget(
     subject : Subject,
-    isOpened : Boolean = false,
-    withAnimation : Boolean = false,
     modifier: Modifier = Modifier,
+    isOpened : Boolean = false,
     onClick : () -> Unit = {}
 ) {
 
@@ -118,7 +117,7 @@ fun SubjectWidget(
                                     if (subject.creditPassed)
                                         Icons.Default.TaskAlt to MaterialTheme.colors.onError
                                     else Icons.Default.HighlightOff to MaterialTheme.colors.error
-                                else -> Icons.Default.Schedule to MaterialTheme.colors.surface
+                                else -> Icons.Default.Schedule to MaterialTheme.colors.onSecondary
                             }
 
 
@@ -131,7 +130,7 @@ fun SubjectWidget(
                                     color = when {
                                         subject.creditMark in 1..3 -> MaterialTheme.colors.error
                                         subject.creditMark > 3 -> MaterialTheme.colors.onError
-                                        else -> MaterialTheme.colors.surface
+                                        else -> MaterialTheme.colors.onSecondary
                                     },
                                     modifier = Modifier.padding(end = 5.dp)
                                 )

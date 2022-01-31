@@ -3,9 +3,8 @@ package github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,6 +15,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
@@ -55,68 +55,15 @@ fun SubjectsScreen(
     subjectsViewModel: SubjectsViewModel = hiltViewModel(),
     onMenuClicked : () -> Unit
 ) {
-
-    val scaffoldState = rememberCollapsingToolbarScaffoldState()
-    val refreshState = rememberSwipeRefreshState(
-        isRefreshing = subjectsViewModel.isUpdating.value
-    )
-
     val subjects by subjectsViewModel.subjects.collectAsState()
-    val visibleSubjects by subjectsViewModel.visibleSubjects.collectAsState()
-    val currentSemester by subjectsViewModel.currentSemester
-
 
     when (subjects) {
         is DataState.Success<*>, is DataState.Loading -> {
-            Column {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colors.secondary)
-                        .statusBarsHeight()
-                        .zIndex(2f)
-                )
-                CollapsingToolbarScaffold(
-                    modifier = Modifier
-                        .zIndex(1f)
-                        .bsuBackgroundPattern(
-                            color = MaterialTheme.colors.primary.copy(alpha = .05f),
-                            clip = true
-                        ),
-                    state = scaffoldState,
-                    enabled = refreshState.indicatorOffset == 0f,
-                    scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
-                    toolbar = {
-                        Toolbar(
-                            viewModel = subjectsViewModel,
-                            toolbarState = scaffoldState.toolbarState,
-                            onMenuClicked = onMenuClicked
-                        )
-                    })
-                {
-                    if (subjects is DataState.Success) {
-                        Body(
-                            initialSemester = currentSemester,
-                            visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
-                            subjects = subjects.valueOrNull()!!,
-                            updater = subjectsViewModel,
-                            refreshState = refreshState,
-                        )
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-
-                        ) {
-                            BsuProgressBar(
-                                Modifier.align(Alignment.Center),
-                                size = 100.dp,
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                    }
-                }
-            }
+           SuccessSubjectsScreen(
+               subjectsViewModel = subjectsViewModel,
+               subjects = subjects,
+               onMenuClicked = onMenuClicked,
+           )
         }
         is DataState.Empty, is DataState.Error -> Box(
             modifier = Modifier
@@ -139,143 +86,211 @@ fun SubjectsScreen(
         }
     }
 }
-@ExperimentalAnimationApi
+
+@ExperimentalFoundationApi
+@ExperimentalPagerApi
+@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
+@ExperimentalAnimationApi
 @FlowPreview
 @Composable
-private fun Toolbar(
-    viewModel : SubjectsViewModel,
-    toolbarState : CollapsingToolbarState,
-    onMenuClicked: () -> Unit) {
+private fun SuccessSubjectsScreen(
+    subjectsViewModel: SubjectsViewModel,
+    subjects: DataState<List<List<Subject>>>,
+    onMenuClicked: () -> Unit,
+) {
 
+    val scaffoldState = rememberCollapsingToolbarScaffoldState()
+    val refreshState = rememberSwipeRefreshState(
+        isRefreshing = subjectsViewModel.isUpdating.value
+    )
 
-    CollapsingToolbar(
-        Modifier
-            .background(MaterialTheme.colors.secondary),
-        collapsingToolbarState = toolbarState
-    ) {
-
-        var filtersVisible by rememberSaveable {
-            mutableStateOf(false)
-        }
-
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-            TopAppBar(
-                elevation = 0.dp,
-                backgroundColor = MaterialTheme.colors.secondary
-            ) {
-                BurgerMenuButton(onClick = onMenuClicked)
-                DefaultTextInput(value = viewModel.searchText.value,
-                    onValueChange = viewModel::search,
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.body1,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(end = 10.dp),
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences
-                    ),
-                    leadingIcon = {
-                        if (viewModel.searchText.value.isEmpty()) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                modifier = Modifier
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        viewModel.search("")
-                                    }
-                            )
-                        }
-                    },
-                    trailingIcon = {
-
-                        Icon(
-                            painter = painterResource(
-                                if (filtersVisible) R.drawable.ic_filter_list_off
-                                else R.drawable.ic_filter_list
-                            ),
-                            contentDescription = "Search",
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable { filtersVisible = !filtersVisible }
-                        )
-                    },
-                    placeholder = {
-                        Text(text = stringResource(id = R.string.subjects))
-                    }
+    val visibleSubjects by subjectsViewModel.visibleSubjects.collectAsState()
+    val currentSemester by subjectsViewModel.currentSemester
+    Column {
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colors.secondary)
+                .statusBarsHeight()
+                .zIndex(2f)
+        )
+        CollapsingToolbarScaffold(
+            modifier = Modifier
+                .zIndex(1f),
+            state = scaffoldState,
+            enabled = refreshState.indicatorOffset == 0f,
+            scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
+            toolbarModifier = Modifier
+                .background(MaterialTheme.colors.primary),
+            toolbar = {
+                Toolbar(
+                    viewModel = subjectsViewModel,
+                    onMenuClicked = onMenuClicked
                 )
-            }
-            AnimatedVisibility(visible = filtersVisible) {
+            })
+        {
+            if (subjects is DataState.Success) {
+                Body(
+                    initialSemester = currentSemester,
+                    visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
+                    subjects = subjects.valueOrNull()!!,
+                    updater = subjectsViewModel,
+                    refreshState = refreshState,
+                    isSearchEnabled = subjectsViewModel.searchText.value.isNotEmpty()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
 
-                Row(
-                    modifier = Modifier.animateEnterExit(
-                        enter = slideInVertically(),
-                        exit = slideOutVertically()
-                    )
                 ) {
-                    Row(
-                        Modifier
-                            .weight(1f)
-                            .padding(horizontal = 5.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                viewModel.setFilter(
-                                    withCredit = viewModel.withCredit.value.not(),
-                                    withExam = viewModel.withExam.value
-                                )
-
-                            },
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = viewModel.withCredit.value,
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = MaterialTheme.colors.primary
-                            ),
-                            onCheckedChange = {
-                                viewModel.setFilter(it,viewModel.withExam.value)
-                            })
-                        Text(text = stringResource(id = R.string.with_credit))
-                    }
-                    Row(
-                        Modifier
-                            .weight(1f)
-                            .padding(horizontal = 5.dp)
-                            .clip(CircleShape)
-                            .clickable {
-                                viewModel.setFilter(
-                                    withCredit = viewModel.withCredit.value,
-                                    withExam = viewModel.withExam.value.not()
-                                )
-                            },
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-
-                    ) {
-                        Checkbox(
-                            checked = viewModel.withExam.value,
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = MaterialTheme.colors.primary
-                            ),
-                            onCheckedChange = {
-                                viewModel.setFilter(viewModel.withCredit.value,it)
-                            })
-                        Text(text = stringResource(id = R.string.with_exam))
-                    }
+                    BsuProgressBar(
+                        Modifier.align(Alignment.Center),
+                        size = 100.dp,
+                        tint = MaterialTheme.colors.primary
+                    )
                 }
             }
         }
     }
 }
 
+@ExperimentalAnimationApi
+@ExperimentalCoroutinesApi
+@FlowPreview
+@Composable
+private fun Toolbar(
+    viewModel: SubjectsViewModel,
+    onMenuClicked: () -> Unit
+) {
+
+    var filtersVisible by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.background(
+            MaterialTheme.colors.secondary
+        )
+    ) {
+
+        TopAppBar(
+            elevation = 0.dp,
+            backgroundColor = Color.Transparent
+        ) {
+            BurgerMenuButton(onClick = onMenuClicked)
+            DefaultTextInput(value = viewModel.searchText.value,
+                onValueChange = viewModel::search,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.body1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 10.dp),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences
+                ),
+                leadingIcon = {
+                    if (viewModel.searchText.value.isEmpty()) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            modifier = Modifier
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .clickable {
+                                    viewModel.search("")
+                                }
+                        )
+                    }
+                },
+                trailingIcon = {
+
+                    Icon(
+                        painter = painterResource(
+                            if (filtersVisible) R.drawable.ic_filter_list_off
+                            else R.drawable.ic_filter_list
+                        ),
+                        contentDescription = "Search",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable { filtersVisible = !filtersVisible }
+                    )
+                },
+                placeholder = {
+                    Text(text = stringResource(id = R.string.subjects))
+                }
+            )
+        }
+        AnimatedVisibility(visible = filtersVisible) {
+
+            Row(
+                modifier = Modifier
+                    .animateEnterExit(
+                        enter = slideInVertically(),
+                        exit = slideOutVertically()
+                )
+            ) {
+                Row(
+                    Modifier
+                        .weight(1f)
+                        .padding(horizontal = 5.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            viewModel.setFilter(
+                                withCredit = viewModel.withCredit.value.not(),
+                                withExam = viewModel.withExam.value
+                            )
+
+                        },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = viewModel.withCredit.value,
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colors.primary
+                        ),
+                        onCheckedChange = {
+                            viewModel.setFilter(it, viewModel.withExam.value)
+                        })
+                    Text(text = stringResource(id = R.string.with_credit))
+                }
+                Row(
+                    Modifier
+                        .weight(1f)
+                        .padding(horizontal = 5.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            viewModel.setFilter(
+                                withCredit = viewModel.withCredit.value,
+                                withExam = viewModel.withExam.value.not()
+                            )
+                        },
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+
+                ) {
+                    Checkbox(
+                        checked = viewModel.withExam.value,
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colors.primary
+                        ),
+                        onCheckedChange = {
+                            viewModel.setFilter(viewModel.withCredit.value, it)
+                        })
+                    Text(text = stringResource(id = R.string.with_exam))
+                }
+            }
+        }
+    }
+}
 @FlowPreview
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
@@ -289,8 +304,87 @@ private fun Body(
     subjects : List<List<Subject>>,
     updater: Updatable,
     refreshState: SwipeRefreshState,
+    isSearchEnabled : Boolean
 ) {
+    if (isSearchEnabled)
+        SearchSubjectsBody(visibleSubjects = visibleSubjects)
+    else
+        AllSemestersBody(
+            initialSemester = initialSemester,
+            visibleSubjects = visibleSubjects ,
+            subjects = subjects,
+            updater = updater,
+            refreshState = refreshState
+        )
+}
 
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
+@ExperimentalFoundationApi
+@Composable
+private fun SearchSubjectsBody(
+    visibleSubjects: List<List<Subject>>
+){
+
+    if (visibleSubjects.isNotEmpty()) {
+        val openedSubject = remember {
+            mutableStateListOf<Subject>()
+        }
+
+        LazyColumn(Modifier.fillMaxSize()) {
+            visibleSubjects.forEachIndexed { idx, list ->
+                if (list.isNotEmpty()) {
+                    stickyHeader {
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colors.background)
+                                .padding(10.dp)
+
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.semester, idx + 1),
+                                style = MaterialTheme.typography.subtitle1
+                            )
+                        }
+                    }
+
+                    item {
+                        Page(
+                            subjects = list,
+                            opened = openedSubject,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
+            }
+        }
+    } else {
+        Box(Modifier.fillMaxSize()) {
+
+            ErrorWidget(
+                title = stringResource(id = R.string.empty),
+                error = stringResource(id = R.string.subjects_not_found_search),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 100.dp)
+            )
+        }
+    }
+}
+
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
+@ExperimentalPagerApi
+@Composable
+private fun AllSemestersBody(
+    initialSemester : Int,
+    visibleSubjects: List<List<Subject>>,
+    subjects : List<List<Subject>>,
+    updater: Updatable,
+    refreshState: SwipeRefreshState,
+) {
     val state = rememberPagerState()
     val scope = rememberCoroutineScope()
 
@@ -300,8 +394,6 @@ private fun Body(
     }
 
 
-//    when (val subjectValue = subjects) {
-//        is DataState.Success ->
     Scaffold(
         topBar = {
             ScrollableTabRow(
@@ -338,7 +430,7 @@ private fun Body(
                             }
                         }) {
                         Text(
-                            text = stringResource(id = R.string.semester, i + 1),
+                            text = stringResource(id = R.string.semester_short, i + 1),
                             modifier = Modifier.padding(vertical = 10.dp)
                         )
                     }
@@ -352,11 +444,7 @@ private fun Body(
         }
         SwipeRefresh(
             modifier = Modifier
-                .fillMaxSize()
-                .bsuBackgroundPattern(
-                    MaterialTheme.colors.primary.copy(alpha = .05f),
-                    clip = true
-                ),
+                .fillMaxSize(),
             indicator = { state, trigger ->
                 BsuProgressBarSwipeRefreshIndicator(state = state, trigger = trigger)
             },
@@ -364,7 +452,7 @@ private fun Body(
             onRefresh = updater::update,
         ) {
             HorizontalPager(
-                count = visibleSubjects.size,
+                count = subjects.size,
                 state = state,
                 modifier = Modifier
                     .fillMaxSize()
@@ -372,21 +460,32 @@ private fun Body(
 
             ) { page ->
 
-                if (visibleSubjects[page].isNotEmpty()) {
+                if (visibleSubjects.getOrNull(page)?.isNotEmpty() == true) {
                     Page(
-                        modifier = Modifier.graphicsLayer {
-                            translationY = refreshState.indicatorOffset
-                        },
+                        modifier = Modifier
+                            .graphicsLayer {
+                                translationY = refreshState.indicatorOffset
+                            }
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .navigationBarsWithImePadding()
+                            .padding(bottom = 10.dp),
 
-                        subjects = subjects[page],
-                        visibleSubjects = visibleSubjects[page],
+                        subjects = visibleSubjects[page],
                         opened = openedSubjects,
                     )
                 } else {
-                    ErrorWidget(
-                        title = stringResource(id = R.string.empty),
-                        error = stringResource(id = R.string.subjects_not_found_for_day)
-                    )
+                    Box(Modifier
+                        .fillMaxSize()) {
+
+                        ErrorWidget(
+                            title = stringResource(id = R.string.empty),
+                            error = stringResource(id = R.string.subjects_not_found),
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 100.dp)
+                        )
+                    }
                 }
             }
         }
@@ -400,7 +499,6 @@ private fun Body(
 @Composable
 private fun Page(
     subjects: List<Subject>,
-    visibleSubjects : List<Subject>,
     opened : SnapshotStateList<Subject>,
     modifier: Modifier = Modifier
 ) {
@@ -409,7 +507,7 @@ private fun Page(
     }
 
     val subjectsInFirstColumn = remember {
-        mutableStateOf(mutableSubjects.size / 2)
+        mutableStateOf(if (subjects.size == 1) 1 else subjects.size / 2)
     }
 
     var shrinkAnimationEnabled by rememberSaveable {
@@ -435,9 +533,6 @@ private fun Page(
             mutableSubjects.addAll(subjects)
             subjectsInFirstColumn.value = mutableSubjects.size / 2
         }
-    }
-
-    LaunchedEffect(visibleSubjects) {
         delay(100)
         shrinkAnimationEnabled = true
         suspendRepeat {
@@ -454,26 +549,8 @@ private fun Page(
         shrinkAnimationEnabled = false
     }
 
-    LaunchedEffect(Unit) {
-        delay(100)
-        suspendRepeat {
-            shrink(
-                columnHeight[0].value,
-                columnHeight[1].value,
-                lastElemHeight[0].value,
-                lastElemHeight[1].value,
-                mutableSubjects,
-                subjectsInFirstColumn
-            )
-        }
-    }
-
     Row(
         modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .navigationBarsWithImePadding()
-            .padding(bottom = 10.dp)
     ) {
         listOf(
             mutableSubjects.subList(0, subjectsInFirstColumn.value),
@@ -482,11 +559,6 @@ private fun Page(
             Column(
                 Modifier
                     .weight(1f)
-//                    .animateContentSize(
-//                        finishedListener = { _, _ ->
-//                            shrinkAnimationEnabled = false
-//                        }
-//                    )
                     .onSizeChanged {
                         columnHeight[columnIndex].value = it.height
                     }
@@ -497,22 +569,16 @@ private fun Page(
                         var visible by rememberSaveable {
                             mutableStateOf(false)
                         }
-
-                        LaunchedEffect(Unit) {
+                        LaunchedEffect(Unit){
                             visible = true
                         }
-
                         AnimatedVisibility(
                             modifier = Modifier.padding(7.dp),
-                            visible = visible && subj in visibleSubjects,
+                            visible = visible,
                             enter = if (shrinkAnimationEnabled) slideInHorizontally {
                                 if (columnIndex == 0) it else -it
                             }
-//                            else slideInHorizontally { if (columnIndex == 0) -it else it },
                             else EnterTransition.None,
-//                            exit = slideOutHorizontally {
-//                                if (columnIndex == 0) -it else it
-//                            }
                             exit = ExitTransition.None
 
                         ) {
@@ -560,7 +626,7 @@ private fun Page(
     }
 }
 
-private suspend fun suspendRepeat(delay:Long = 100, max:Int = 5, shrink : () ->Boolean){
+private suspend fun suspendRepeat(delay:Long = 100, max:Int = 3, shrink : () ->Boolean){
     var cur = 0
     while (shrink() && cur<max){
         delay(delay)
@@ -578,26 +644,26 @@ private fun shrink(
 ) : Boolean {
     return when {
         (firstColumnHeight - secondColumnHeight).let {
-            it > 0 && lastElemInFirstColumnHeight*1.2 < it &&
+            it > 0 && lastElemInFirstColumnHeight*1.1 < it &&
                     subjects.size > subjectsInFirstColumn.value - 1 &&
+                    subjects.size >1 &&
                     subjectsInFirstColumn.value >0
         } -> {
-            subjects.add(subjects[subjectsInFirstColumn.value - 1])
-            subjects.removeAt(subjectsInFirstColumn.value - 1)
+            subjects.add(subjects.removeAt(subjectsInFirstColumn.value - 1))
             subjectsInFirstColumn.value--
             true
         }
 
         (secondColumnHeight - firstColumnHeight).let {
-            it > 0 && lastElemInSecondColumnHeight*1.2 < it &&
+            it > 0 && lastElemInSecondColumnHeight*1.1  < it &&
                     subjects.size > subjectsInFirstColumn.value &&
+                    subjects.size >1 &&
                     subjectsInFirstColumn.value >= 0
         } -> {
             subjects.add(
                 subjectsInFirstColumn.value,
-                subjects.last()
+                subjects.removeLast()
             )
-            subjects.removeLast()
             subjectsInFirstColumn.value++
             true
         }

@@ -89,8 +89,7 @@ class SubjectsViewModel @Inject constructor(
         _visibleSubjects.tryEmit(subjects.value.valueOrNull()?.map {
             it.filter {
                 (_searchText.value.isEmpty() || it.name.contains(_searchText.value, true)) &&
-                        (!withCredit.value || it.hasCredit) &&
-                        (!withExam.value || it.hasExam)
+                        (!withCredit.value || it.hasCredit) && (!withExam.value || it.hasExam)
             }
         }?.takeIf { it.any(Collection<*>::isNotEmpty) }?.let {
             DataState.Success(it)
