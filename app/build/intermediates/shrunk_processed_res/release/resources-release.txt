@@ -68,6 +68,7 @@ Marking dimen:design_snackbar_padding_vertical_2lines:2131165319 reachable: refe
 Marking dimen:design_snackbar_padding_vertical:2131165318 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:row_index_key:2131362107 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:fragment_container_view_tag:2131361964 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+Marking string:common_google_play_services_unknown_issue:2131820608 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:inspection_slot_table_set:2131361989 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking id:wrapped_composition_tag:2131362233 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:subjects:2131820790 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
@@ -100,7 +101,6 @@ Marking string:news_empty:2131820742 reachable: referenced from /Users/alexzhirk
 Marking layout:abc_action_menu_layout:2131558403 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking layout:abc_action_menu_item_layout:2131558402 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking attr:imageButtonStyle:2130969021 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
-Marking string:common_google_play_services_unknown_issue:2131820608 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking drawable:design_password_eye:2131230839 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:password_toggle_content_description:2131820759 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
 Marking string:subjects_not_found:2131820792 reachable: referenced from /Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
@@ -580,7 +580,6 @@ OPTIONAL_MODULE_LANGUAGE_ID_RELEASE
 maxMs
 $this$AnimatedNavHost
 ksr
-last_advertising_id_reset
 BrightnessValue
 com.google.crypto.tink.shaded.protobu...
 androidx.compose.foundation.Focusable...
@@ -644,8 +643,8 @@ NumberPassword
 X
 ON_DEVICE_POSE_LOAD
 measurement.lifecycle.app_backgrounde...
-_
 policy
+_
 kotlinx.coroutines.flow.FlowKt__LimitKt
 a
 b
@@ -665,9 +664,9 @@ Doctype
 effectiveDirectAddress
 l
 OnClick
-m
 AuthCookie
 cookieJar
+m
 n
 o
 ad_click
@@ -699,6 +698,7 @@ logEventKey
 val$foregroundFuture
 consent_state
 mlkit:vision
+propertyXName
 PRIORITY
 mimeType
 has_realtime
@@ -752,9 +752,8 @@ isDebugInspectorInfoEnabled
 Filled.VisibilityOff
 root
 androidx.compose.foundation.lazy.Lazy...
-last_deep_link_referrer
-previous_first_open_count
 github.alexzhirkevich.studentbsuby.re...
+previous_first_open_count
 GlobalSnapshotManager.android.kt
 headers
 kotlin.collections.List
@@ -799,9 +798,9 @@ serverProviderClass
 HardwareConfig
 LOCKED
 $this$binarySearch
+byte
 $this$Button
 androidx.compose.animation.core.Mutat...
-byte
 androidx.compose.foundation.gestures....
 LESS_THAN
 _nmtid
@@ -882,6 +881,7 @@ android.view.accessibility.extra.DATA...
 androidx.compose.foundation.gestures....
 setEpicenterBounds
 github.alexzhirkevich.studentbsuby.re...
+repeatCount
 ga_previous_screen
 realtime
 kotlinx.coroutines.flow.FlowKt__Chann...
@@ -920,7 +920,6 @@ editCommands
 app_store_refund
 InMeasureBlock
 SSLv3
-lifetime_user_engagement
 SFIXED64_LIST_PACKED
 teacher
 DEAD_CLIENT
@@ -972,7 +971,6 @@ len
 CONNECT_ERROR
 DELETE_NEXT_CHAR
 item_list
-last_gclid
 AttributeName
 state
 worker
@@ -1155,8 +1153,8 @@ TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
 BREAK
 androidx.compose.foundation.selection...
 LOCAL
-newSemanticsNodes
 enter
+newSemanticsNodes
 drawableStart
 ACTION_SHOW_ON_SCREEN
 hardware
@@ -1331,8 +1329,8 @@ config_fetched_time
 path
 com.skydoves.landscapist.ImageLoad__I...
 EXTRA_WORK_SPEC_ID
-engagement_time_msec
 ReceiveQueued
+engagement_time_msec
 ExposureMode
 Button
 Recomposer.kt
@@ -1408,8 +1406,8 @@ ScriptDataEscapedEndTagOpen
 right
 outAttrs
 TLS_RSA_WITH_SEED_CBC_SHA
-ga_list_length
 measurement.client.consent.gmpappid_w...
+ga_list_length
 dynamite_version
 OkHttp
 Recomposer:recompose
@@ -1509,8 +1507,8 @@ multipart/digest
 baseUrl
 OPTIONAL_MODULE_INFERENCE_ERROR
 Expect
-lenientToString
 on_update
+lenientToString
 hash_
 context.theme
 androidx.compose.material.ripple.Ripp...
@@ -1556,8 +1554,8 @@ dns
 androidx.compose.foundation.ScrollKt$...
 requestHeaders
 POST_DECREMENT
-TOP
 field
+TOP
 contents
 invalid
 uploading_gmp_version
@@ -1667,6 +1665,7 @@ last_pause_time
 session_timeout
 org.conscrypt.Conscrypt$Version
 http.agent
+objectAnimator
 AfterAttributeValue_quoted
 entry.key
 LambdaLast
@@ -1717,11 +1716,11 @@ properties
 LightSource
 method.declaringClass
 androidx.compose.material.DrawerKt$Sc...
+RestrictedAPI
 com.google.android.gms.googlecertific...
 NATIVE_LIBRARY_LOAD_ERROR
 Vertical
 00
-RestrictedAPI
 onImeActionPerformed
 common_google_play_services_restricte...
 argumentName
@@ -1739,6 +1738,7 @@ ComponentDiscovery
 1$
 sizes
 GET_INDEX
+valueType
 $this$connect
 $noName_0
 TRACE_TAG_APP
@@ -1833,6 +1833,7 @@ com.google.android.gms.signin.interna...
 navigator
 Operations:
 dialogId
+DrawableDelegate
 ACTION_CANCEL_WORK
 keyData_
 github.alexzhirkevich.studentbsuby_en...
@@ -2035,8 +2036,8 @@ github.alexzhirkevich.studentbsuby.ui...
 clearMemory
 configuration
 .font
-_lgclid
 LTR
+_lgclid
 type.googleapis.com/google.crypto.tin...
 org.eclipse.jetty.alpn.ALPN$Provider
 DESELECT
@@ -2116,8 +2117,8 @@ unused
 emitAllImpl$FlowKt__ChannelsKt
 ENCODE
 cloudTextDetectionLogEvent
-ga_screen
 notification_dismiss
+ga_screen
 PREF_CURRENTSEMESTER_
 InColumnGroup
 :not
@@ -2125,12 +2126,13 @@ headerIndexes
 android.intent.extra.PROCESS_TEXT_REA...
 matrix
 Chip
+VectorDrawableCompat
 measurement
 PASSED
 DIVIDE
 LayingOut
-com.google.common.base.Strings
 MESSAGE
+com.google.common.base.Strings
 DIRTY
 http/1.1
 http/1.0
@@ -2174,6 +2176,7 @@ kotlin.collections.convert_arg_to_set...
 DO
 Miter
 fling
+currentIndex
 TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY130...
 deferred_analytics_collection
 startColor
@@ -2421,7 +2424,6 @@ handleLifecycleEvent
 Indeterminate
 media
 workerClassName
-first_visit_time
 WakeLocks
 crossAxisSize
 TRANSFORMED
@@ -2505,9 +2507,9 @@ ChannelFlow.kt
 androidx.compose.ui.window.AndroidPop...
 _Impl
 ctl00%24ContentPlaceHolder0%24txtUser...
-system_app
 android.intent.action.SENDTO
 00001111
+system_app
 SSL_RSA_EXPORT_WITH_DES40_CBC_SHA
 android.view.accessibility.extra.DATA...
 measurement.upload.blacklist_internal
@@ -2582,6 +2584,7 @@ urlSpanStyle
 UINT64_LIST
 TYPE_THIN
 responseHeaders
+startOffset
 github.alexzhirkevich.studentbsuby.ut...
 TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256
 Up
@@ -2613,7 +2616,9 @@ checkout_option
 news
 SOURCE_CLIPBOARD
 ဌ
+XA
 chunked
+XB
 LibraryVersion
 workSpecId
 cloudDocumentTextDetectionLogEvent
@@ -2692,8 +2697,8 @@ paragraphStyles
 WrongCall
 UNKNOWN_MATCH_TYPE
 fcm
-message_time
 processingTimeMillis
+message_time
 onDeviceTranslationLogEvent
 android.hardware.type.watch
 UTF_8
@@ -2767,8 +2772,8 @@ endReason
 :ImmediateParent%s
 thirdQuartileMs
 _consensus
-payment_type
 firebaseinstallations.googleapis.com
+payment_type
 android.support.v13.view.inputmethod....
 firebase_previous_id
 org_id
@@ -2783,7 +2788,6 @@ END_STREAM
 generator
 Ltr
 Touch
-first_open_after_install
 Filled.ExpandLess
 com.google.android.gms.signin.interna...
 workSpecs
@@ -2868,6 +2872,7 @@ STRING_SET
 finder
 UNKNOWN_PREFIX
 $this$heightIn
+ar
 proxy
 keyFormat
 kotlinx.coroutines.scheduler.resoluti...
@@ -2891,6 +2896,7 @@ InternalMutatorMutex.kt
 iconScale
 onDeviceTextDetectionLogEvent
 common_google_play_services_resolutio...
+ordering
 :memory:
 measurement.config.url_scheme
 kotlinx.coroutines.flow.internal.Undi...
@@ -2944,6 +2950,7 @@ ENDS_WITH
 MOBILE_HIPRI
 USHORT
 _sno
+autoMirrored
 SSL_DH_anon_WITH_DES_CBC_SHA
 resourceLoader
 inefficientWriteStringNoTag
@@ -2961,6 +2968,7 @@ rootView.handler
 com.google.accompanist.pager.Pager$Pa...
 FIXED
 em
+en
 NonDisposableHandle
 com.google.android.gms.vision.text.Ch...
 JobInfoScheduler
@@ -3000,8 +3008,8 @@ h2
 h3
 paramName
 h4
-easing
 h5
+easing
 MaterialButton
 content
 h6
@@ -3096,8 +3104,8 @@ http:
 AndroidPopup.android.kt
 l1
 l2
-onEmailClicked
 FIRSTSTRONG_RTL
+onEmailClicked
 com.google.android.gms.measurement.ap...
 Uri
 BatteryNotLowTracker
@@ -3107,15 +3115,15 @@ $this$writeMedium
 $this$readUtf8Line
 subjectsDao
 CLOUD_FACE_CLOSE
-promotion_name
 com.bumptech.glide.load.model.stream....
+promotion_name
 log_event_dropped
 filter_type
 androidx.compose.foundation.gestures....
 paragraphIntrinsics.textPaint.textLocale
 measurement.test.int_flag
-RIGHT
 OPTIONAL_MODULE_NLCLASSIFIER_CREATE
+RIGHT
 androidx.compose.foundation.gestures....
 startDragImmediately
 GROUP_LIST
@@ -3147,6 +3155,7 @@ onDeviceBarcodeDetectionLogEvent
 startedAt
 childValue
 unmonitored
+tintMode
 second
 offsetX
 AfterHead
@@ -3246,6 +3255,7 @@ manual_install
 com.google.firebase.components:
 animSpec
 AnimatedContent
+valueTo
 region.bounds
 timestamp_millis
 TLS_DH_anon_WITH_AES_256_CBC_SHA256
@@ -3264,9 +3274,10 @@ INTERRUPTED
 Cookie
 ProcessCommand
 getObject
+drawable
 transitionSpec
-_sys
 ACTION_NEXT_HTML_ELEMENT
+_sys
 appExitInfo
 measurement.upload.max_event_name_car...
 edit
@@ -3440,6 +3451,7 @@ api_force_staging
 $this$deleteIfSelectedOr
 Dispatchers.Main.immediate
 View
+valueFrom
 checkPath
 failed_config_fetch_time
 annotatedString
@@ -3579,8 +3591,8 @@ navDeepLink
 measurement.collection.synthetic_data...
 CLOUD_SAFE_SEARCH_CLOSE
 drawable.bitmap
-_cer
 add_payment_info
+_cer
 calling_package
 needsReschedule
 google_app_id
@@ -3666,8 +3678,9 @@ internal.platform
 CONNECTION_SUSPENDED_DURING_CALL
 optional
 firstQuartileMs
-ad_event_id
 Orientation
+ad_event_id
+keyframe
 requires_battery_not_low
 textSelectionRange
 outputLength
@@ -3719,6 +3732,7 @@ SUSPEND
 app_store_subscription_renew
 arch
 currentValue
+standard
 OPTIONAL_MODULE_NLCLASSIFIER
 reports
 androidx.core.view.inputmethod.InputC...
@@ -3739,15 +3753,15 @@ drawableLeft
 com.android.org.conscrypt.OpenSSLSock...
 SOURCE_UNKNOWN
 ACTION_SCROLL_FORWARD
-ga_event_origin
 SIGN_IN_REQUIRED
+ga_event_origin
 Short
 Filled.ArrowBack
 area
 eventUptimeMs
 BeforeAttributeValue
-view.attributeSourceResourceMap
 select_item
+view.attributeSourceResourceMap
 PersonalCabinet/Pay/report
 com.google.firebase.components.Compon...
 popupLayoutHelper
@@ -3776,14 +3790,14 @@ selectionManager
 _aa
 child
 figcaption
-ByteBufferEncoder
 _ac
 TOO_MANY_REQUESTS
+ByteBufferEncoder
 _ab
 _ae
 UNDO
-repeatMode
 UNREGISTERED
+repeatMode
 RESULT_BASELINE_PROFILE_NOT_FOUND
 _ai
 DEEP_COPY_VALIDATOR_KEY
@@ -3807,9 +3821,9 @@ val$subject
 kotlinx.coroutines.flow.FlowKt__Reduc...
 NaN
 _delayed
+owner.defaultViewModelProviderFactory
 replaceCacheIf
 FIXED32_LIST_PACKED
-owner.defaultViewModelProviderFactory
 navigationBars
 jobscheduler
 $this$invoke
@@ -3832,8 +3846,8 @@ BatteryChrgTracker
 _cc
 charAt
 android.view.View$AttachInfo
-textLayoutResult
 _cd
+textLayoutResult
 java.lang.Float
 Dispatchers.IO
 SHA1
@@ -3920,6 +3934,7 @@ layoutCoordinates
 FirebaseApp
 AUTOML_IMAGE_LABELING_CLOSE
 %40
+linear
 _fi
 autoMigrationSpecsMap
 BasePendingResult
@@ -3943,11 +3958,11 @@ TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 RemoteModel
 New
 savedStateRegistryOwner.savedStateReg...
-_gn
 putMethod
+_gn
 user_attributes
-executeImageRequest
 pid
+executeImageRequest
 tryEmit
 cipherSuite
 table_id
@@ -3963,8 +3978,8 @@ CLOUD_SAFE_SEARCH_DETECT
 .%s
 property_filters
 type.googleapis.com/google.crypto.tin...
-ConflictingOnColor
 void
+ConflictingOnColor
 measurement.lifecycle.app_backgrounde...
 firebase_data_collection_default_enabled
 measurement.validation.internal_limit...
@@ -4063,7 +4078,6 @@ events
 _ll
 pointers
 %8s
-_ln
 pending_intent
 deep_link_retrieval_attempts
 _exp_expire
@@ -4168,11 +4182,12 @@ _pi
 toxicityDetectionInferenceEvent
 has
 MODEL_TYPE_MISUSE
-_pn
 REPLACE
+_pn
 Eraser
 analytics_storage
 _po
+AvdcInflateDelegate
 INTEGER
 brush
 UINT32_LIST_PACKED
@@ -4182,9 +4197,9 @@ _pv
 :prev%s
 effectCoroutineContext
 DELETE_PREV_CHAR
+weight
 CAMERAX_SOURCE_ERROR
 contractNumber
-weight
 worker_class_name
 synchronizationEnabled
 REMOTE_MODEL_LOADER_ERROR
@@ -4207,8 +4222,8 @@ common_google_play_services_network_e...
 Filled.Replay10
 application_build
 common_google_play_services_invalid_a...
-last_sampled_complex_event_id
 FIRSTSTRONG_LTR
+last_sampled_complex_event_id
 video
 google_app_measurement_local.db
 tint
@@ -4301,8 +4316,8 @@ CustomActions
 ANYRTL_LTR
 _ug
 _ui
-_lte
 index_WorkName_work_spec_id
+_lte
 GET
 unicodeDomain
 google_analytics_default_allow_ad_per...
@@ -4344,8 +4359,8 @@ reverse
 FIXED32_LIST
 $this$toCanonicalHost
 onActivityCreated
-androidx.work.CoroutineWorker$startWo...
 char
+androidx.work.CoroutineWorker$startWo...
 ConnectivityMonitor
 small
 androidx.compose.material.DrawerKt$Mo...
@@ -4459,6 +4474,7 @@ measurement.client.sessions.check_on_...
 ViewHolder
 trim
 MlKitInitProvider
+propertyValuesHolder
 com.google.android.gms.measurement.dy...
 kotlin.reflect.jvm.internal.Reflectio...
 com.android.org.conscrypt.SSLParamete...
@@ -4483,6 +4499,7 @@ SINT32
 cancellation
 route
 timezoneOffsetSeconds
+interpolator
 Filled.LocalFireDepartment
 :path
 allocateInstance
@@ -4522,8 +4539,8 @@ restored
 animatedInsets
 github.alexzhirkevich.studentbsuby.ui...
 SYSTEM
-androidx.core.view.inputmethod.InputC...
 in_app_purchase
+androidx.core.view.inputmethod.InputC...
 triggerForDescendants
 listener
 PaidServicesViewModel.kt
@@ -4682,8 +4699,8 @@ floatDecaySpec
 strike
 github.alexzhirkevich.studentbsuby.re...
 menu
-_uwa
 select_promotion
+_uwa
 androidx.core.view.inputmethod.InputC...
 getLong
 onEripHelpClicked
@@ -4697,6 +4714,7 @@ return
 WrkMgrInitializer
 CM_SAMPLE_BUFFER_REF
 EmojiCompat.MetadataRepo.create
+AsldcInflateDelegate
 onClick
 $this$null
 instance
@@ -4706,7 +4724,6 @@ $this$bsuBackgroundPattern
 CAMERA1_SOURCE_NO_SUITABLE_FPS_ERROR
 Filled.ExpandMore
 integer
-session_user_engagement
 GmsCore_OpenSSL
 UnknownNullness
 mVisibleInsets
@@ -4717,6 +4734,7 @@ find
 AES/ECB/NoPadding
 CheckResult
 host
+accelerate
 indexOf
 selected
 HTTP_2
@@ -4799,16 +4817,16 @@ NEVER
 PNG
 Activity
 $this$toHostHeader
-HORIZONTAL_DIMENSION
 FINISHED
+HORIZONTAL_DIMENSION
 CENTER
 $this$delimiterOffset
 Unknown
 java.lang.Long
 ctl00_ContentPlaceHolder0_cmdLogIn
 medianMs
-transaction_id
 PACKED_VECTOR
+transaction_id
 ScionFrontendApi
 abs:
 0x%02x
@@ -4858,6 +4876,7 @@ DECODE_DATA
 AboveBaseline
 inferenceDurationStats
 eventCode
+propertyName
 github.alexzhirkevich.studentbsuby.ui...
 WorkProgress
 PropertySet
@@ -4934,6 +4953,7 @@ UNRECOGNIZED
 every
 SetProgress
 utm_content
+getMaxAvailableHeight
 summary
 DEVELOPER
 _mst
@@ -4965,8 +4985,8 @@ ActualAndroid.android.kt
 offsetAnimation
 getViewRootImpl
 childCoordinates
-price
 delimiter
+price
 github.alexzhirkevich.studentbsuby.re...
 _efs
 roundRect
@@ -5133,8 +5153,8 @@ GmsClient
 TestTag
 app_in_background
 Filled.Settings
-REMOTE_EXCEPTION
 int
+REMOTE_EXCEPTION
 ins
 SnackbarHost.kt
 SHA256
@@ -5252,6 +5272,7 @@ POST_INCREMENT
 storageBucket
 _ndt
 addSuppressed
+decelerate
 CSLCompat
 ThumbnailImageWidth
 RESULT_OK
@@ -5353,8 +5374,8 @@ zzM
 CLOUD_IMAGE_LABEL_CLOSE
 zzL
 zzO
-location_id
 parentList
+location_id
 androidx.compose.material.SwipeableSt...
 zzN
 zzQ
@@ -5398,8 +5419,8 @@ zzl
 script
 zzo
 BITWISE_XOR
-animation
 zzn
+animation
 zzq
 CUSTOM_OBJECT_CREATE
 Variant
@@ -5413,7 +5434,6 @@ triggered_event
 dynamiteLoader
 zzt
 awaitLongPressOrCancellation
-user_id
 zzw
 current_data
 zzv
@@ -5568,8 +5588,8 @@ application
 paddingValues
 val$news
 until
-_nmt
 context_id
+_nmt
 semester
 SLONG
 NetworkStateTracker
@@ -5616,8 +5636,8 @@ marquee
 Make
 BUILD_MESSAGE_INFO
 Dependency
-invalidateParentLayer
 owner.viewModelStore
+invalidateParentLayer
 ဌ ဇဈဈဈ
 :or%s
 android.net.http.X509TrustManagerExte...
@@ -5634,6 +5654,7 @@ AndroidKeystoreAesGcm
 SSL_RSA_WITH_3DES_EDE_CBC_SHA
 app_store_subscription_cancel
 Processor
+PathParser
 endState
 measurement.service.consent_state_v1_W36
 circularReveal
@@ -5683,6 +5704,7 @@ RecyclerView
 Share.kt
 intersectionCounter
 NewsDetailScreen.kt
+animator
 ScriptDataEscapeStart
 $this$selectPrefix
 .%2e
@@ -5778,6 +5800,7 @@ KEY_START_ID
 unshift
 subtreeRoot
 TLS_DH_anon_WITH_AES_256_GCM_SHA384
+VdcInflateDelegate
 MainContent
 appVersion
 tileMode
@@ -5797,6 +5820,7 @@ END_HEADERS
 consumeUntilUp
 ExposureTime
 $this$toImmutableList
+propertyYName
 ConnectionStatusConfig
 CdataSection
 ivSize
@@ -5894,7 +5918,6 @@ editableText
 PUSH_PROMISE
 com.google.android.gms.dynamite.descr...
 allow_personalized_ads
-CLOSED_EMPTY
 kotlin.collections.Iterator
 SecureOn
 res/
@@ -5960,8 +5983,8 @@ OPTIONAL_MODULE_CUSTOM_IMAGE_LABELING...
 comparison_value
 measurement.service.audience.fix_skip...
 RecommendedExposureIndex
-bitmap
 keyUri_
+bitmap
 getSuppressed
 measurement.client.consent_state_v1
 processNewAnchors$material_release
@@ -5998,7 +6021,6 @@ imeOptions
 Theme.Dialog.Alert
 icon
 $this$socketHost
-firebase_last_notification
 animationSpec
 java.
 $this$intrinsicSize
@@ -6019,10 +6041,10 @@ COMPRESSION_ERROR
 ISO
 app_version_int
 ACK
-ga_extra_params_ct
-session_id
 add_to_wishlist
 app_backgrounded
+ga_extra_params_ct
+session_id
 plaintext
 CAMERA1_SOURCE_NO_SUITABLE_SIZE_ERROR
 lessonsDao
@@ -6088,8 +6110,8 @@ ACTION_LONG_CLICK
 $this$indexOfFirstNonAsciiWhitespace
 os_update
 SRATIONAL
-_fvt
 android.speech.extra.LANGUAGE
+_fvt
 GPRS
 getFloat
 putLong
@@ -6369,8 +6391,8 @@ android:dialogShowing
 news_detail/
 extended
 sup
-BASELINE
 ASC
+BASELINE
 current
 RTT
 eventsDroppedCount
@@ -6432,8 +6454,8 @@ ffff0000
 NOT_IN_STACK
 OffsetTimeOriginal
 placementAnimator
-ga_error_value
 ad_impression
+ga_error_value
 desc
 androidx.compose.material.SwitchKt$Sw...
 $this$KeyboardActions
@@ -6492,7 +6514,6 @@ topLeft
 REMOTE_MODEL_INVALID
 InCell
 $this$ImageRequest
-REMOVED_TASK
 oetf
 NO_VALID_MODEL
 transformedText
@@ -6616,9 +6637,9 @@ BITWISE_NOT
 newKeyAllowed_
 androidx.compose.material.ripple.Stat...
 RESULT_UNSUPPORTED_ART_VERSION
-tax
 innerTextField
 ACTION_COPY
+tax
 com.google.firebase.crash.FirebaseCrash
 Pragma
 github.alexzhirkevich.studentbsuby.ui...
@@ -6683,8 +6704,8 @@ run_in_foreground
 com.google.android.wearable.app
 FLOAT_LIST_PACKED
 CUSTOM_MODEL_RUN
-arguments
 Popup:
+arguments
 new_audience
 LocalWindowInfo
 ScrollableState.kt
@@ -7353,6 +7374,12 @@ Marking id:adjust_height:2131361860 used because it matches string pool constant
 Marking id:adjust_width:2131361861 used because it matches string pool constant ad
 Marking string:additionally:2131820575 used because it matches string pool constant ad
 Marking attr:shrinkMotionSpec:2130969362 used because it matches string pool constant shrink
+Marking attr:arcMode:2130968630 used because it matches string pool constant ar
+Marking attr:argType:2130968631 used because it matches string pool constant ar
+Marking attr:arrowHeadLength:2130968632 used because it matches string pool constant ar
+Marking attr:arrowShaftLength:2130968633 used because it matches string pool constant ar
+Marking id:arc:2131361869 used because it matches string pool constant ar
+Marking attr:orderingFromXml:2130969253 used because it matches string pool constant ordering
 Marking attr:brightness:2130968688 used because it matches string pool constant br
 Marking color:bright_foreground_disabled_material_dark:2131099684 used because it matches string pool constant br
 Marking color:bright_foreground_disabled_material_light:2131099685 used because it matches string pool constant br
@@ -7395,6 +7422,28 @@ Marking id:image:2131361987 used because it matches string pool constant image
 Marking layout:image_frame:2131558445 used because it matches string pool constant image
 Marking attr:emojiCompatEnabled:2130968899 used because it matches string pool constant em
 Marking string:empty:2131820631 used because it matches string pool constant em
+Marking attr:enableCopying:2130968900 used because it matches string pool constant en
+Marking attr:enableEdgeToEdge:2130968901 used because it matches string pool constant en
+Marking attr:enabled:2130968902 used because it matches string pool constant en
+Marking attr:endIconCheckable:2130968903 used because it matches string pool constant en
+Marking attr:endIconContentDescription:2130968904 used because it matches string pool constant en
+Marking attr:endIconDrawable:2130968905 used because it matches string pool constant en
+Marking attr:endIconMode:2130968906 used because it matches string pool constant en
+Marking attr:endIconTint:2130968907 used because it matches string pool constant en
+Marking attr:endIconTintMode:2130968908 used because it matches string pool constant en
+Marking attr:enforceMaterialTheme:2130968909 used because it matches string pool constant en
+Marking attr:enforceTextAppearance:2130968910 used because it matches string pool constant en
+Marking attr:ensureMinTouchTargetSize:2130968911 used because it matches string pool constant en
+Marking attr:enterAnim:2130968912 used because it matches string pool constant en
+Marking attr:entries:2130968913 used because it matches string pool constant en
+Marking attr:entryValues:2130968914 used because it matches string pool constant en
+Marking bool:enable_system_alarm_service_default:2131034115 used because it matches string pool constant en
+Marking bool:enable_system_foreground_service_default:2131034116 used because it matches string pool constant en
+Marking bool:enable_system_job_service_default:2131034117 used because it matches string pool constant en
+Marking id:end:2131361947 used because it matches string pool constant en
+Marking id:endToStart:2131361948 used because it matches string pool constant en
+Marking id:enterAlways:2131361949 used because it matches string pool constant en
+Marking id:enterAlwaysCollapsed:2131361950 used because it matches string pool constant en
 Marking attr:framePosition:2130968984 used because it matches string pool constant frame
 Marking attr:content:2130968797 used because it matches string pool constant content
 Marking id:content:2131361907 used because it matches string pool constant content
@@ -7512,6 +7561,8 @@ Marking id:line3:2131362006 used because it matches string pool constant li
 Marking id:linear:2131362007 used because it matches string pool constant li
 Marking id:listMode:2131362008 used because it matches string pool constant li
 Marking id:list_item:2131362009 used because it matches string pool constant li
+Marking attr:tintMode:2130969500 used because it matches string pool constant tintMode
+Marking attr:tintMode:2130969500 used because it matches string pool constant tintMode
 Marking color:secondary_text_default_material_dark:2131099860 used because it matches string pool constant second
 Marking color:secondary_text_default_material_light:2131099861 used because it matches string pool constant second
 Marking color:secondary_text_disabled_material_dark:2131099862 used because it matches string pool constant second
@@ -7553,6 +7604,15 @@ Marking attr:onShow:2130969250 used because it matches string pool constant on
 Marking attr:onTouchUp:2130969251 used because it matches string pool constant on
 Marking id:on:2131362078 used because it matches string pool constant on
 Marking string:on:2131820749 used because it matches string pool constant on
+Marking attr:drawableBottomCompat:2130968878 used because it matches string pool constant drawable
+Marking attr:drawableEndCompat:2130968879 used because it matches string pool constant drawable
+Marking attr:drawableLeftCompat:2130968880 used because it matches string pool constant drawable
+Marking attr:drawableRightCompat:2130968881 used because it matches string pool constant drawable
+Marking attr:drawableSize:2130968882 used because it matches string pool constant drawable
+Marking attr:drawableStartCompat:2130968883 used because it matches string pool constant drawable
+Marking attr:drawableTint:2130968884 used because it matches string pool constant drawable
+Marking attr:drawableTintMode:2130968885 used because it matches string pool constant drawable
+Marking attr:drawableTopCompat:2130968886 used because it matches string pool constant drawable
 Marking attr:editTextBackground:2130968892 used because it matches string pool constant edit
 Marking attr:editTextColor:2130968893 used because it matches string pool constant edit
 Marking attr:editTextPreferenceStyle:2130968894 used because it matches string pool constant edit
@@ -7780,6 +7840,8 @@ Marking attr:contentPaddingStart:2130968810 used because it matches string pool 
 Marking attr:contentPaddingTop:2130968811 used because it matches string pool constant contentPadding
 Marking attr:paddingStart:2130969261 used because it matches string pool constant paddingStart
 Marking attr:paddingStart:2130969261 used because it matches string pool constant paddingStart
+Marking id:standard:2131362155 used because it matches string pool constant standard
+Marking id:standard:2131362155 used because it matches string pool constant standard
 Marking attr:drawableLeftCompat:2130968880 used because it matches string pool constant drawableLeft
 Marking drawable:list:2131230856 used because it matches string pool constant list
 Marking attr:listChoiceBackgroundIndicator:2130969140 used because it matches string pool constant list
@@ -7804,6 +7866,13 @@ Marking string:labs:2131820679 used because it matches string pool constant labs
 Marking string:labs:2131820679 used because it matches string pool constant labs
 Marking attr:layoutDescription:2130969070 used because it matches string pool constant layoutDescription
 Marking attr:layoutDescription:2130969070 used because it matches string pool constant layoutDescription
+Marking id:linear:2131362007 used because it matches string pool constant linear
+Marking animator:linear_indeterminate_line1_head_interpolator:2130837513 used because it matches string pool constant linear
+Marking animator:linear_indeterminate_line1_tail_interpolator:2130837514 used because it matches string pool constant linear
+Marking animator:linear_indeterminate_line2_head_interpolator:2130837515 used because it matches string pool constant linear
+Marking animator:linear_indeterminate_line2_tail_interpolator:2130837516 used because it matches string pool constant linear
+Marking attr:linearProgressIndicatorStyle:2130969139 used because it matches string pool constant linear
+Marking id:linear:2131362007 used because it matches string pool constant linear
 Marking attr:checkedIconEnabled:2130968720 used because it matches string pool constant checkedIconEnabled
 Marking attr:checkedIconEnabled:2130968720 used because it matches string pool constant checkedIconEnabled
 Marking attr:elevation:2130968896 used because it matches string pool constant elevation
@@ -8074,6 +8143,8 @@ Marking string:hostel_not_provided:2131820669 used because it matches string poo
 Marking string:hostel_not_provided_ext:2131820670 used because it matches string pool constant host
 Marking string:hostel_payment:2131820671 used because it matches string pool constant host
 Marking string:hostel_provided:2131820672 used because it matches string pool constant host
+Marking id:accelerate:2131361806 used because it matches string pool constant accelerate
+Marking id:accelerate:2131361806 used because it matches string pool constant accelerate
 Marking id:selected:2131362131 used because it matches string pool constant selected
 Marking string:selected:2131820772 used because it matches string pool constant selected
 Marking id:selected:2131362131 used because it matches string pool constant selected
@@ -8207,6 +8278,9 @@ Marking id:accessibility_custom_action_6:2131361836 used because it matches stri
 Marking id:accessibility_custom_action_7:2131361837 used because it matches string pool constant acc
 Marking id:accessibility_custom_action_8:2131361838 used because it matches string pool constant acc
 Marking id:accessibility_custom_action_9:2131361839 used because it matches string pool constant acc
+Marking id:decelerate:2131361918 used because it matches string pool constant decelerate
+Marking id:decelerate:2131361918 used because it matches string pool constant decelerate
+Marking id:decelerateAndComplete:2131361919 used because it matches string pool constant decelerate
 Marking id:add:2131361859 used because it matches string pool constant add
 Marking id:add:2131361859 used because it matches string pool constant add
 Marking string:additionally:2131820575 used because it matches string pool constant add
@@ -8784,10 +8858,10 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @attr/animationMode : reachable=true
 @attr/appBarLayoutStyle : reachable=true
 @attr/applyMotionScene : reachable=true
-@attr/arcMode : reachable=false
-@attr/argType : reachable=false
-@attr/arrowHeadLength : reachable=false
-@attr/arrowShaftLength : reachable=false
+@attr/arcMode : reachable=true
+@attr/argType : reachable=true
+@attr/arrowHeadLength : reachable=true
+@attr/arrowShaftLength : reachable=true
 @attr/attributeName : reachable=false
 @attr/autoCompleteTextViewStyle : reachable=true
 @attr/autoSizeMaxTextSize : reachable=true
@@ -9032,15 +9106,15 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @attr/dragScale : reachable=false
 @attr/dragThreshold : reachable=false
 @attr/drawPath : reachable=false
-@attr/drawableBottomCompat : reachable=false
+@attr/drawableBottomCompat : reachable=true
 @attr/drawableEndCompat : reachable=true
 @attr/drawableLeftCompat : reachable=true
 @attr/drawableRightCompat : reachable=true
-@attr/drawableSize : reachable=false
+@attr/drawableSize : reachable=true
 @attr/drawableStartCompat : reachable=true
-@attr/drawableTint : reachable=false
-@attr/drawableTintMode : reachable=false
-@attr/drawableTopCompat : reachable=false
+@attr/drawableTint : reachable=true
+@attr/drawableTintMode : reachable=true
+@attr/drawableTopCompat : reachable=true
 @attr/drawerArrowStyle : reachable=true
 @attr/dropDownListViewStyle : reachable=true
 @attr/dropdownListPreferredItemHeight : reachable=false
@@ -9054,18 +9128,18 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @attr/elevationOverlayColor : reachable=true
 @attr/elevationOverlayEnabled : reachable=true
 @attr/emojiCompatEnabled : reachable=true
-@attr/enableCopying : reachable=false
-@attr/enableEdgeToEdge : reachable=false
+@attr/enableCopying : reachable=true
+@attr/enableEdgeToEdge : reachable=true
 @attr/enabled : reachable=true
-@attr/endIconCheckable : reachable=false
-@attr/endIconContentDescription : reachable=false
-@attr/endIconDrawable : reachable=false
-@attr/endIconMode : reachable=false
-@attr/endIconTint : reachable=false
-@attr/endIconTintMode : reachable=false
-@attr/enforceMaterialTheme : reachable=false
-@attr/enforceTextAppearance : reachable=false
-@attr/ensureMinTouchTargetSize : reachable=false
+@attr/endIconCheckable : reachable=true
+@attr/endIconContentDescription : reachable=true
+@attr/endIconDrawable : reachable=true
+@attr/endIconMode : reachable=true
+@attr/endIconTint : reachable=true
+@attr/endIconTintMode : reachable=true
+@attr/enforceMaterialTheme : reachable=true
+@attr/enforceTextAppearance : reachable=true
+@attr/ensureMinTouchTargetSize : reachable=true
 @attr/enterAnim : reachable=true
 @attr/entries : reachable=true
 @attr/entryValues : reachable=true
@@ -9407,7 +9481,7 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @attr/onShow : reachable=true
 @attr/onTouchUp : reachable=true
 @attr/order : reachable=false
-@attr/orderingFromXml : reachable=false
+@attr/orderingFromXml : reachable=true
 @attr/overlapAnchor : reachable=false
 @attr/overlay : reachable=false
 @attr/paddingBottomNoButtons : reachable=false
@@ -11032,7 +11106,7 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @id/androidx_compose_ui_view_composition_context : reachable=true
 @id/animateToEnd : reachable=true
 @id/animateToStart : reachable=true
-@id/arc : reachable=false
+@id/arc : reachable=true
 @id/asConfigured : reachable=false
 @id/async : reachable=false
 @id/auto : reachable=true
@@ -11081,8 +11155,8 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @id/cut : reachable=false
 @id/dark : reachable=false
 @id/date_picker_actions : reachable=true
-@id/decelerate : reachable=false
-@id/decelerateAndComplete : reachable=false
+@id/decelerate : reachable=true
+@id/decelerateAndComplete : reachable=true
 @id/decor_content_parent : reachable=false
 @id/default_activity_button : reachable=true
 @id/deltaRelative : reachable=true
@@ -11110,8 +11184,8 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @id/easeOut : reachable=false
 @id/edit_query : reachable=true
 @id/elastic : reachable=false
-@id/end : reachable=false
-@id/endToStart : reachable=false
+@id/end : reachable=true
+@id/endToStart : reachable=true
 @id/enterAlways : reachable=true
 @id/enterAlwaysCollapsed : reachable=true
 @id/exitUntilCollapsed : reachable=true
@@ -11318,7 +11392,7 @@ Marking id:fragment_container_view_tag:2131361964 used because it matches string
 @id/src_atop : reachable=false
 @id/src_in : reachable=false
 @id/src_over : reachable=false
-@id/standard : reachable=false
+@id/standard : reachable=true
 @id/start : reachable=false
 @id/startHorizontal : reachable=false
 @id/startToEnd : reachable=false
@@ -16577,6 +16651,10 @@ The root reachable resources are:
  attr:animationMode:2130968627
  attr:appBarLayoutStyle:2130968628
  attr:applyMotionScene:2130968629
+ attr:arcMode:2130968630
+ attr:argType:2130968631
+ attr:arrowHeadLength:2130968632
+ attr:arrowShaftLength:2130968633
  attr:autoCompleteTextViewStyle:2130968635
  attr:autoSizeMaxTextSize:2130968636
  attr:autoSizeMinTextSize:2130968637
@@ -16719,10 +16797,15 @@ The root reachable resources are:
  attr:dividerHorizontal:2130968871
  attr:dividerPadding:2130968872
  attr:dividerVertical:2130968873
+ attr:drawableBottomCompat:2130968878
  attr:drawableEndCompat:2130968879
  attr:drawableLeftCompat:2130968880
  attr:drawableRightCompat:2130968881
+ attr:drawableSize:2130968882
  attr:drawableStartCompat:2130968883
+ attr:drawableTint:2130968884
+ attr:drawableTintMode:2130968885
+ attr:drawableTopCompat:2130968886
  attr:drawerArrowStyle:2130968887
  attr:dropDownListViewStyle:2130968888
  attr:dropdownPreferenceStyle:2130968890
@@ -16735,7 +16818,18 @@ The root reachable resources are:
  attr:elevationOverlayColor:2130968897
  attr:elevationOverlayEnabled:2130968898
  attr:emojiCompatEnabled:2130968899
+ attr:enableCopying:2130968900
+ attr:enableEdgeToEdge:2130968901
  attr:enabled:2130968902
+ attr:endIconCheckable:2130968903
+ attr:endIconContentDescription:2130968904
+ attr:endIconDrawable:2130968905
+ attr:endIconMode:2130968906
+ attr:endIconTint:2130968907
+ attr:endIconTintMode:2130968908
+ attr:enforceMaterialTheme:2130968909
+ attr:enforceTextAppearance:2130968910
+ attr:ensureMinTouchTargetSize:2130968911
  attr:enterAnim:2130968912
  attr:entries:2130968913
  attr:entryValues:2130968914
@@ -16963,6 +17057,7 @@ The root reachable resources are:
  attr:onPositiveCross:2130969249
  attr:onShow:2130969250
  attr:onTouchUp:2130969251
+ attr:orderingFromXml:2130969253
  attr:paddingEnd:2130969258
  attr:paddingStart:2130969261
  attr:passwordToggleContentDescription:2130969267
@@ -17518,6 +17613,7 @@ The root reachable resources are:
  id:androidx_compose_ui_view_composition_context:2131361866
  id:animateToEnd:2131361867
  id:animateToStart:2131361868
+ id:arc:2131361869
  id:auto:2131361872
  id:autoComplete:2131361873
  id:autoCompleteToEnd:2131361874
@@ -17543,6 +17639,8 @@ The root reachable resources are:
  id:custom:2131361913
  id:customPanel:2131361914
  id:date_picker_actions:2131361917
+ id:decelerate:2131361918
+ id:decelerateAndComplete:2131361919
  id:default_activity_button:2131361921
  id:deltaRelative:2131361922
  id:design_menu_item_action_area_stub:2131361925
@@ -17551,6 +17649,8 @@ The root reachable resources are:
  id:dimensions:2131361929
  id:direct:2131361930
  id:edit_query:2131361945
+ id:end:2131361947
+ id:endToStart:2131361948
  id:enterAlways:2131361949
  id:enterAlwaysCollapsed:2131361950
  id:exitUntilCollapsed:2131361951
@@ -17670,6 +17770,7 @@ The root reachable resources are:
  id:spacer:2131362144
  id:special_effects_controller_view_tag:2131362145
  id:split_action_bar:2131362148
+ id:standard:2131362155
  id:stretch:2131362163
  id:submenuarrow:2131362164
  id:submit_area:2131362165
