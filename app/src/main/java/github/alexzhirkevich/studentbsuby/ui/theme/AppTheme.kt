@@ -1,27 +1,35 @@
 package github.alexzhirkevich.studentbsuby.ui.theme
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import com.google.accompanist.insets.ProvideWindowInsets
+import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.ui.theme.values.*
 import github.alexzhirkevich.studentbsuby.ui.theme.values.Colors
 
 @SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
-    primary = Color(0xff383b40),
-    primaryVariant = Colors.White,
-    secondary = Color(0xFF27292d),
+    primary = Color.White,
+    primaryVariant = Color(0xFF252525),
+    secondary = Color(0xff1d1d1d),
     secondaryVariant = Color.White,
     surface= Colors.White,
-    background = Color(0xFF1f2023),
+    background = Color(0xff101010),
     error = Colors.Red,
     onError = Colors.Green,
     onSecondary = Colors.White,
-    onPrimary = Colors.White
+    onPrimary = Color.Black
 )
 
 
@@ -32,43 +40,63 @@ private val LightColorPalette = lightColors(
     secondaryVariant = Color.White,
     background = Colors.GrayBackground,
     error = Colors.Red,
-    onError = Colors.Green
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
+    onError = Colors.Green,
     onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
 )
 
 
 @Composable
 fun StudentbsubyTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
 
-    CompositionLocalProvider(
-        LocalThemeSelector provides rememberThemeSelector(),
-    ) {
+    val themeSelector = rememberThemeSelector()
 
-        val colors = if (LocalThemeSelector.current.isInDarkTheme()) {
-            DarkColorPalette
-        } else {
-            LightColorPalette
+
+    val isDark = if (themeSelector.currentTheme.value == Theme.System)
+        isSystemInDarkTheme()
+    else themeSelector.currentTheme.value == Theme.Dark
+
+    val activity = LocalContext.current as Activity
+
+    fun update() {
+        val navBarColor = if (isDark)
+            android.R.color.transparent
+        else R.color.blue_transparent
+
+        activity.window.apply {
+            navigationBarColor = ContextCompat.getColor(activity, navBarColor)
+            decorView.systemUiVisibility = if (!isDark)
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            else 0
+//            statusBarColor = android.graphics.Color.WHITE
         }
-        MaterialTheme(
-            colors = colors,
-            typography = Typography,
-            shapes = Shapes,
-        ) {
-            ProvideWindowInsets {
-                ProvideTextStyle(MaterialTheme.typography.body1) {
-                    content()
-                }
+    }
+
+    LaunchedEffect(key1 = isSystemInDarkTheme()) {
+        update()
+    }
+
+    LaunchedEffect(isDark) {
+        update()
+    }
+    val colors = if (isDark) DarkColorPalette else LightColorPalette
+
+    CompositionLocalProvider(
+        LocalThemeSelector provides themeSelector,
+    ) {
+        ProvideWindowInsets() {
+            ProvideTextStyle(LocalTextStyle.current.copy(
+                color = if (isDark) Color.White else Color.Black
+            )) {
+                MaterialTheme(
+                    colors = colors,
+                    typography = Typography,
+                    shapes = Shapes,
+                    content = content
+                )
             }
         }
+
     }
 }

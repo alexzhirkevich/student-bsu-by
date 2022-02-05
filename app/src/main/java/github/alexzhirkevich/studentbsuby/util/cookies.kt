@@ -7,6 +7,8 @@ import com.franmontiel.persistentcookiejar.cache.CookieCache
 import okhttp3.*
 
 interface LoginCookieManager{
+    fun getCookies() : String
+
     fun cleanCookies()
 
     fun canRestoreSession() : Boolean
@@ -43,6 +45,10 @@ class PreferencesCookieCache(context: Context)
 
     override fun clear() {
         prefs.clearCookies()
+    }
+
+    override fun getCookies(): String {
+        return prefs.cookies.joinToString(separator = ";") { "${it.name}=${it.value}" }
     }
 
     override fun cleanCookies() {

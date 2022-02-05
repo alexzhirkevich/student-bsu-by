@@ -25,10 +25,11 @@ val Typography = Typography(
     ),
     body2 = TextStyle(
         fontSize = 16.sp,
+        fontWeight = FontWeight.Medium,
         color =  Colors.Gray,
     ),
     caption = TextStyle(
-        fontSize = 12.sp,
+        fontSize = 13.sp,
         fontWeight = FontWeight.Light,
         color = Colors.Gray
     ),

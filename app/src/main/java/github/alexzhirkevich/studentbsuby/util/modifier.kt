@@ -39,7 +39,7 @@ private fun preview() {
 
 fun Modifier.bsuBackgroundPattern(
     color : Color,
-    clip : Boolean = false,
+    clip : Boolean = true,
     scale : Float = 1f,
     horizontalCycles : Float = 1f,
     verticalCycles : Float = 1f,
@@ -147,11 +147,11 @@ fun Modifier.bsuBackgroundPattern(
 
             val sizeWithOffset = 4 * (sizeUnit + delta)
             val deltaOffcet = sizeWithOffset / 2
-            for (i in 1..2) {
-                val offcet = if (i == 1) deltaOffcet else 0f
-                translate(offcet, offcet) {
-                    for (i in 0..(size.width / sizeWithOffset * horizontalCycles).toInt()+1) {
-                        for (j in 0..(size.height / sizeWithOffset*verticalCycles).toInt()+1) {
+            repeat(2) {
+                val offset = if (it == 1) deltaOffcet else 0f
+                translate(offset, offset) {
+                    for (i in 0..(size.width / sizeWithOffset * horizontalCycles).toInt() + 1) {
+                        for (j in 0..(size.height / sizeWithOffset * verticalCycles).toInt() + 1) {
                             translate(
                                 sizeWithOffset * i,
                                 sizeWithOffset * j

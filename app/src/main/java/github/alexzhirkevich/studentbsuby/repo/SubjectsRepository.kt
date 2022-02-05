@@ -10,68 +10,36 @@ import github.alexzhirkevich.studentbsuby.util.exceptions.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import org.jsoup.Jsoup
 import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val PREF_CURRENTSEMESTER_ = "PREF_CURRENTSEMESTER_"
 
-
-
 @Singleton
 class SubjectsRepository @Inject constructor(
-    private val loginRepository: LoginRepository,
+    private val usernameProvider: UsernameProvider,
     private val profileApi: ProfileApi,
     private val subjectsDao: SubjectsDao,
-    private val sharedPreferences: SharedPreferences
-) {
+) : CacheWebRepository<List<List<Subject>>>() {
 
-    @FlowPreview
-    @ExperimentalCoroutinesApi
-    fun currentSemester(): Flow<Int>  = flow {
-
-        getCurrentSemesterFromCache()?.let {
-            emit(it)
-        }
-
-        getCurrentSemesterFromWeb()?.let {
-            emit(it)
-            saveCurrentSemesterToCache(it)
-        }
+    override fun get(
+        dataSource: DataSource,
+        replaceCacheIf: (cached: List<List<Subject>>?, new: List<List<Subject>>) -> Boolean
+    ): Flow<List<List<Subject>>> = super.get(dataSource){ old, new ->
+        replaceCacheIf(old,new) && new.isNotEmpty()
     }
 
-    @FlowPreview
-    @ExperimentalCoroutinesApi
-    fun getSubjects(fromWebOnly : Boolean = false): Flow<List<List<Subject>>> = flow {
-        val cached = if (!fromWebOnly)
-            getSubjectsFromCache()?.also {
-                emit(it)
-            } else null
-        getSubjectsFromWeb()?.let {
-            emit(it)
-            if (it.isNotEmpty() && it != cached) {
-                saveSubjectsToCache(it.flatten())
-            }
-        }
-    }
-
-    private suspend fun getSubjectsFromWeb(): List<List<Subject>>? {
-
-        val username = loginRepository.cachedLogin
+    override suspend fun getFromWeb(): List<List<Subject>> {
+        // TODO: refactor
+        val username = usernameProvider.username
 
         if (username.isEmpty())
             throw UsernameNotFoundException()
 
-        val resp = profileApi.subjects(profileApi.AllSubjectsRequest)
-        if (!resp.isSuccessful)
-            throw FailResponseException(resp.code())
+        val string = profileApi.subjects(profileApi.AllSubjectsRequest).html()
 
-        val bytes = resp.body()?.byteStream()?.readBytes()
-            ?: throw EmptyResponseException()
-        val string = String(bytes)
         if (!string.contains("updatePanel")) {
             throw IncorrectResponseException()
         }
@@ -87,7 +55,7 @@ class SubjectsRepository @Inject constructor(
         val jsoup = Jsoup.parse(html)
 
         val numbers = jsoup.getElementsByClass("styleNumberBody")
-            .map() {
+            .map {
                 it.text().toIntOrNull()
             }
         val lessons = jsoup.getElementsByClass("styleLessonBody").map {
@@ -153,8 +121,9 @@ class SubjectsRepository @Inject constructor(
         return subjects
     }
 
-    private suspend fun saveSubjectsToCache(subjects: List<Subject>) {
+    override suspend fun saveToCache(value: List<List<Subject>>) {
         kotlin.runCatching {
+            val subjects = value.flatten()
             if (subjects.isNotEmpty()) {
                 subjectsDao.clear(subjects[0].owner)
                 subjects.forEach {
@@ -164,10 +133,10 @@ class SubjectsRepository @Inject constructor(
         }
     }
 
-    private suspend fun getSubjectsFromCache(): List<List<Subject>>? {
+    override suspend fun getFromCache(): List<List<Subject>>? {
         return kotlin.runCatching {
-            loginRepository
-                .cachedLogin.takeIf(String::isNotEmpty)?.let { login ->
+            usernameProvider
+                .username.takeIf(String::isNotEmpty)?.let { login ->
                     subjectsDao
                         .getAll(login)
                         .groupBy { it.semester }
@@ -175,10 +144,16 @@ class SubjectsRepository @Inject constructor(
                 }
         }.getOrNull()
     }
+}
 
-    fun getCurrentSemesterFromCache(): Int? {
+class CurrentSemesterRepository @Inject constructor(
+    private val usernameProvider: UsernameProvider,
+    private val profileApi: ProfileApi,
+    private val sharedPreferences: SharedPreferences
+) : CacheWebRepository<Int>() {
+    override suspend fun getFromCache(): Int? {
         return kotlin.runCatching {
-            val username = loginRepository.cachedLogin
+            val username = usernameProvider.username
             if (username.isNotEmpty()) {
                 val semester = sharedPreferences.getInt(PREF_CURRENTSEMESTER_ + username, -1)
                 semester.takeIf { it >= 0 }
@@ -186,7 +161,7 @@ class SubjectsRepository @Inject constructor(
         }.getOrNull()
     }
 
-    private suspend fun getCurrentSemesterFromWeb(): Int? {
+    override suspend fun getFromWeb(): Int? {
 
         val resp = profileApi.studProgress()
         if (!resp.isSuccessful)
@@ -214,12 +189,12 @@ class SubjectsRepository @Inject constructor(
         }.getOrNull()
     }
 
-    private fun saveCurrentSemesterToCache(semester: Int) {
+    override suspend fun saveToCache(value: Int) {
         kotlin.runCatching {
-            val username = loginRepository.cachedLogin
+            val username = usernameProvider.username
             if (username.isNotEmpty()) {
                 sharedPreferences.edit()
-                    .putInt(PREF_CURRENTSEMESTER_ + username, semester)
+                    .putInt(PREF_CURRENTSEMESTER_ + username, value)
                     .apply()
             }
         }

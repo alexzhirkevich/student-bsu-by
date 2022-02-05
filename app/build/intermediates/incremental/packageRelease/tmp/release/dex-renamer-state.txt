@@ -1,0 +1,4 @@
+#Sat Feb 05 23:11:29 MSK 2022
+base.0=/Users/alexzhirkevich/projects/studentbsuby/app/build/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

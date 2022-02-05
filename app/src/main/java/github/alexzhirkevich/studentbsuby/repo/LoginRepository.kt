@@ -3,25 +3,49 @@ package github.alexzhirkevich.studentbsuby.repo
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.ui.ExperimentalComposeUiApi
+import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.api.LoginApi
 import github.alexzhirkevich.studentbsuby.api.createLoginData
+import github.alexzhirkevich.studentbsuby.di.Encrypted
 import github.alexzhirkevich.studentbsuby.util.CaptchaRecognizer
 import github.alexzhirkevich.studentbsuby.util.LoginCookieManager
+import github.alexzhirkevich.studentbsuby.util.sharedPreferences
+import github.alexzhirkevich.studentbsuby.workers.SynchronizationWorkerManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import org.jsoup.Jsoup
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.reflect.KProperty
 
-private const val PREF_LOGIN = "PREF_LOGIN"
-private const val PREF_PW = "PREF_PW"
-private const val PREF_AUTOLOGIN = "PREF_AUTOLOGIN"
+interface UsernameProvider {
+    val username : String
+}
+
+open class UsernameProviderImpl @Inject constructor(
+    @Encrypted val encryptedPreferences: SharedPreferences
+    ) : UsernameProvider {
+
+    override var username: String by sharedPreferences(encryptedPreferences,"")
+        protected set
+
+}
+operator fun UsernameProvider.getValue(thisObj: Any?, property: KProperty<*>): String {
+    return username
+}
 
 @Singleton
 class LoginRepository @Inject constructor(
     private val api : LoginApi,
+    @Encrypted encryptedPreferences: SharedPreferences,
     private val preferences: SharedPreferences,
     private val captchaRecognizer: CaptchaRecognizer,
-    private val loginCookieManager: LoginCookieManager
-    ) {
+    private val loginCookieManager: LoginCookieManager,
+    ) : UsernameProviderImpl(preferences) {
 
     data class LoginResponse(
         val success: Boolean,
@@ -29,23 +53,14 @@ class LoginRepository @Inject constructor(
         val loginResult : String?
     )
 
-    var autoLogin : Boolean
-        get() = preferences.getBoolean(PREF_AUTOLOGIN, false)
-        set(value) {
-            preferences.edit().putBoolean(PREF_AUTOLOGIN, value).apply()
-        }
+    var password by sharedPreferences(encryptedPreferences, "")
+        private set
 
-    val cachedLogin: String
-        get() = preferences.getString(PREF_LOGIN, "").orEmpty()
-
-    val cachedPassword: String
-        get() = preferences.getString(PREF_PW, "").orEmpty()
-
+    var autoLogin by sharedPreferences(preferences,false)
 
     suspend fun initialize(): LoginResponse {
         try {
             val resp = api.initialize()
-
 
             val jsoup = resp.body()?.byteStream()?.readBytes()?.let {
                 Jsoup.parse(String(it))
@@ -92,10 +107,8 @@ class LoginRepository @Inject constructor(
 
             val logged = res.code() == 302
             val loginResult = if (logged){
-                preferences.edit()
-                    .putString(PREF_LOGIN, login)
-                    .putString(PREF_PW, password)
-                    .apply()
+                this.username = login
+                this.password = password
                 null
             } else{
                 res.body()?.byteStream()?.readBytes()?.let {
@@ -129,14 +142,11 @@ class LoginRepository @Inject constructor(
 
     fun canRestoreSession() = loginCookieManager.canRestoreSession()
 
-
-
-
     private val overflowCount = 5
     private var currentUpdateCount = 0
     private var updatedBitmap: Bitmap? = null
 
-    suspend fun getCaptchaText(bitmap: Bitmap): String {
+    tailrec suspend fun getCaptchaText(bitmap: Bitmap): String {
         return kotlin.runCatching {
             val text = captchaRecognizer
                 .recognize(bitmap)

@@ -20,8 +20,8 @@ import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -78,18 +78,21 @@ class HostelViewModel @Inject constructor(
         updateHostelState()
     }
 
+
+    private var hostelStateJob : Job? = null
     private fun updateHostelState() {
         if (_hostelState.value is DataState.Error)
             _hostelState.tryEmit(DataState.Loading)
 
         hostelRepository
-            .getHostelState()
+            .get()
             .onEmpty { _hostelState.tryEmit(DataState.Empty) }
             .onEach {
                 _hostelState.tryEmit(DataState.Success(it))
             }.onCompletion {
                 _isUpdating.value = false
             }
+            .flowOn(Dispatchers.IO)
             .catch {
                 if (_hostelState.value !is DataState.Success) {
                     _hostelState.tryEmit(
@@ -110,7 +113,10 @@ class HostelViewModel @Inject constructor(
                     cause = it
                 )
             }
-            .launchIn(viewModelScope)
+            .launchIn(viewModelScope).also {
+                hostelStateJob?.cancel()
+                hostelStateJob = it
+            }
     }
 
     private fun showOnMap(address : String){

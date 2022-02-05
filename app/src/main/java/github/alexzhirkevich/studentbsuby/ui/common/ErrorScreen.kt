@@ -7,7 +7,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Updater
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,9 +41,10 @@ fun ErrorScreen(
             elevation = 0.dp,
             backgroundColor = Color.Transparent
         ) {
-            BurgerMenuButton(onMenuClicked)
+            NavigationMenuButton(onClick = onMenuClicked)
             Text(
                 text = toolbarText,
+                color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.subtitle1
             )
         }
@@ -56,6 +56,9 @@ fun ErrorScreen(
             state = rememberSwipeRefreshState(
                 isRefreshing = updater.isUpdating.value
             ),
+            indicator = { state,offset->
+                BsuProgressBarSwipeRefreshIndicator(state = state, trigger = offset)
+            },
             indicatorPadding = PaddingValues(top = status.toDp() + 75.dp),
             onRefresh = updater::update
         ) {
@@ -81,7 +84,7 @@ fun ErrorScreen(
 fun ErrorWidget(title : String, error : String, modifier: Modifier = Modifier) {
 
     Column(
-        modifier = modifier,
+        modifier = modifier.padding(horizontal = 30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
@@ -94,7 +97,7 @@ fun ErrorWidget(title : String, error : String, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.h2,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         Text(
             text = error,
             style = MaterialTheme.typography.body1,

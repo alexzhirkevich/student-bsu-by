@@ -1,5 +1,7 @@
 package github.alexzhirkevich.studentbsuby.util.logger
 
+import android.content.Context
+
 interface Logger {
 
     enum class LogLevel{
@@ -13,4 +15,6 @@ interface Logger {
         logLevel: LogLevel = LogLevel.Warning,
         cause: Throwable?=null,
     )
+
+    fun share(context: Context)
 }

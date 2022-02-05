@@ -1,14 +1,9 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer
 
-import android.util.Log
 import androidx.annotation.StringRes
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,11 +11,11 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -35,27 +30,23 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.User
 import github.alexzhirkevich.studentbsuby.navigation.Route
 import github.alexzhirkevich.studentbsuby.navigation.navigate
+import github.alexzhirkevich.studentbsuby.ui.common.animatedComposable
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutScreen
-import github.alexzhirkevich.studentbsuby.ui.screens.drawer.data.ProfileViewModel
-import github.alexzhirkevich.studentbsuby.ui.screens.drawer.data.SettingsViewModel
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel.HostelScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.news.NewsScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices.PaidServicesScreen
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects.SubjectsScreen
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.TimetableScreen
-import github.alexzhirkevich.studentbsuby.ui.theme.LocalThemeSelector
-import github.alexzhirkevich.studentbsuby.ui.theme.Theme
 import github.alexzhirkevich.studentbsuby.util.DataState
-import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.ExperimentalToolbarApi
 
@@ -70,10 +61,13 @@ private sealed class DrawerRoute(
     object Timetable : DrawerRoute(Icons.Default.FormatListBulleted, R.string.timetable, Route.DrawerScreen.Timetable)
     object About : DrawerRoute(Icons.Default.Info, R.string.about, Route.DrawerScreen.About)
     object Hostel : DrawerRoute(Icons.Default.House, R.string.hostel, Route.DrawerScreen.Hostel)
+    object PaidServices : DrawerRoute(Icons.Default.Payment, R.string.paidservices, Route.DrawerScreen.PaidServices)
+    object News : DrawerRoute(Icons.Default.Campaign, R.string.news, Route.DrawerScreen.News)
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalToolbarApi
-@FlowPreview
+
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
@@ -83,7 +77,6 @@ private sealed class DrawerRoute(
 fun DrawerScreen(
     navController: NavController,
     profileViewModel: ProfileViewModel = hiltViewModel(),
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
 ) {
 
     val scaffoldState = rememberScaffoldState(
@@ -94,24 +87,27 @@ fun DrawerScreen(
     val childNavController = rememberAnimatedNavController()
     val initial =  DrawerRoute.Timetable
 
+
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.background(MaterialTheme.colors.secondary),
         drawerShape = remember { DrawerShape() },
+        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
         drawerContent = {
 
             DrawerContent(
                 navController = navController,
                 childNavController = childNavController,
-                profileViewModel = profileViewModel,
-                settingsViewModel = settingsViewModel,
                 routes = listOf(
+                    DrawerRoute.News,
                     DrawerRoute.Subjects,
                     DrawerRoute.Timetable,
                     DrawerRoute.Hostel,
+                    DrawerRoute.PaidServices,
                     DrawerRoute.About,
-                ),
-                initial = initial
+                    ),
+                initial = initial,
+                profileViewModel = profileViewModel
             ){
                 scope.launch {
                     scaffoldState.drawerState.close()
@@ -138,167 +134,185 @@ fun DrawerScreen(
             startDestination = initial.route.route
         ) {
 
-            composable(DrawerRoute.Subjects.route.route) {
+            val animIn = scaleIn(initialScale = .95f) + fadeIn()
+            val animOut = scaleOut(targetScale = .95f) + fadeOut()
+
+
+            animatedComposable(
+                DrawerRoute.News.route,
+                enterTransition = { animIn },
+                exitTransition = {animOut}
+            ) {
+                NewsScreen(onMenuClicked = onMenuClicked)
+            }
+            animatedComposable(
+                DrawerRoute.Subjects.route,
+                enterTransition = { animIn },
+                exitTransition = {animOut}
+            ) {
                 SubjectsScreen(onMenuClicked = onMenuClicked)
             }
 
-            composable(DrawerRoute.Timetable.route.route){
+            animatedComposable(
+                DrawerRoute.Timetable.route,
+                enterTransition = { animIn },
+                exitTransition = {animOut}
+            ){
                 TimetableScreen(onMenuClicked = onMenuClicked)
             }
 
-            composable(DrawerRoute.Hostel.route.route){
+            animatedComposable(
+                DrawerRoute.Hostel.route,
+                enterTransition = { animIn },
+                exitTransition = {animOut}
+            ){
                 HostelScreen(onMenuClicked = onMenuClicked)
             }
 
-            composable(DrawerRoute.About.route.route){
+            animatedComposable(
+                DrawerRoute.About.route,
+                enterTransition = { animIn },
+                exitTransition = {animOut}
+            ){
                 AboutScreen(onMenuClicked = onMenuClicked)
+            }
+
+            animatedComposable(
+                DrawerRoute.PaidServices.route,
+                enterTransition = { animIn },
+                exitTransition = {animOut}
+            ){
+                PaidServicesScreen(onMenuClicked = onMenuClicked)
             }
         }
     }
 }
 
+
+@ExperimentalPagerApi
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
+@ExperimentalComposeUiApi
+@ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @Composable
-private fun ColumnScope.DrawerContent(
+private fun DrawerContent(
     navController: NavController,
     childNavController: NavController,
-    routes : List<DrawerRoute>,
-    initial : DrawerRoute,
+    routes: List<DrawerRoute>,
+    initial: DrawerRoute,
     profileViewModel: ProfileViewModel,
-    settingsViewModel: SettingsViewModel,
-    onRouteSelected : (DrawerRoute) -> Unit = {}
+    onRouteSelected: () -> Unit = {}
 ) {
-
-
-    Box(
-        Modifier
-            .clip(ProfileRoundShape())
-            .background(MaterialTheme.colors.primary)
-            .bsuBackgroundPattern(
-                MaterialTheme.colors.onPrimary
-                    .copy(alpha = .1f)
-            )
-            .statusBarsPadding()
+    Column(
+        Modifier.background(MaterialTheme.colors.secondary)
     ) {
         Box(
             Modifier
-                .padding(
-                    start = CardPaddings + AvatarWidth,
-                    end = CardPaddings,
+                .clip(ProfileRoundShape())
+                .background(MaterialTheme.colors.primaryVariant)
+                .bsuBackgroundPattern(
+                    MaterialTheme.colors.onPrimary
+                        .copy(alpha = .1f)
                 )
-                .height(CardTopPadding)
-                .fillMaxWidth()
+                .statusBarsPadding()
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_text),
-                contentDescription = "Logo",
-                modifier = Modifier
-                    .scale(1.4f)
-                    .align(Alignment.Center)
+            Box(
+                Modifier
+                    .padding(
+                        start = CardPaddings + AvatarWidth,
+                        end = CardPaddings,
+                    )
+                    .height(CardTopPadding)
+                    .fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo_text),
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .scale(1.4f)
+                        .align(Alignment.Center)
+                )
+            }
+
+            ProfileCard(
+                photo = profileViewModel.photo.value,
+                user = profileViewModel.user.value,
+                modifier = Modifier.padding(
+                    top = CardTopPadding,
+                    start = CardPaddings,
+                    end = CardPaddings,
+                    bottom = CardPaddings
+                )
             )
         }
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .navigationBarsWithImePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
 
-        ProfileCard(
-            photo = profileViewModel.photo.value,
-            user = profileViewModel.user.value,
-            modifier = Modifier.padding(
-                top = CardTopPadding,
-                start = CardPaddings,
-                end = CardPaddings,
-                bottom = CardPaddings
-            )
-        )
-    }
-    Spacer(
-        modifier = Modifier.height(10.dp)
-    )
-    Column(
-        modifier = Modifier.navigationBarsWithImePadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+            var currentRoute by rememberSaveable {
+                mutableStateOf(initial.route.route)
+            }
+            Column {
+                Spacer(modifier = Modifier.height(10.dp))
+                routes.forEach {
+                    DrawerButton(
+                        icon = it.icon,
+                        text = stringResource(id = it.title),
+                        onClick = {
+                            onRouteSelected()
+                            if (currentRoute != it.route.route) {
+                                currentRoute = it.route.route
+                                childNavController.navigate(it.route) {
+                                    val last =
+                                        childNavController.backQueue.lastOrNull()?.destination?.id
+                                            ?: childNavController.graph.findStartDestination().id
+                                    popUpTo(last) {
+                                        childNavController.backQueue.last().destination
+                                        saveState = true
+                                        inclusive = true
+                                    }
 
-        var currentRoute by rememberSaveable {
-            mutableStateOf(initial.route.route)
-        }
-
-        routes.forEach {
-            DrawerButton(
-                icon = it.icon,
-                text = stringResource(id = it.title),
-                onClick = {
-                    onRouteSelected(it)
-                    if (currentRoute != it.route.route) {
-                        currentRoute = it.route.route
-                        childNavController.navigate(it.route) {
-                            val last = childNavController.backQueue.lastOrNull()?.destination?.id
-                                ?: childNavController.graph.findStartDestination().id
-                            popUpTo(last) {
-                                childNavController.backQueue.last().destination
-                                saveState = true
-                                inclusive = true
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
+                        })
+                }
+                Spacer(
+                    modifier = Modifier
+                        .height(.5.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.typography.caption.color)
+                )
+                DrawerButton(
+                    icon = Icons.Default.Settings,
+                    text = stringResource(id = R.string.settings),
+                    onClick = {
+                        onRouteSelected()
+                        navController.navigate(Route.SettingsScreen)
+                    })
 
-                            launchSingleTop = true
-                            restoreState = true
+            }
+
+            DrawerButton(
+                icon = Icons.Default.Logout,
+                text = stringResource(id = R.string.logout),
+                onClick = {
+                    profileViewModel.logout()
+                    navController.navigate(Route.AuthScreen) {
+                        launchSingleTop = true
+                        popUpTo(Route.DrawerScreen.route) {
+                            inclusive = true
                         }
                     }
                 })
         }
-
-        DrawerButton(
-            icon = Icons.Default.Settings,
-            text = stringResource(id = R.string.settings),
-            onClick = { /*TODO*/ })
-
-//        DrawerButton(
-//            icon = Icons.Default.Info,
-//            text = stringResource(id = R.string.about),
-//            onClick = { /*TODO*/ })
-
-
-        Spacer(
-            modifier = Modifier
-                .height(.5.dp)
-                .fillMaxWidth()
-                .background(MaterialTheme.typography.caption.color)
-        )
-
-        val themeSelector = LocalThemeSelector.current
-
-        DrawerButton(
-            icon = Icons.Default.DarkMode,
-            text = stringResource(id = R.string.dark_theme),
-            onClick = {
-            }){
-            Switch(
-                checked = themeSelector.isInDarkTheme(),
-                onCheckedChange = {
-                    themeSelector.setTheme(
-                        if (it) Theme.Dark else Theme.Light
-                    )
-                },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = MaterialTheme.colors.primary
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        DrawerButton(
-            icon = Icons.Default.Logout,
-            text = stringResource(id = R.string.logout),
-            onClick = {
-                profileViewModel.logout()
-                navController.navigate(Route.AuthScreen){
-                    launchSingleTop = true
-                    popUpTo(Route.DrawerScreen.route){
-                        inclusive = true
-                    }
-                }
-            })
-        Spacer(modifier = Modifier.height(10.dp))
-
     }
 }
 
@@ -307,6 +321,7 @@ private fun DrawerButton(
     icon : ImageVector,
     text : String,
     onClick : () -> Unit,
+    modifier: Modifier = Modifier,
     content : @Composable RowScope.() -> Unit = {}
 ){
 
@@ -316,7 +331,7 @@ private fun DrawerButton(
         )
     ){
         Row(
-            Modifier
+            modifier
                 .clickable(onClick = onClick)
                 .heightIn(min = 45.dp)
                 .padding(
@@ -333,10 +348,11 @@ private fun DrawerButton(
             Spacer(modifier = Modifier.width(20.dp))
             Text(
                 text = text,
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.primary,
                 modifier = Modifier.weight(1f)
             )
             content()
-            Spacer(modifier = Modifier.width(50.dp))
         }
     }
 }
@@ -350,6 +366,7 @@ private fun ProfileCard(
     Box(modifier) {
         Card(
             shape = MaterialTheme.shapes.medium,
+            backgroundColor = MaterialTheme.colors.secondary,
             elevation = 5.dp,
             modifier = Modifier
                 .offset(y = (-AvatarWidth / 3))

@@ -1,7 +1,9 @@
 package github.alexzhirkevich.studentbsuby.di
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.annotation.ChecksSdkIntAtLeast
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.google.gson.GsonBuilder
@@ -12,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import github.alexzhirkevich.studentbsuby.BuildConfig
 import github.alexzhirkevich.studentbsuby.api.LoginApi
+import github.alexzhirkevich.studentbsuby.api.PaidServicesApi
 import github.alexzhirkevich.studentbsuby.api.ProfileApi
 import github.alexzhirkevich.studentbsuby.api.TimetableApi
 import github.alexzhirkevich.studentbsuby.util.LoginCookieManager
@@ -33,31 +36,23 @@ class RetrofitModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(@ApplicationContext context: Context): Retrofit {
-        val cache  = PreferencesCookieCache(context)
-        val cookieJar = PersistentCookieJar(cache, SharedPrefsCookiePersistor(context))
+    fun provideBaseUrl() : Uri = Uri.parse("https://student.bsu.by")
 
+    @Provides
+    @Singleton
+    fun provideHttpClient(@ApplicationContext context: Context) :OkHttpClient {
+        val cache = PreferencesCookieCache(context)
+        val cookieJar = PersistentCookieJar(cache, SharedPrefsCookiePersistor(context))
         loginCookieManager = cache
 
-        val httpClient = OkHttpClient.Builder()
+        return OkHttpClient.Builder()
             .cookieJar(cookieJar)
             .followRedirects(false)
             .followSslRedirects(false)
-//            .cache(Cache(context.cacheDir,1024*1024*256))
             .retryOnConnectionFailure(true)
             .connectTimeout(10, TimeUnit.SECONDS)
             .writeTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
-//            .addInterceptor { chain ->
-//                val resp = chain.proceed(chain.request())
-//                val url = chain.request().url
-//
-//                val cookies = resp.headers("Set-Cookie").mapNotNull {
-//                    Cookie.parse(url,it)
-//                }
-//                cookieJar.saveFromResponse(url,cookies)
-//                resp
-//            }
             .addInterceptor {
                 val cookies = cookieJar.loadForRequest(it.request().url)
                 val sCookies = cookies.joinToString(separator = "; ") { it.name + '=' + it.value }
@@ -69,10 +64,10 @@ class RetrofitModule {
                     .build()
                 it.proceed(newReq)
             }
-            .addNetworkInterceptor( Interceptor {
+            .addNetworkInterceptor(Interceptor {
                 val request = it.request().newBuilder()
-                    .addHeader("Connection", "close").build();
-                it.proceed(request);
+                    .addHeader("Connection", "close").build()
+                it.proceed(request)
             })
             .let {
                 if (BuildConfig.DEBUG) {
@@ -92,9 +87,14 @@ class RetrofitModule {
                 } else it
             }
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(httpClient: OkHttpClient, baeUri : Uri): Retrofit {
 
         return Retrofit.Builder()
-            .baseUrl("https://student.bsu.by")
+            .baseUrl(baeUri.toString())
             .client(httpClient)
             .addConverterFactory(
                 GsonConverterFactory.create(
@@ -126,5 +126,11 @@ class RetrofitModule {
     @Singleton
     fun provideTimetableApi(retrofit: Retrofit) : TimetableApi {
         return retrofit.create(TimetableApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePaidServicesApi(retrofit: Retrofit) : PaidServicesApi {
+        return retrofit.create(PaidServicesApi::class.java)
     }
 }

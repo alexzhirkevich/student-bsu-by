@@ -1,6 +1,5 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects
 
-import android.accounts.NetworkErrorException
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -8,38 +7,35 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Subject
+import github.alexzhirkevich.studentbsuby.repo.CurrentSemesterRepository
+import github.alexzhirkevich.studentbsuby.repo.DataSource
+import github.alexzhirkevich.studentbsuby.repo.Repository
 import github.alexzhirkevich.studentbsuby.repo.SubjectsRepository
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
-import github.alexzhirkevich.studentbsuby.util.setState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
-@FlowPreview
+
 @ExperimentalCoroutinesApi
 @HiltViewModel
 class SubjectsViewModel @Inject constructor(
     private val subjectsRepository: SubjectsRepository,
+    private val currentSemesterRepository: Repository<Int>,
     private val logger : Logger,
 ) : ViewModel(), Updatable {
 
-    private val _currentSemester = mutableStateOf(
-        subjectsRepository.getCurrentSemesterFromCache() ?: 0
-    )
+    private val _currentSemester = mutableStateOf(0)
     val currentSemester: State<Int>
         get() = _currentSemester
 
     private val _isUpdating = mutableStateOf(false)
     override val isUpdating: State<Boolean>
         get() = _isUpdating
-
-//    private val _subjects = mutableStateOf<DataState<List<List<Subject>>>>(DataState.Empty)
-//    val subjects : State<DataState<List<List<Subject>>>>
-//    get() = _subjects
 
     private val _subjects = MutableStateFlow<DataState<List<List<Subject>>>>(DataState.Loading)
     val subjects: StateFlow<DataState<List<List<Subject>>>> = _subjects.asStateFlow()
@@ -60,8 +56,12 @@ class SubjectsViewModel @Inject constructor(
     val withExam: State<Boolean>
         get() = _withExam
 
-//    @Volatile private var realSubjects : List<List<Subject>>?=null
+    @Volatile private var currentSemesterChangedByUser = false
 
+    fun setCurrentSemester(it: Int) {
+        currentSemesterChangedByUser = true
+        _currentSemester.value = it
+    }
     fun setFilter(withCredit: Boolean, withExam: Boolean) {
         _withCredit.value = withCredit
         _withExam.value = withExam
@@ -76,13 +76,13 @@ class SubjectsViewModel @Inject constructor(
 
     override fun update() {
         _isUpdating.value = true
-        updateSubjects(true)
+        updateSubjects(DataSource.Remote)
     }
 
 
     init {
-        updateSubjects()
-        updateCurrentSemester()
+        updateSubjects(DataSource.All)
+        updateCurrentSemester(DataSource.All)
     }
 
     private fun applySubjectFilter() {
@@ -96,11 +96,13 @@ class SubjectsViewModel @Inject constructor(
         } ?: DataState.Empty)
     }
 
-    private fun updateCurrentSemester() =
-        subjectsRepository
-            .currentSemester()
+    private fun updateCurrentSemester(dataSource: DataSource) =
+        currentSemesterRepository
+            .get(dataSource)
+            .flowOn(Dispatchers.IO)
             .onEach {
-                _currentSemester.value = it
+                if (!currentSemesterChangedByUser)
+                    _currentSemester.value = it
             }
             .catch {
                 logger.log(
@@ -109,28 +111,33 @@ class SubjectsViewModel @Inject constructor(
                     logLevel = Logger.LogLevel.Error,
                     cause = it
                 )
-            }
+            }.flowOn(Dispatchers.Main)
             .launchIn(viewModelScope)
 
 
-    @FlowPreview
-    private fun updateSubjects(fromWebOnly: Boolean = false) =
+    private var subjectsJob : Job?= null
+    
+    private fun updateSubjects(dataSource: DataSource) =
         subjectsRepository
-            .getSubjects(fromWebOnly)
-            .onEach {
-                _subjects.tryEmit(
-                    if (it.isNotEmpty())
-                        DataState.Success(it) else DataState.Empty
-                )
-                applySubjectFilter()
+            .get(dataSource)
+            .map {
+                if (it.isNotEmpty())
+                    DataState.Success(it)
+                else DataState.Empty
             }
+            .onEach(_subjects::tryEmit)
             .onEmpty {
                 if (_subjects.value !is DataState.Success) {
-                    _subjects.value = DataState.Empty
+                    _subjects.tryEmit(DataState.Empty)
                 }
             }
+            .flowOn(Dispatchers.IO)
             .onCompletion {
                 _isUpdating.value = false
+            }
+            .flowOn(Dispatchers.Main)
+            .onEach {
+                applySubjectFilter()
             }
             .catch {
                 if (_subjects.value !is DataState.Success) {
@@ -152,5 +159,9 @@ class SubjectsViewModel @Inject constructor(
                     cause = it
                 )
             }
-            .launchIn(viewModelScope)
+            .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope).also {
+                subjectsJob?.cancel()
+                subjectsJob = it
+            }
 }

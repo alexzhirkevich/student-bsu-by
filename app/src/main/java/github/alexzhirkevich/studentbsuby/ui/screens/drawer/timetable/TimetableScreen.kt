@@ -32,7 +32,6 @@ import github.alexzhirkevich.studentbsuby.ui.common.*
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.*
 
@@ -41,7 +40,7 @@ private const val TabsHeight = 40
 @ExperimentalToolbarApi
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
-@FlowPreview
+
 @Composable
 fun TimetableScreen(
     timetableViewModel: TimetableViewModel = hiltViewModel(),
@@ -62,7 +61,8 @@ fun TimetableScreen(
 
 }
 
-@FlowPreview
+
+@ExperimentalToolbarApi
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
 @Composable
@@ -113,7 +113,7 @@ fun SuccessTimetableScreen(
 }
 
 @ExperimentalPagerApi
-@FlowPreview
+
 @Composable
 private fun CollapsingToolbarScope.Toolbar(
     toolbarState: CollapsingToolbarState,
@@ -141,7 +141,7 @@ private fun CollapsingToolbarScope.Toolbar(
                 exit = slideOutVertically { -2 * it }
             ) {
 
-               BurgerMenuButton(onClick = onMenuClicked)
+               NavigationMenuButton(onClick = onMenuClicked)
             }
         }
     }
@@ -242,7 +242,7 @@ private fun CollapsingToolbarScope.Toolbar(
 
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
-@FlowPreview
+
 @Composable
 private fun Body(
     swipeEnabled: Boolean,
@@ -309,7 +309,7 @@ private fun Body(
     }
 }
 
-@FlowPreview
+
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @Composable

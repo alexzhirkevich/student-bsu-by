@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Кабинет студента БГУ</string>
+    <string name="app_email">sasha.zhirkevich@yandex.ru</string>
+    <string name="app_tg">https://t.me/alexzhirkevich</string>
     <string name="login">Логин</string>
     <string name="password">Пароль</string>
     <string name="btn_login">Войти</string>
@@ -33,7 +35,7 @@
     <string name="type">Тип</string>
     <string name="teacher">Препод.</string>
     <string name="timetable">Расписание</string>
-    <string name="about_text">"Приложение позволяет получить доступ к <a href="https://student.bsu.by/">личному кабинету студента БГУ</a>. Оно является неофициальным и открытым, исходный код доступен на <a href="https://github.com/alexzhirkevich/student-bsu-by">github</a>. \n\nЕсли какие-то функции не работают или работают неправильно, пожалуйста, свяжитесь с разработчиком любым удобным способом из указанных ниже, либо создайте <a href="https://github.com/alexzhirkevich/student-bsu-by/issues">issue</a> на github."</string>
+    <string name="about_text">"Приложение позволяет получить доступ к <a href="https://student.bsu.by/">личному кабинету студента БГУ</a>. Оно является неофициальным и открытым, исходный код доступен на <a href="https://github.com/alexzhirkevich/student-bsu-by">github</a>. \n\nЕсли какие-то функции не работают или работают неправильно, пожалуйста, свяжитесь с разработчиком одним из способов, указанных ниже, либо создайте <a href="https://github.com/alexzhirkevich/student-bsu-by/issues">issue</a> на github."</string>
     <string name="hostel">Общежитие</string>
     <string name="hostel_provided">Вам предоставлено общежитие</string>
     <string name="show_on_map">Показать на карте</string>
@@ -59,8 +61,64 @@
     <string name="error_load_user">Не удалось получить данные профиля</string>
     <string name="error_load_timetable">Не удалось загрузить расписание</string>
     <string name="error_load_hostel">Не удалось получить информацию об общежитии</string>
-    <string name="subjects_not_found_search">Предметы по этому запросу не найдены</string>
+    <string name="subjects_not_found_search">Предметы по запросу «%s» не найдены</string>
+    <string name="info">Информация</string>
 
+    <string name="paidservices">Платные услуги</string>
+    <string name="paidservices_phones">Телефоны для справок</string>
+    <string name="paidservices_phones_text">По вопросам заключения и перезаключения договоров платной формы обучения обращаться в отдел платных услуг по телефонам: 8 (017) 209 57 18, 8 (017) 209 53 19.\nПо вопросам стоимости обучения, порядка и сроков оплаты обращаться в деканаты факультетов. Номера телефонов размещены <a href="https://student.bsu.by/DekanatPhone">здесь</a>.\nПо вопросам начисления оплат за обучение обращаться в бухгалтерию по телефону 8 (017) 209 51 35</string>
+    <string name="paidservices_requisites">Реквизиты</string>
+    <string name="paidservices_requisites_text">Банковские реквизиты для всех платежей, кроме оплаты за общежитие:\n<i>Белорусский государственный университет, 220030, г.Минск, пр.Независимости, 4. Банковские реквизиты БГУ: УНП 100235722, ОКПО 02071814, р/с BY88BLBB36320100235722001001, в Дирекции ОАО «Белинвестбанк» по г. Минску и Минской области, БИК BLBBBY2X, адрес банка: г. Минск, ул. Коллекторная, 11</i></string>
+    <string name="paidservices_fine">Пеня</string>
+    <string name="paidservices_fine_text">Если студент в установленные сроки не оплачивает или оплачивает частично свою учебу, то начисляется пеня в зависимости от суммы задолженности за каждый день просрочки (причем, если дата начала начисления пени попадает на субботу и воскресенье, то она автоматически переносится на понедельник). Процент пени указан в договоре.\nСумма пени на текущую дату формируется автоматически каждый день, начиная со следующего числа от даты крайнего срока оплаты этапа, и зависит от суммы задолженности. Окончательное начисление суммы пени происходит в момент внесения фактического платежа студентом за этап.\nЧтобы остановить рост пени, при наличии задолженности по пене и задолженности по оплате за обучение, надо в первую очередь оплатить задолженность за обучение полностью. Сумма пени в этом случае фиксируется и ее можно оплатить позднее.</string>
+    <string name="erip_help">Оплата через АЕС ЕРИП</string>
+    <string name="contract_number">Номер договора</string>
+    <string name="debt">Задолженность</string>
+    <string name="fine">Пеня</string>
+    <string name="error_load_paidinfo">Не удалось загрузить информацию о платных услугах</string>
+    <string name="error_load_bills">Не удалось загрузить квитанции</string>
+    <string name="error_load_tuition_fees">Не удалось загрузить квитанции об облате обучения</string>
+    <string name="tuition_fees_empty">Квитанции об оплате обучения не обнаружены</string>
+    <string name="bills">Счета</string>
+    <string name="history">История</string>
+    <string name="sum">Сумма операции</string>
+    <string name="currency">BYN</string>
+    <string name="deadline">Срок оплаты</string>
+    <string name="left">Остаток</string>
+    <string name="full_price">Полная стоимость</string>
+    <string name="fine_days">Дни пени</string>
+    <string name="fine_size">Размер пени</string>
+    <string name="tuition_fee">Обучение</string>
+    <string name="updates">Обновления</string>
+    <string name="timetable_changed">В расписании появились изменения</string>
+    <string name="hostel_payment">Оплата за общежитие</string>
+    <string name="error_load_receipts">Не удалось загрузить прочие платежи</string>
+    <string name="error_load_hostel_bills">Не удалось загрузить информацию по оплате общежития</string>
+    <string name="error_load_academ_debt_receipts">Не удалось загрузить информацию по оплате академической задолженности</string>
+    <string name="hostel_bills_empty">Нет счетов по оплате общежития</string>
+    <string name="common_receipts_empty">Прочие оплаты не найдены</string>
+    <string name="academ_debt">Академ. долг</string>
+    <string name="common_receipts">Прочее</string>
+    <string name="academ_debt_empty">Академические задолженности не найдены</string>
+    <string name="additionally">Дополнительно</string>
+    <string name="error_load_messages">Не удалось загрузись список новостей</string>
+    <string name="news">Новости</string>
+    <string name="news_empty">Новостей нет</string>
+    <string name="notifications">Уведомления</string>
+    <string name="settings_update_notifications">Уведомления об изменениях</string>
+    <string name="settings_update_notifications_helper">Получать уведомления при изменении в расписании и предоставлении общежития. Задержка уведомления может быть в пределах 1 часа.\n\n<b>Внимание:</b> Функция может не работать на устройствах китайских производителей. Если Вы действительно хотите получать уведомления, разрешите автозапуск и отключите контроль фоновой активности приложения в настройках устройства.</string>
+    <string name="other">Прочее</string>
+    <string name="setting_collect_statistics">Разрешить сбор статистики</string>
+    <string name="setting_collect_statistics_helper">Вся статистика собирается анонимно и не содержит информации, относящейся к БГУ.</string>
+    <string name="setting_collect_crashlytics">Отправлять отчеты об ошибках</string>
+    <string name="setting_collect_crashlytics_helper">Отправляя отчеты об ошибках, Вы помогаете приложению становится лучше.</string>
+    <string name="appearance">Внешний вид</string>
+    <string name="settings_dark_theme_system">Использовать системную тему</string>
+    <string name="settings_dark_theme_forsed">Темная тема</string>
+    <string name="notification_channel_description">Изменения в расписании и предоставлении общежития</string>
+    <string name="share_logs">Поделиться логами</string>
+    <string name="share_logs_helper">Логи не содержат личной информации.</string>
+    <string name="cant_login_dialog">Приложение не предоставляет возможности изменить пароль. Вы можете сделать это через <a href = "https://student.bsu.by">сайт</a>.\nЕсли Вы уверены в правильности введенных данных и подключении к интернету, но войти не удается, свяжитесь с разработчиком.</string>
 
     <string-array name="months">
         <item>Январь</item>

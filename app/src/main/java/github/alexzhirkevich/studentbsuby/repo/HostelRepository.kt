@@ -3,32 +3,25 @@ package github.alexzhirkevich.studentbsuby.repo
 import android.content.SharedPreferences
 import androidx.annotation.IntRange
 import github.alexzhirkevich.studentbsuby.api.ProfileApi
-import github.alexzhirkevich.studentbsuby.api.isSessionExpired
 import github.alexzhirkevich.studentbsuby.dao.HostelDao
 import github.alexzhirkevich.studentbsuby.data.models.HostelAdvert
-import github.alexzhirkevich.studentbsuby.util.exceptions.EmptyResponseException
-import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
 import github.alexzhirkevich.studentbsuby.util.exceptions.IncorrectResponseException
-import github.alexzhirkevich.studentbsuby.util.exceptions.SessionExpiredException
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import org.jsoup.Jsoup
 import javax.inject.Inject
 
 sealed interface HostelState{
-    class Provided(val address : String) : HostelState
-    class NotProvided(val adverts : List<HostelAdvert>) : HostelState
+    data class Provided(val address : String) : HostelState
+    data class NotProvided(val adverts : List<HostelAdvert>) : HostelState
 }
 
 private const val PREF_HOSTEL_ADDRESS_ = "PREF_HOSTEL_ADDRESS_"
 
 class HostelRepository @Inject constructor(
-    private val loginRepository: LoginRepository,
+    private val usernameProvider: UsernameProvider,
     private val profileApi : ProfileApi,
     private val hostelDao : HostelDao,
     private val preferences : SharedPreferences
-) {
+) : CacheWebRepository<HostelState>() {
 
     private val images = listOf("" +
             "https://studgorodok.bsu.by/images/ZdUhc72c4d4.jpg",
@@ -63,31 +56,11 @@ class HostelRepository @Inject constructor(
             "" else images[number-1]
     }
 
-    fun getHostelState() : Flow<HostelState> = flow {
-        val cached = getFromCache().getOrNull()?.also {
-            emit(it)
-        }
-        getFromWeb().let {
-            emit(it)
-            if (cached != it) {
-                saveToCache(it)
-            }
-        }
-    }
 
+    override suspend fun getFromWeb() : HostelState{
+        // TODO: refactor
 
-    private suspend fun getFromWeb() : HostelState{
-        val resp = profileApi.hostel()
-        if (!resp.isSuccessful)
-            throw FailResponseException(resp.code())
-
-        if (resp.body()?.isSessionExpired == true)
-            throw SessionExpiredException()
-
-        val bytes = resp.body()?.byteStream()?.readBytes()
-            ?: throw EmptyResponseException()
-
-        val jsoup = Jsoup.parse(String(bytes))
+        val jsoup = Jsoup.parse(profileApi.hostel().html())
 
         jsoup.getElementById("ctl00_ctl00_ContentPlaceHolder0_ContentPlaceHolder1_lbHouse2")
             ?.text()?.let {
@@ -104,8 +77,6 @@ class HostelRepository @Inject constructor(
             ?.filter { !it.hasAttr("scope") }
             ?.map { it.text() }
             ?.chunked(8)
-
-        println(other)
 
         val ads = other
             ?.mapIndexedNotNull { index, it ->
@@ -127,26 +98,28 @@ class HostelRepository @Inject constructor(
         return HostelState.NotProvided(ads)
     }
 
-    private suspend fun saveToCache(hostelState: HostelState)= kotlin.runCatching {
-        val username = loginRepository.cachedLogin.takeIf(String::isNotBlank)
-            ?: return@runCatching
-        when (hostelState) {
-            is HostelState.Provided ->
-                preferences.edit()
-                    .putString(PREF_HOSTEL_ADDRESS_ + username, hostelState.address)
-                    .apply()
-            is HostelState.NotProvided ->
-                with(hostelDao) {
-                    clear()
-                    hostelState.adverts.forEach {
-                        insert(it)
+    override suspend fun saveToCache(value: HostelState) {
+        kotlin.runCatching {
+            val username = usernameProvider.username.takeIf(String::isNotBlank)
+                ?: return@runCatching
+            when (value) {
+                is HostelState.Provided ->
+                    preferences.edit()
+                        .putString(PREF_HOSTEL_ADDRESS_ + username, value.address)
+                        .apply()
+                is HostelState.NotProvided ->
+                    with(hostelDao) {
+                        clear()
+                        value.adverts.forEach {
+                            insert(it)
+                        }
                     }
-                }
+            }
         }
     }
 
-    private suspend fun getFromCache()  = kotlin.runCatching {
-        loginRepository.cachedLogin.takeIf(String::isNotBlank)?.let {
+    override suspend fun getFromCache()  = kotlin.runCatching {
+        usernameProvider.username.takeIf(String::isNotBlank)?.let {
             val providedAddress = preferences.getString(PREF_HOSTEL_ADDRESS_ + it, "")
             if (!providedAddress.isNullOrBlank()) {
                 HostelState.Provided(providedAddress)
@@ -156,5 +129,5 @@ class HostelRepository @Inject constructor(
                 }
             }
         }
-    }
+    }.getOrNull()
 }

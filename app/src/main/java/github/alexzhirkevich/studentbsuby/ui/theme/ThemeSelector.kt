@@ -1,11 +1,11 @@
 package github.alexzhirkevich.studentbsuby.ui.theme
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 
 interface ThemeSelector {
 
-    @Composable
-    fun isInDarkTheme(): Boolean
-    
+    val currentTheme: State<Theme>
+
     fun setTheme(theme: Theme)
 }

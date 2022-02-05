@@ -32,16 +32,19 @@ import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.HostelAdvert
 import github.alexzhirkevich.studentbsuby.repo.HostelState
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
-import github.alexzhirkevich.studentbsuby.ui.common.BurgerMenuButton
+import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBarSwipeRefreshIndicator
+import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.ui.common.ErrorScreen
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import me.onebone.toolbar.CollapsingToolbarScaffold
+import me.onebone.toolbar.ExperimentalToolbarApi
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
+@ExperimentalToolbarApi
 @ExperimentalMaterialApi
 @Composable
 fun HostelScreen(
@@ -108,9 +111,10 @@ fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
                 elevation = 0.dp,
                 backgroundColor = Color.Transparent
             ) {
-                BurgerMenuButton(onMenuClicked)
+                NavigationMenuButton(onClick = onMenuClicked)
                 Text(
                     text = stringResource(id = R.string.hostel),
+                    color = MaterialTheme.colors.onSecondary,
                     style = MaterialTheme.typography.subtitle1
                 )
             }
@@ -120,6 +124,7 @@ fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
 }
 
 
+@ExperimentalToolbarApi
 @Composable
 private fun ProvidedHostelScreen(
     address : String,
@@ -136,23 +141,24 @@ private fun ProvidedHostelScreen(
         scaffoldState.toolbarState.expand(500)
     }
 
-    Scaffold(
+    CollapsingToolbarScaffold(
         modifier = Modifier.fillMaxSize(),
-//        state = scaffoldState,
-//        enabled = refreshState.indicatorOffset == 0f,
-//        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-//        toolbarModifier = Modifier.background(MaterialTheme.colors.secondary),
-        topBar = {
+        state = scaffoldState,
+        enabled = false,
+        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+        toolbarModifier = Modifier.background(MaterialTheme.colors.secondary),
+        toolbar = {
             Column(Modifier.zIndex(2f)) {
                 Spacer(modifier = Modifier.statusBarsHeight())
                 TopAppBar(
                     backgroundColor = Color.Transparent,
                     elevation = 0.dp
                 ) {
-                    BurgerMenuButton(onMenuClicked)
+                    NavigationMenuButton(onClick = onMenuClicked)
                     AnimatedVisibility(visible = scaffoldState.toolbarState.progress == 0f) {
                         Text(
                             text = stringResource(id = R.string.hostel),
+                            color = MaterialTheme.colors.onSecondary,
                             style = MaterialTheme.typography.subtitle1
                         )
                     }
@@ -165,7 +171,13 @@ private fun ProvidedHostelScreen(
                         .fillMaxWidth()
 //                        .parallax()
                         .aspectRatio(1.4f)
-                        .alpha(scaffoldState.toolbarState.progress)
+                        .alpha(scaffoldState.toolbarState.progress),
+                    loading = {
+                        BsuProgressBar(
+                            modifier = Modifier.align(Alignment.Center),
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
                 )
             }
         }) {
@@ -173,6 +185,9 @@ private fun ProvidedHostelScreen(
             state = refreshState,
             swipeEnabled = scaffoldState.toolbarState.progress == 1f,
             onRefresh = updater::update,
+            indicator = { state,offset->
+                BsuProgressBarSwipeRefreshIndicator(state = state, trigger = offset)
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .bsuBackgroundPattern(
@@ -195,10 +210,12 @@ private fun ProvidedHostelScreen(
                     modifier = Modifier
                         .padding(
                             horizontal = 30.dp,
-                            vertical = 30.dp)
+                            vertical = 30.dp
+                        )
                         .widthIn(max = 400.dp),
-                    elevation = 3.dp
-                ) {
+                    elevation = 3.dp,
+                    backgroundColor = MaterialTheme.colors.secondary,
+                    ) {
                     Column(
                         modifier = Modifier
                             .padding(20.dp),
@@ -218,17 +235,21 @@ private fun ProvidedHostelScreen(
                     }
                 }
                 Button(
-                    onClick = onShowOnMapClicked
+                    onClick = onShowOnMapClicked,
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.Place,
+                            tint = MaterialTheme.colors.onPrimary,
                             contentDescription = "Show on map"
                         )
                         Spacer(modifier = Modifier.width(10.dp))
-                        Text(text = stringResource(id = R.string.show_on_map))
+                        Text(
+                            text = stringResource(id = R.string.show_on_map),
+                            color = MaterialTheme.colors.onPrimary
+                        )
                     }
                 }
 
@@ -251,7 +272,7 @@ private fun NonProvidedHostelScreen(
 
     if (needShowDialog) {
         Dialog(onDismissRequest = { needShowDialog = false }) {
-            Card {
+            Card(backgroundColor = MaterialTheme.colors.secondary) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(
@@ -272,12 +293,15 @@ private fun NonProvidedHostelScreen(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Button(
+                    TextButton(
                         onClick = { needShowDialog=false },
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        Text(text = stringResource(id = R.string.close))
+                        Text(
+                            text = stringResource(id = R.string.close),
+                            color = MaterialTheme.colors.onSecondary
+                        )
                     }
                 }
             }
@@ -313,9 +337,10 @@ private fun NonProvidedHostelScreen(
                         backgroundColor = Color.Transparent,
                         elevation = 0.dp
                     ) {
-                        BurgerMenuButton(onClick = onMenuClicked)
+                        NavigationMenuButton(onClick = onMenuClicked)
                         Text(
                             text = stringResource(id = R.string.hostel),
+                            color = MaterialTheme.colors.onSecondary,
                             style = MaterialTheme.typography.subtitle1
                         )
                     }
@@ -324,6 +349,9 @@ private fun NonProvidedHostelScreen(
             SwipeRefresh(
                 state = refreshState,
                 onRefresh = viewModel::update,
+                indicator = { state,offset->
+                    BsuProgressBarSwipeRefreshIndicator(state = state, trigger = offset)
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .bsuBackgroundPattern(
@@ -344,7 +372,7 @@ private fun NonProvidedHostelScreen(
                     items(ads.size) {
                         HostelAdWidget(
                             modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                                .padding(5.dp),
                             ad = ads[it],
                             onLocateClicked = {
                                 viewModel.showOnMap(ads[it])

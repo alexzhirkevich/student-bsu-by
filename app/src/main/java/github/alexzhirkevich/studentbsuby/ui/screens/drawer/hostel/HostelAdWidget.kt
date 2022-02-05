@@ -1,17 +1,13 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -31,6 +27,7 @@ fun HostelAdWidget(
 
     Card(
         modifier = modifier,
+        backgroundColor = MaterialTheme.colors.secondary,
         elevation = 3.dp,
     ) {
         Column(
@@ -57,7 +54,7 @@ fun HostelAdWidget(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column() {
+                Column {
                     ad.conditions?.let {
                         InfoText(stringResource(id = R.string.conditions), it)
                     }
@@ -75,26 +72,28 @@ fun HostelAdWidget(
 
                 }
                 Spacer(modifier = Modifier.width(10.dp))
-                if (!ad.phone.isNullOrBlank()) {
-                    IconButton(
-                        onClick = onCallClicked,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Call,
-                            tint = MaterialTheme.colors.primary,
-                            contentDescription = "Call"
-                        )
+                Row {
+                    if (!ad.phone.isNullOrBlank()) {
+                        IconButton(
+                            onClick = onCallClicked,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Call,
+                                tint = MaterialTheme.colors.primary,
+                                contentDescription = "Call"
+                            )
+                        }
                     }
-                }
-                if (!ad.address.isNullOrBlank()) {
-                    IconButton(
-                        onClick = onLocateClicked,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            tint = MaterialTheme.colors.primary,
-                            contentDescription = "Locate"
-                        )
+                    if (!ad.address.isNullOrBlank()) {
+                        IconButton(
+                            onClick = onLocateClicked,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                tint = MaterialTheme.colors.primary,
+                                contentDescription = "Locate"
+                            )
+                        }
                     }
                 }
             }
@@ -103,9 +102,8 @@ fun HostelAdWidget(
 }
 @Composable
 fun InfoText(
-    title : String,
-    text : String,
-    modifier: Modifier = Modifier
+    title: String,
+    text: String
 ) {
     Text(
         text = AnnotatedString(

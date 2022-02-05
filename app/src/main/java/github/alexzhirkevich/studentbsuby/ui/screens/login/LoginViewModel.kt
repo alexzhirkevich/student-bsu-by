@@ -2,32 +2,46 @@ package github.alexzhirkevich.studentbsuby.ui.screens.login
 
 import android.content.res.Resources
 import android.util.Log
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.accompanist.pager.ExperimentalPagerApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.repo.LoginRepository
+import github.alexzhirkevich.studentbsuby.repo.SettingsRepository
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import github.alexzhirkevich.studentbsuby.util.setState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
+import github.alexzhirkevich.studentbsuby.workers.SynchronizationWorkerManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
-import kotlin.math.log
+import javax.inject.Singleton
 
-
+@ExperimentalCoroutinesApi
+@ExperimentalMaterialApi
+@ExperimentalComposeUiApi
+@ExperimentalAnimationApi
+@ExperimentalFoundationApi
+@ExperimentalPagerApi
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
+    private val synchronizationWorkerManager: SynchronizationWorkerManager,
+    private val settingsRepository: SettingsRepository,
     private val resources: Resources,
     private val logger: Logger
 ) : ViewModel() {
@@ -51,7 +65,7 @@ class LoginViewModel @Inject constructor(
     val captchaText : StateFlow<String> = _captchaText.asStateFlow()
 
     private val _loginText = mutableStateOf(
-        loginRepository.cachedLogin)
+        loginRepository.username)
     val loginText : State<String>
         get()= _loginText
 
@@ -60,7 +74,7 @@ class LoginViewModel @Inject constructor(
         get()= _autoLogin
 
     private val _passwordText = mutableStateOf(
-        loginRepository.cachedPassword)
+        loginRepository.password)
 
     val passwordText : State<String>
         get()= _passwordText
@@ -72,7 +86,7 @@ class LoginViewModel @Inject constructor(
 
             do {
                 val result = init()
-                if (lastResult != result) {
+                if (result.isFailure && lastResult != result) {
                     logger.log(
                         "Failed to initialize login page",
                         this@LoginViewModel.javaClass.simpleName,
@@ -110,7 +124,6 @@ class LoginViewModel @Inject constructor(
     fun login() {
         _loggedIn.value = DataState.Loading
 
-
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
                 val res = loginRepository.login(
@@ -119,19 +132,21 @@ class LoginViewModel @Inject constructor(
                     captchaText.value
                 )
                 setState {
-
-                    if (res.loggedIn) {
-                        _loggedIn.value = DataState.Success(true)
+                    _loggedIn.value = if (res.loggedIn) {
                         loginRepository.autoLogin = autoLogin.value
+                        if (autoLogin.value && settingsRepository.synchronizationEnabled){
+                            synchronizationWorkerManager.run()
+                        }
+                        DataState.Success(true)
                     } else {
-                        _loggedIn.value = DataState.Error(
+                        updateCaptcha()
+                        _shouldShowSplashScreen.value = false
+                        DataState.Error(
                             R.string.error_login,
                             res.loginResult?.let {
                                 LoginException(it)
                             }
                         )
-                        updateCaptcha()
-                        _shouldShowSplashScreen.value = false
                     }
                 }
             }.onFailure {
@@ -146,11 +161,6 @@ class LoginViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-
-    fun logout(){
-        loginRepository.logout()
     }
 
     override fun onCleared() {
@@ -189,10 +199,8 @@ class LoginViewModel @Inject constructor(
                         _splashText.value = resources.getString(R.string.restoring_session)
                     }
 
-                    //try login with cached auth cookie
-                    val (success, logged, message) = loginRepository.initialize()
+                    val (success, logged, _) = loginRepository.initialize()
 
-                    //expired auth cookie
                     if (logged){
                         setState {
                             _loggedIn.value = DataState.Success(true)
@@ -214,7 +222,6 @@ class LoginViewModel @Inject constructor(
                         setState {
                             _splashText.value = resources.getString(R.string.loading_captcha)
                         }
-//                            updateCaptcha()
                         updateAndRecognizeSameCaptcha(true) {
                             setState {
                                 _splashText.value =

@@ -21,37 +21,27 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.statusBarsHeight
 import de.charlex.compose.HtmlText
 import github.alexzhirkevich.studentbsuby.R
-import github.alexzhirkevich.studentbsuby.ui.common.BurgerMenuButton
-import github.alexzhirkevich.studentbsuby.ui.theme.StudentbsubyTheme
+import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import me.onebone.toolbar.*
 
-@Preview
-@Composable
-private fun aboutPrev() {
-
-    StudentbsubyTheme() {
-        AboutScreen {
-
-        }
-    }
-}
-
 @ExperimentalToolbarApi
 @Composable
-fun AboutScreen(onMenuClicked : () -> Unit) {
+fun AboutScreen(
+    aboutViewModel: AboutViewModel = hiltViewModel(),
+                onMenuClicked : () -> Unit) {
 
     val scaffoldState = rememberCollapsingToolbarScaffoldState(
         toolbarState = rememberCollapsingToolbarState(0)
     )
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         scaffoldState.toolbarState.collapse(0)
         scaffoldState.toolbarState.expand(500)
     }
@@ -65,20 +55,22 @@ fun AboutScreen(onMenuClicked : () -> Unit) {
         state = scaffoldState,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbar = {
-            Column() {
+            Column {
                 Spacer(modifier = Modifier.statusBarsHeight())
                 TopAppBar(
                     elevation = 0.dp,
                     backgroundColor = Color.Transparent
                 ) {
-                    BurgerMenuButton(onClick = onMenuClicked)
+                    NavigationMenuButton(onClick = onMenuClicked)
                     AnimatedVisibility(visible = scaffoldState.toolbarState.progress == 0f) {
                         Text(
                             text = stringResource(id = R.string.about),
+                            color = MaterialTheme.colors.onSecondary,
                             style = MaterialTheme.typography.subtitle1
                         )
                     }
                 }
+
             }
 
             Text(
@@ -118,12 +110,12 @@ fun AboutScreen(onMenuClicked : () -> Unit) {
         ) {
 
             Card(
-                elevation = 3.dp
+                elevation = 3.dp,
+                backgroundColor = MaterialTheme.colors.secondary,
             ) {
                 HtmlText(
                     textId = R.string.about_text,
                     style = MaterialTheme.typography.body1,
-                    textAlign = TextAlign.Justify,
                     modifier = Modifier.padding(10.dp),
                     urlSpanStyle = SpanStyle(
                         color = MaterialTheme.colors.primary,
@@ -141,7 +133,7 @@ fun AboutScreen(onMenuClicked : () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                IconButton(onClick = { }) {
+                IconButton(onClick = aboutViewModel::onEmailClicked) {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "E-mail",
@@ -150,7 +142,7 @@ fun AboutScreen(onMenuClicked : () -> Unit) {
                     )
                 }
 
-                IconButton(onClick = { }) {
+                IconButton(onClick = aboutViewModel::onTgClicked) {
                     Image(
                         painter = painterResource(R.drawable.ic_telegram),
                         contentDescription = "Telegram",

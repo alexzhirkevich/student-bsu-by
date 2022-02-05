@@ -24,8 +24,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.statusBarsHeight
+import com.google.accompanist.insets.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
@@ -42,9 +41,11 @@ import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.*
 import me.onebone.toolbar.*
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 
-@FlowPreview
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
@@ -92,7 +93,7 @@ fun SubjectsScreen(
 @ExperimentalMaterialApi
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
-@FlowPreview
+
 @Composable
 private fun SuccessSubjectsScreen(
     subjectsViewModel: SubjectsViewModel,
@@ -108,6 +109,7 @@ private fun SuccessSubjectsScreen(
     val visibleSubjects by subjectsViewModel.visibleSubjects.collectAsState()
     val currentSemester by subjectsViewModel.currentSemester
     Column {
+
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -115,9 +117,13 @@ private fun SuccessSubjectsScreen(
                 .statusBarsHeight()
                 .zIndex(2f)
         )
+
         CollapsingToolbarScaffold(
             modifier = Modifier
-                .zIndex(1f),
+                .zIndex(1f)
+                .bsuBackgroundPattern(
+                    color = MaterialTheme.colors.primary.copy(alpha = .05f)
+                ),
             state = scaffoldState,
             enabled = refreshState.indicatorOffset == 0f,
             scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
@@ -137,7 +143,8 @@ private fun SuccessSubjectsScreen(
                     subjects = subjects.valueOrNull()!!,
                     updater = subjectsViewModel,
                     refreshState = refreshState,
-                    isSearchEnabled = subjectsViewModel.searchText.value.isNotEmpty()
+                    searchText = subjectsViewModel.searchText.value,
+                    onSemesterChanged = subjectsViewModel::setCurrentSemester
                 )
             } else {
                 Box(
@@ -158,7 +165,7 @@ private fun SuccessSubjectsScreen(
 
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
-@FlowPreview
+
 @Composable
 private fun Toolbar(
     viewModel: SubjectsViewModel,
@@ -180,14 +187,14 @@ private fun Toolbar(
             elevation = 0.dp,
             backgroundColor = Color.Transparent
         ) {
-            BurgerMenuButton(onClick = onMenuClicked)
+            NavigationMenuButton(onClick = onMenuClicked)
             DefaultTextInput(value = viewModel.searchText.value,
                 onValueChange = viewModel::search,
                 singleLine = true,
                 textStyle = MaterialTheme.typography.body1,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 10.dp),
+                    .padding(end = 5.dp),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences
                 ),
@@ -291,7 +298,7 @@ private fun Toolbar(
         }
     }
 }
-@FlowPreview
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
@@ -304,17 +311,24 @@ private fun Body(
     subjects : List<List<Subject>>,
     updater: Updatable,
     refreshState: SwipeRefreshState,
-    isSearchEnabled : Boolean
+    searchText : String,
+    onSemesterChanged: (Int) -> Unit
 ) {
-    if (isSearchEnabled)
-        SearchSubjectsBody(visibleSubjects = visibleSubjects)
+
+
+    if (searchText.isNotBlank())
+        SearchSubjectsBody(
+            visibleSubjects = visibleSubjects,
+            searchText = searchText
+        )
     else
         AllSemestersBody(
             initialSemester = initialSemester,
             visibleSubjects = visibleSubjects ,
             subjects = subjects,
             updater = updater,
-            refreshState = refreshState
+            refreshState = refreshState,
+            onSemesterChanged = onSemesterChanged
         )
 }
 
@@ -323,7 +337,8 @@ private fun Body(
 @ExperimentalFoundationApi
 @Composable
 private fun SearchSubjectsBody(
-    visibleSubjects: List<List<Subject>>
+    visibleSubjects: List<List<Subject>>,
+    searchText: String
 ){
 
     if (visibleSubjects.isNotEmpty()) {
@@ -338,13 +353,17 @@ private fun SearchSubjectsBody(
                         Box(
                             Modifier
                                 .fillMaxWidth()
-                                .background(MaterialTheme.colors.background)
-                                .padding(10.dp)
+                                .padding(5.dp)
 
                         ) {
                             Text(
                                 text = stringResource(id = R.string.semester, idx + 1),
-                                style = MaterialTheme.typography.subtitle1
+                                style = MaterialTheme.typography.body1,
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .background(MaterialTheme.colors.background.copy(.9f))
+                                    .padding(vertical = 5.dp, horizontal = 10.dp)
+                                    .align(Alignment.TopCenter)
                             )
                         }
                     }
@@ -358,13 +377,16 @@ private fun SearchSubjectsBody(
                     }
                 }
             }
+            item { 
+                Spacer(modifier = Modifier.navigationBarsWithImePadding())
+            }
         }
     } else {
         Box(Modifier.fillMaxSize()) {
 
             ErrorWidget(
                 title = stringResource(id = R.string.empty),
-                error = stringResource(id = R.string.subjects_not_found_search),
+                error = stringResource(id = R.string.subjects_not_found_search,searchText),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 100.dp)
@@ -384,22 +406,28 @@ private fun AllSemestersBody(
     subjects : List<List<Subject>>,
     updater: Updatable,
     refreshState: SwipeRefreshState,
+    onSemesterChanged : (Int) -> Unit
 ) {
     val state = rememberPagerState()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = initialSemester) {
+    LaunchedEffect(Unit) {
         if (state.pageCount > initialSemester)
             state.scrollToPage(initialSemester)
     }
 
+    LaunchedEffect(key1 = state.currentPage){
+        onSemesterChanged(state.currentPage)
+    }
 
     Scaffold(
+        backgroundColor = Color.Transparent,
         topBar = {
             ScrollableTabRow(
                 selectedTabIndex = state.currentPage,
                 backgroundColor = MaterialTheme.colors.secondary,
                 edgePadding = 0.dp,
+                modifier = Modifier.fillMaxWidth(),
                 indicator = { tabs ->
                     Box {
                         Spacer(
@@ -507,7 +535,7 @@ private fun Page(
     }
 
     val subjectsInFirstColumn = remember {
-        mutableStateOf(if (subjects.size == 1) 1 else subjects.size / 2)
+        mutableStateOf(ceil(subjects.size/2f).roundToInt())
     }
 
     var shrinkAnimationEnabled by rememberSaveable {
@@ -526,6 +554,13 @@ private fun Page(
     )
 
     val scope = rememberCoroutineScope()
+
+    val firstColumnItems = remember {
+        mutableStateListOf<Subject>()
+    }
+    val secondColumnItems = remember {
+        mutableStateListOf<Subject>()
+    }
 
     LaunchedEffect(subjects) {
         if (mutableSubjects.toList() != subjects) {
@@ -549,13 +584,18 @@ private fun Page(
         shrinkAnimationEnabled = false
     }
 
+    LaunchedEffect(key1 = subjectsInFirstColumn.value) {
+        firstColumnItems.clear()
+        firstColumnItems.addAll(mutableSubjects.subList(0, subjectsInFirstColumn.value))
+        secondColumnItems.clear()
+        secondColumnItems.addAll(
+            mutableSubjects.subList(subjectsInFirstColumn.value, mutableSubjects.size))
+    }
+
     Row(
         modifier = modifier
     ) {
-        listOf(
-            mutableSubjects.subList(0, subjectsInFirstColumn.value),
-            mutableSubjects.subList(subjectsInFirstColumn.value, mutableSubjects.size)
-        ).forEachIndexed { columnIndex, list ->
+        listOf(firstColumnItems,secondColumnItems).forEachIndexed { columnIndex, list ->
             Column(
                 Modifier
                     .weight(1f)
@@ -643,6 +683,9 @@ private fun shrink(
     subjectsInFirstColumn : MutableState<Int>
 ) : Boolean {
     return when {
+
+        subjects.size == 1 -> false
+
         (firstColumnHeight - secondColumnHeight).let {
             it > 0 && lastElemInFirstColumnHeight*1.1 < it &&
                     subjects.size > subjectsInFirstColumn.value - 1 &&

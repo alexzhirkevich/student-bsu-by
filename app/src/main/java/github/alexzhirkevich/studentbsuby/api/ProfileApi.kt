@@ -1,7 +1,6 @@
 package github.alexzhirkevich.studentbsuby.api
 
 import okhttp3.ResponseBody
-import okhttp3.internal.cacheGet
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -31,14 +30,21 @@ interface ProfileApi {
     @POST("PersonalCabinet/StudProgress")
     suspend fun subjects(@FieldMap(encoded = true) request : FormUrlEncodedBody) : Response<ResponseBody>
 
-    @GET("PersonalCabinet/News.aspx")
+    @GET(URL_NEWS)
+    suspend fun newsItem(@Query(value = "id") id : Int) : Response<ResponseBody>
+
+    @GET(URL_NEWS)
     suspend fun news(): Response<ResponseBody>
 
-    @GET("PersonalCabinet/Hostel.aspx")
+    @GET("PersonalCabinet/Hostel")
     suspend fun hostel(): Response<ResponseBody>
 
-     @GET("PersonalCabinet/stb.aspx")
+     @GET("PersonalCabinet/stb")
     suspend fun studBilet(): Response<ResponseBody>
 
     suspend fun exit() : Response<ResponseBody>
+
+    companion object{
+        const val URL_NEWS = "PersonalCabinet/News"
+    }
 }

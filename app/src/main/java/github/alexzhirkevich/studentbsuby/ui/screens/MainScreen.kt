@@ -3,22 +3,27 @@ package github.alexzhirkevich.studentbsuby.ui.screens
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDeepLink
-import androidx.navigation.NavGraphBuilder
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.navigation.Route
+import github.alexzhirkevich.studentbsuby.ui.common.animatedComposable
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.DrawerScreen
 import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.settings.SettingsScreen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import me.onebone.toolbar.ExperimentalToolbarApi
 
+@ExperimentalToolbarApi
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
@@ -35,16 +40,27 @@ fun MainScreen() {
         navController.setOnBackPressedDispatcher(it)
     }
 
-//    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
     AnimatedNavHost(
+        modifier = Modifier.background(color = MaterialTheme.colors.background),
         navController = navController,
         startDestination = Route.AuthScreen.route,
     ) {
         animatedComposable(
             Route.AuthScreen,
-            exitTransition = { fadeOut()},
-        ) {
+            enterTransition = {
+                fadeIn()
+            },
+            popEnterTransition = {
+                fadeIn()
+            },
+            popExitTransition = {
+                fadeOut()
+            },
+            exitTransition = {
+                fadeOut()
+            }        ) {
             LoginScreen(navController)
         }
         animatedComposable(
@@ -54,41 +70,35 @@ fun MainScreen() {
             },
             popEnterTransition = {
                 fadeIn()
+            },
+            popExitTransition = {
+                fadeOut()
+            },
+            exitTransition = {
+                fadeOut()
             }
         ){
-            DrawerScreen(navController)
-//
+            CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
+                DrawerScreen(navController)
+            }
+        }
+        animatedComposable(
+            Route.SettingsScreen,
+            enterTransition = {
+                slideInHorizontally { it/2 } + fadeIn()
+            },
+            popEnterTransition = {
+                slideInHorizontally { it/2 } + fadeIn()
+            },
+            popExitTransition = {
+                slideOutHorizontally { it/2 } + fadeOut()
+            },
+            exitTransition = {
+                slideOutHorizontally { it/2 } + fadeOut()
+            }
+        ) {
+            SettingsScreen()
         }
     }
 }
 
-@ExperimentalAnimationApi
-private fun NavGraphBuilder.animatedComposable(
-    route: Route,
-    deepLinks: List<NavDeepLink> = emptyList(),
-    enterTransition: (AnimatedContentScope<NavBackStackEntry>.() -> EnterTransition?)? = {
-        slideIntoContainer(AnimatedContentScope.SlideDirection.Left)
-    },
-    exitTransition: (AnimatedContentScope<NavBackStackEntry>.() -> ExitTransition?)? ={
-        slideOutOfContainer(AnimatedContentScope.SlideDirection.Left)
-    },
-    popEnterTransition: (AnimatedContentScope<NavBackStackEntry>.() -> EnterTransition?)? = {
-        slideIntoContainer(AnimatedContentScope.SlideDirection.Right)
-    },
-    popExitTransition: (AnimatedContentScope<NavBackStackEntry>.() -> ExitTransition?)? = {
-        slideOutOfContainer(AnimatedContentScope.SlideDirection.Right)
-
-    },
-    content: @Composable AnimatedVisibilityScope.(NavBackStackEntry) -> Unit
-) {
-    composable(
-        route.route,
-        route.navArguments,
-        deepLinks,
-        enterTransition = enterTransition,
-        exitTransition = exitTransition,
-        popEnterTransition = popEnterTransition,
-        popExitTransition = popExitTransition,
-        content = content
-    )
-}

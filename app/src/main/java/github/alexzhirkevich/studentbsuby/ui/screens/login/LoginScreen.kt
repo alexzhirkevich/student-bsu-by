@@ -12,9 +12,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VpnKey
 import androidx.compose.material.icons.rounded.Person
@@ -28,10 +26,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -39,40 +34,56 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
+import com.google.accompanist.pager.ExperimentalPagerApi
+import de.charlex.compose.HtmlText
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.navigation.Route
 import github.alexzhirkevich.studentbsuby.navigation.navigate
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
 import github.alexzhirkevich.studentbsuby.ui.common.DefaultTextInput
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutViewModel
+import github.alexzhirkevich.studentbsuby.ui.theme.LocalThemeSelector
 import github.alexzhirkevich.studentbsuby.ui.theme.values.Colors
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val ButtonWidth = 200
 
+@ExperimentalCoroutinesApi
+@ExperimentalPagerApi
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 @Composable
 fun LoginScreen(
     navController: NavController,
-    loginViewModel: LoginViewModel = hiltViewModel()
+    loginViewModel: LoginViewModel = hiltViewModel(),
+    aboutViewModel: AboutViewModel = hiltViewModel()
 ) {
 
     val loggedIn = loginViewModel.loggedIn.value
@@ -92,7 +103,8 @@ fun LoginScreen(
 
 
     LoginWidget(
-        loginViewModel = loginViewModel
+        loginViewModel = loginViewModel,
+        aboutViewModel =  aboutViewModel,
     )
     AnimatedVisibility(
         visible = loginViewModel.shouldShowSplashScreen.value,
@@ -140,7 +152,7 @@ fun SplashScreen(text : String = "") {
 
         Text(
             text = text+dots,
-            color = MaterialTheme.colors.onPrimary,
+            color = Color.White,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 50.dp)
@@ -149,10 +161,17 @@ fun SplashScreen(text : String = "") {
     }
 }
 
+
+@ExperimentalCoroutinesApi
+@ExperimentalPagerApi
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 @Composable
 private fun LoginWidget(
-    loginViewModel: LoginViewModel
+    loginViewModel: LoginViewModel,
+    aboutViewModel: AboutViewModel
 ) {
 
     val loginState by loginViewModel.loggedIn
@@ -179,12 +198,27 @@ private fun LoginWidget(
                     .navigationBarsWithImePadding()
 
             ) {
-                Snackbar(
-                    snackbarData = it,
+                Card(
+                    elevation = 5.dp,
                     backgroundColor = MaterialTheme.colors.secondary,
-                    contentColor = MaterialTheme.colors.primary,
-                    actionColor = MaterialTheme.colors.primary
-                )
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(10.dp),
+                        text = it.message,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colors.error
+                    )
+                }
+//                Snackbar(
+//                    snackbarData = it,
+//                    backgroundColor = MaterialTheme.colors.secondary,
+//                    contentColor = MaterialTheme.colors.error,
+//                    actionColor = MaterialTheme.colors.error,
+//
+//                )
             }
         }
     ) {
@@ -210,7 +244,7 @@ private fun LoginWidget(
             ) {
                 Spacer(
                     modifier = Modifier
-                        .height(40.dp)
+                        .height(45.dp)
                 )
 
                 Box {
@@ -221,6 +255,7 @@ private fun LoginWidget(
                             .size(80.dp)
                             .zIndex(2f),
                         elevation = 3.dp,
+                        backgroundColor = MaterialTheme.colors.secondary,
                         shape = CircleShape
                     ) {
                         Box(
@@ -238,7 +273,7 @@ private fun LoginWidget(
                     }
                     Card(
                         elevation = 3.dp,
-                        backgroundColor = MaterialTheme.colors.background,
+                        backgroundColor = MaterialTheme.colors.secondary,
                         modifier = Modifier
                             .padding(horizontal = 35.dp)
                             .zIndex(1f)
@@ -248,6 +283,7 @@ private fun LoginWidget(
                         ) {
                             Card(
                                 elevation = 2.dp,
+                                backgroundColor = MaterialTheme.colors.secondary,
                                 shape = object : Shape {
 
                                     override fun createOutline(
@@ -302,7 +338,8 @@ private fun LoginWidget(
                                             enabled = loginViewModel.loggedIn.value !is DataState.Loading,
                                             onCheckedChange = loginViewModel::setAutoLogin,
                                             colors = CheckboxDefaults.colors(
-                                                checkedColor = MaterialTheme.colors.primary
+                                                checkedColor = MaterialTheme.colors.primary,
+                                                checkmarkColor = MaterialTheme.colors.onPrimary
                                             )
                                         )
 
@@ -321,18 +358,91 @@ private fun LoginWidget(
                                     enabled = loginViewModel.loggedIn.value !is DataState.Loading,
                                     modifier = Modifier
                                         .width(ButtonWidth.dp)
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(MaterialTheme.shapes.medium)
                                 ) {
-                                    Text(text = stringResource(id = R.string.btn_login))
+                                    Text(
+                                        text = stringResource(id = R.string.btn_login),
+                                        color = MaterialTheme.colors.onPrimary
+                                    )
                                 }
 
                                 Spacer(modifier = Modifier.height(3.dp))
 
+
+                                var showDialog by rememberSaveable {
+                                    mutableStateOf(false)
+                                }
+                                if (showDialog) {
+                                    Dialog(onDismissRequest = { showDialog = false }) {
+                                        Card(
+                                            backgroundColor = MaterialTheme.colors.secondary
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.padding(
+                                                    horizontal = 10.dp,
+                                                    vertical = 5.dp
+                                                )
+                                            ) {
+                                                Text(
+                                                    text = stringResource(id = R.string.cant_login),
+                                                    style = MaterialTheme.typography.subtitle1,
+                                                    textAlign = TextAlign.Center,
+                                                )
+                                                Spacer(modifier = Modifier.height(10.dp))
+                                                HtmlText(
+                                                    textId = R.string.cant_login_dialog,
+                                                    style = MaterialTheme.typography.body1,
+                                                    textAlign = TextAlign.Center,
+                                                    urlSpanStyle = SpanStyle(
+                                                        color = MaterialTheme.colors.primary,
+                                                        textDecoration = TextDecoration.Underline
+                                                    )
+                                                )
+                                                Spacer(modifier = Modifier.height(10.dp))
+
+                                                Row(
+                                                    Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceAround,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+
+                                                    IconButton(onClick = aboutViewModel::onEmailClicked) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Email,
+                                                            contentDescription = "E-mail",
+                                                            tint = MaterialTheme.colors.primary,
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
+                                                    }
+
+                                                    IconButton(onClick = aboutViewModel::onTgClicked) {
+                                                        Image(
+                                                            painter = painterResource(R.drawable.ic_telegram),
+                                                            contentDescription = "Telegram",
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
+                                                    }
+
+                                                    IconButton(onClick ={showDialog = false}) {
+                                                        Icon(
+                                                            imageVector = Icons.Default.Close,
+                                                            tint = MaterialTheme.colors.onSecondary,
+                                                            contentDescription = "Close",
+                                                            modifier = Modifier.size(24.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 ClickableText(
-                                    style = MaterialTheme.typography.caption
-                                        .copy(color = MaterialTheme.colors.primary),
+                                    style = MaterialTheme.typography.caption,
                                     text = AnnotatedString(stringResource(R.string.cant_login))
-                                ) {}
+                                ) {
+                                    showDialog = true
+                                }
                             }
                         }
                     }
@@ -343,12 +453,17 @@ private fun LoginWidget(
     }
 }
 
+
+@ExperimentalCoroutinesApi
+@ExperimentalPagerApi
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
 @ExperimentalComposeUiApi
 @Composable
 private fun LoginForm(
     loginViewModel: LoginViewModel
 ){
-
 
     Column(
         modifier = Modifier
@@ -458,7 +573,18 @@ private fun LoginForm(
                         bitmap = capcha.valueOrNull()!!,
                         contentDescription = "captcha",
                         contentScale = ContentScale.Crop,
-                        modifier = capchaModifier
+                        modifier = capchaModifier,
+                        colorFilter = if (!MaterialTheme.colors.isLight)
+                            ColorFilter.colorMatrix(
+                                colorMatrix = ColorMatrix(
+                                    floatArrayOf(
+                                        -1f, 0f, 0f, 0f, 255f,
+                                        0f, -1f, 0f, 0f, 255f,
+                                        0f, 0f, -1f, 0f, 255f,
+                                        0f, 0f, 0f, 1f, 0f,
+                                    )
+                                )
+                            ) else null
                     )
                     else -> Spacer(modifier = capchaModifier)
                 }

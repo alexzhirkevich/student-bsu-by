@@ -2,6 +2,7 @@ package github.alexzhirkevich.studentbsuby.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.AutoMigrationSpec
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,23 +18,33 @@ class RoomModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context) : AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "db_cache")
+        Room
+            .databaseBuilder(context, AppDatabase::class.java, "db_cache")
+            .fallbackToDestructiveMigration()
             .build()
 
 
     @Singleton
     @Provides
-    fun provideUsersDao(appDatabase: AppDatabase) : UsersDao = appDatabase.userDao()
+    fun provideUsersDao(appDatabase: AppDatabase) = appDatabase.userDao()
 
     @Singleton
     @Provides
-    fun provideSubjectsDao(appDatabase: AppDatabase) : SubjectsDao = appDatabase.subjectsDao()
+    fun provideSubjectsDao(appDatabase: AppDatabase)  = appDatabase.subjectsDao()
 
     @Singleton
     @Provides
-    fun provideLessonsDao(appDatabase: AppDatabase) : LessonsDao = appDatabase.lessonsDao()
+    fun provideLessonsDao(appDatabase: AppDatabase)  = appDatabase.lessonsDao()
 
     @Singleton
     @Provides
-    fun provideHostelDao(appDatabase: AppDatabase) : HostelDao = appDatabase.hostelDao()
+    fun provideHostelDao(appDatabase: AppDatabase) = appDatabase.hostelDao()
+
+    @Singleton
+    @Provides
+    fun providePaidServicesDao(appDatabase: AppDatabase)  = appDatabase.paidServicesDao()
+
+    @Singleton
+    @Provides
+    fun provideNewsDao(appDatabase: AppDatabase)  = appDatabase.newsDao()
 }

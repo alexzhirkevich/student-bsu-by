@@ -29,6 +29,16 @@
         <entry key="../../../../layout/compose-model-1643505250234.xml" value="0.17685185185185184" />
         <entry key="../../../../layout/compose-model-1643506365835.xml" value="0.17685185185185184" />
         <entry key="../../../../layout/compose-model-1643589472805.xml" value="0.1" />
+        <entry key="../../../../layout/compose-model-1643648466811.xml" value="0.17685185185185184" />
+        <entry key="../../../../layout/compose-model-1643700065799.xml" value="0.335" />
+        <entry key="../../../../layout/compose-model-1643701241476.xml" value="0.17685185185185184" />
+        <entry key="../../../../layout/compose-model-1643728470158.xml" value="0.17685185185185184" />
+        <entry key="../../../../layout/compose-model-1643730172841.xml" value="0.17685185185185184" />
+        <entry key="../../../../layout/compose-model-1643734654110.xml" value="0.17685185185185184" />
+        <entry key="../../../../layout/compose-model-1643889872327.xml" value="0.17685185185185184" />
+        <entry key="../../../../layout/compose-model-1643942822329.xml" value="0.11739864864864864" />
+        <entry key="../../../../layout/compose-model-1643942912050.xml" value="0.11739864864864864" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_filter_list_off.xml" value="0.20925925925925926" />
         <entry key="app/src/main/res/drawable/ic_logo_footer.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_telegram.xml" value="0.11" />
@@ -37,6 +47,7 @@
         <entry key="app/src/main/res/drawable/splash_logo.xml" value="0.16018518518518518" />
         <entry key="app/src/main/res/font/fonts.xml" value="0.15185185185185185" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.20925925925925926" />
+        <entry key="app/src/main/res/xml/provider_paths.xml" value="0.13333333333333333" />
       </map>
     </option>
   </component>

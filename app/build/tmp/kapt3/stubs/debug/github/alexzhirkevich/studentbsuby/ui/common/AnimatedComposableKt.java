@@ -1,0 +1,19 @@
+package github.alexzhirkevich.studentbsuby.ui.common;
+
+import java.lang.System;
+
+@kotlin.Metadata(mv = {1, 5, 1}, k = 2, d1 = {"\u0000H\n\u0000\n\u0002\u0010\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010 \n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0003\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\u001a\u00dc\u0001\u0010\u0000\u001a\u00020\u0001*\u00020\u00022\u0006\u0010\u0003\u001a\u00020\u00042\u000e\b\u0002\u0010\u0005\u001a\b\u0012\u0004\u0012\u00020\u00070\u00062#\b\u0002\u0010\b\u001a\u001d\u0012\n\u0012\b\u0012\u0004\u0012\u00020\u000b0\n\u0012\u0006\u0012\u0004\u0018\u00010\f\u0018\u00010\t\u00a2\u0006\u0002\b\r2#\b\u0002\u0010\u000e\u001a\u001d\u0012\n\u0012\b\u0012\u0004\u0012\u00020\u000b0\n\u0012\u0006\u0012\u0004\u0018\u00010\u000f\u0018\u00010\t\u00a2\u0006\u0002\b\r2#\b\u0002\u0010\u0010\u001a\u001d\u0012\n\u0012\b\u0012\u0004\u0012\u00020\u000b0\n\u0012\u0006\u0012\u0004\u0018\u00010\f\u0018\u00010\t\u00a2\u0006\u0002\b\r2#\b\u0002\u0010\u0011\u001a\u001d\u0012\n\u0012\b\u0012\u0004\u0012\u00020\u000b0\n\u0012\u0006\u0012\u0004\u0018\u00010\u000f\u0018\u00010\t\u00a2\u0006\u0002\b\r2\"\u0010\u0012\u001a\u001e\u0012\u0004\u0012\u00020\u0014\u0012\u0004\u0012\u00020\u000b\u0012\u0004\u0012\u00020\u00010\u0013\u00a2\u0006\u0002\b\u0015\u00a2\u0006\u0002\b\rH\u0007\u00a8\u0006\u0016"}, d2 = {"animatedComposable", "", "Landroidx/navigation/NavGraphBuilder;", "route", "Lgithub/alexzhirkevich/studentbsuby/navigation/Route;", "deepLinks", "", "Landroidx/navigation/NavDeepLink;", "enterTransition", "Lkotlin/Function1;", "Landroidx/compose/animation/AnimatedContentScope;", "Landroidx/navigation/NavBackStackEntry;", "Landroidx/compose/animation/EnterTransition;", "Lkotlin/ExtensionFunctionType;", "exitTransition", "Landroidx/compose/animation/ExitTransition;", "popEnterTransition", "popExitTransition", "content", "Lkotlin/Function2;", "Landroidx/compose/animation/AnimatedVisibilityScope;", "Landroidx/compose/runtime/Composable;", "app_debug"})
+public final class AnimatedComposableKt {
+    
+    @androidx.compose.animation.ExperimentalAnimationApi()
+    public static final void animatedComposable(@org.jetbrains.annotations.NotNull()
+    androidx.navigation.NavGraphBuilder $this$animatedComposable, @org.jetbrains.annotations.NotNull()
+    github.alexzhirkevich.studentbsuby.navigation.Route route, @org.jetbrains.annotations.NotNull()
+    java.util.List<androidx.navigation.NavDeepLink> deepLinks, @org.jetbrains.annotations.Nullable()
+    kotlin.jvm.functions.Function1<? super androidx.compose.animation.AnimatedContentScope<androidx.navigation.NavBackStackEntry>, ? extends androidx.compose.animation.EnterTransition> enterTransition, @org.jetbrains.annotations.Nullable()
+    kotlin.jvm.functions.Function1<? super androidx.compose.animation.AnimatedContentScope<androidx.navigation.NavBackStackEntry>, ? extends androidx.compose.animation.ExitTransition> exitTransition, @org.jetbrains.annotations.Nullable()
+    kotlin.jvm.functions.Function1<? super androidx.compose.animation.AnimatedContentScope<androidx.navigation.NavBackStackEntry>, ? extends androidx.compose.animation.EnterTransition> popEnterTransition, @org.jetbrains.annotations.Nullable()
+    kotlin.jvm.functions.Function1<? super androidx.compose.animation.AnimatedContentScope<androidx.navigation.NavBackStackEntry>, ? extends androidx.compose.animation.ExitTransition> popExitTransition, @org.jetbrains.annotations.NotNull()
+    kotlin.jvm.functions.Function2<? super androidx.compose.animation.AnimatedVisibilityScope, ? super androidx.navigation.NavBackStackEntry, kotlin.Unit> content) {
+    }
+}

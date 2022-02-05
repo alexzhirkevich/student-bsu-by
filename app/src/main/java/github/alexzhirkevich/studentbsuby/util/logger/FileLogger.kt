@@ -1,10 +1,16 @@
 package github.alexzhirkevich.studentbsuby.util.logger
 
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Build
 import android.util.Log
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.BuildConfig
+import github.alexzhirkevich.studentbsuby.R
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -12,7 +18,7 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
-open class DefaultLogger : Logger {
+abstract class DefaultLogger : Logger {
 
     override fun log(msg: String, tag : String, logLevel: Logger.LogLevel, cause: Throwable?) {
         when (logLevel) {
@@ -69,12 +75,34 @@ class FileLogger constructor(
                 logFile.createNewFile()
                 logFile.appendText(buildString {
                     append("Device: ${Build.DEVICE}\n")
+                    append("Brand: ${Build.BRAND}\n")
                     append("Model: ${Build.MODEL}\n")
-                    append("Product: ${Build.PRODUCT}\n")
+                    append("Manufacturer: ${Build.MANUFACTURER}\n")
+                    append("Display: ${Build.DISPLAY}\n")
                     append("API: ${Build.VERSION.SDK_INT}\n")
+                    append("vc: ${BuildConfig.VERSION_CODE}\n")
+                    append("v: ${BuildConfig.VERSION_NAME}\n")
                     append("\n")
                 })
             }
         }
+    }
+
+    override fun share(context: Context) {
+        kotlin.runCatching {
+            val uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider",logFile)
+            Intent(Intent.ACTION_SEND).apply {
+                type = "application/txt"
+                flags = FLAG_GRANT_READ_URI_PERMISSION
+                putExtra(Intent.EXTRA_STREAM, uri)
+            }.let {
+                context.startActivity(
+                    Intent.createChooser(
+                        it,
+                        context.getString(R.string.share_logs)
+                    )
+                )
+            }
+        }.getOrThrow()
     }
 }

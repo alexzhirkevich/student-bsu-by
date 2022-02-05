@@ -61,7 +61,7 @@ fun SubjectWidget(
             Box(
                 Modifier
                     .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colors.primary)
+                    .background(MaterialTheme.colors.primaryVariant)
                     .bsuBackgroundPattern(
                         color = MaterialTheme.colors.background.copy(alpha = .05f),
                         clip = true
@@ -72,11 +72,9 @@ fun SubjectWidget(
 
                 Text(
                     text = subject.name,
-                    color = MaterialTheme.colors.onPrimary,
+                    color = MaterialTheme.colors.surface,
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold,
-                    fontStyle = FontStyle.Italic,
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -120,36 +118,44 @@ fun SubjectWidget(
                                 else -> Icons.Default.Schedule to MaterialTheme.colors.onSecondary
                             }
 
+                            Row(verticalAlignment = Alignment.CenterVertically) {
 
-                            if (subject.creditMark == null) {
-                                Icon(imageVector = icon, tint = color, contentDescription = "")
-                            }else {
-                                Text(
-                                    text = subject.creditMark.toString(),
-                                    style = MaterialTheme.typography.subtitle1,
-                                    color = when {
-                                        subject.creditMark in 1..3 -> MaterialTheme.colors.error
-                                        subject.creditMark > 3 -> MaterialTheme.colors.onError
-                                        else -> MaterialTheme.colors.onSecondary
-                                    },
-                                    modifier = Modifier.padding(end = 5.dp)
-                                )
-                            }
-                            if (subject.creditRetakes != 0) {
-                                Box() {
-                                    Icon(
-                                        imageVector = Icons.Default.Replay,
-                                        contentDescription = "",
-                                        tint = MaterialTheme.colors.error,
-                                        modifier = Modifier.align(Alignment.Center)
-                                    )
+                                if (subject.creditRetakes != 0) {
+                                    Box {
+                                        Icon(
+                                            imageVector = Icons.Default.Replay,
+                                            contentDescription = "",
+                                            tint = MaterialTheme.colors.error,
+                                            modifier = Modifier.align(Alignment.Center)
+                                                .size(28.dp)
+                                        )
+                                        Text(
+                                            text = subject.creditRetakes.toString(),
+                                            style = MaterialTheme.typography.caption,
+                                            color = MaterialTheme.colors.error,
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(5.dp))
+
+
+                                if (subject.creditMark == null) {
+                                    Icon(imageVector = icon, tint = color, contentDescription = "")
+                                } else {
                                     Text(
-                                        text = subject.creditRetakes.toString(),
-                                        style = MaterialTheme.typography.caption,
-                                        color = MaterialTheme.colors.error,
-                                        modifier = Modifier.align(Alignment.Center)
+                                        text = subject.creditMark.toString(),
+                                        style = MaterialTheme.typography.subtitle1,
+                                        color = when {
+                                            subject.creditMark in 1..3 -> MaterialTheme.colors.error
+                                            subject.creditMark > 3 -> MaterialTheme.colors.onError
+                                            else -> MaterialTheme.colors.onSecondary
+                                        },
+                                        modifier = Modifier.padding(end = 5.dp)
                                     )
                                 }
+
                             }
                         }
                     }
@@ -167,46 +173,45 @@ fun SubjectWidget(
                                 style = MaterialTheme.typography.body1
                             )
 
-//                            val (icon, mark) = when {
-//                                subject.examMark != null ->
-//                                    Icons.Default.RadioButtonUnchecked to subject.examMark
-//                                else -> Icons.Default.Schedule to 0
-//                            }
+                            Spacer(modifier = Modifier.width(5.dp))
 
-                            Spacer(modifier = Modifier.weight(1f))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
 
-                            if(subject.examMark != null) {
-                                Text(
-                                    text = subject.examMark.toString(),
-                                    style = MaterialTheme.typography.subtitle1,
-                                    color = when {
-                                        subject.examMark in 1..3 -> MaterialTheme.colors.error
-                                        subject.examMark > 3 -> MaterialTheme.colors.onError
-                                        else -> MaterialTheme.typography.body1.color
-                                    },
-                                    modifier = Modifier.padding(end = 5.dp)
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Schedule,
-                                    tint = MaterialTheme.typography.body1.color,
-                                    contentDescription = "")
-                            }
+                                if (subject.examRetakes != 0) {
+                                    Box {
+                                        Icon(
+                                            imageVector = Icons.Default.Replay,
+                                            contentDescription = "",
+                                            modifier = Modifier.align(Alignment.Center)
+                                                .size(28.dp)
+                                        )
+                                        Text(
+                                            text = subject.examMark.toString(),
+                                            style = MaterialTheme.typography.caption,
+                                            color = MaterialTheme.typography.body1.color,
+                                            modifier = Modifier.align(Alignment.Center)
+                                        )
+                                    }
+                                }
 
-                        }
-                        if (subject.examRetakes != 0) {
-                            Box() {
-                                Icon(
-                                    imageVector = Icons.Default.Replay,
-                                    contentDescription = "",
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
-                                Text(
-                                    text = subject.examMark.toString(),
-                                    style = MaterialTheme.typography.caption,
-                                    color = MaterialTheme.typography.body1.color,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
+                                if (subject.examMark != null) {
+                                    Text(
+                                        text = subject.examMark.toString(),
+                                        style = MaterialTheme.typography.subtitle1,
+                                        color = when {
+                                            subject.examMark in 1..3 -> MaterialTheme.colors.error
+                                            subject.examMark > 3 -> MaterialTheme.colors.onError
+                                            else -> MaterialTheme.colors.onSecondary
+                                        },
+                                        modifier = Modifier.padding(end = 5.dp)
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Schedule,
+                                        tint = MaterialTheme.colors.onSecondary,
+                                        contentDescription = ""
+                                    )
+                                }
                             }
                         }
                     }

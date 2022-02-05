@@ -9,15 +9,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
+import github.alexzhirkevich.studentbsuby.repo.DataSource
 import github.alexzhirkevich.studentbsuby.repo.TimetableRepository
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import github.alexzhirkevich.studentbsuby.util.setState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
@@ -29,7 +28,7 @@ enum class LessonState{
 
 typealias Timetable = List<List<Pair<Lesson,LessonState>>>
 
-@FlowPreview
+
 @HiltViewModel
 class TimetableViewModel @Inject constructor(
     private val timetableRepository: TimetableRepository,
@@ -74,19 +73,40 @@ class TimetableViewModel @Inject constructor(
         get() = _isUpdating
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-            updateTimeTable()
-        }
+        updateTimeTable(DataSource.All)
     }
 
     override fun update() {
         _isUpdating.value = true
-        updateTimeTable(true)
+        updateTimeTable(DataSource.Remote)
     }
 
-    private fun updateTimeTable(fromWebOnly: Boolean = false) =
+
+    private var timetableJob : Job? = null
+    private fun updateTimeTable(dataSource: DataSource) =
         timetableRepository
-            .getTimetable(fromWebOnly)
+            .get(dataSource)
+            .flowOn(Dispatchers.IO)
+            .map {
+                if (it.flatten().isNotEmpty())
+                    DataState.Success(
+                        it.map { day ->
+                            var hasRunning = false
+                            val time = currentTime()
+                            day.mapIndexed { _, lesson ->
+                                lesson to when {
+                                    lesson.dayOfWeek < currentDayOfWeek ||
+                                            lesson.dayOfWeek == currentDayOfWeek && lesson.ends <= time ->
+                                        LessonState.PASSED
+                                    !hasRunning && lesson.dayOfWeek == currentDayOfWeek &&
+                                            lesson.ends > time ->
+                                        LessonState.RUNNING.also { hasRunning = true }
+                                    else -> LessonState.INCOMING
+                                }
+                            }
+                        })
+                else DataState.Empty
+            }
             .onEmpty {
                 if (_timetable.value !is DataState.Success){
                     _timetable.value is DataState.Empty
@@ -96,26 +116,7 @@ class TimetableViewModel @Inject constructor(
                 _isUpdating.value = false
             }
             .onEach {
-                _timetable.tryEmit(
-                    if (it.flatten().isNotEmpty())
-                        DataState.Success(
-                            it.map { day ->
-                                var hasRunning = false
-                                val time = currentTime()
-                                day.mapIndexed { idx, lesson ->
-                                    lesson to when {
-                                        lesson.dayOfWeek < currentDayOfWeek ||
-                                                lesson.dayOfWeek == currentDayOfWeek && lesson.ends <= time ->
-                                            LessonState.PASSED
-                                        !hasRunning && lesson.dayOfWeek == currentDayOfWeek &&
-                                                lesson.ends > time ->
-                                            LessonState.RUNNING.also { hasRunning = true }
-                                        else -> LessonState.INCOMING
-                                    }
-                                }
-                            })
-                    else DataState.Empty
-                )
+                _timetable.value = it
             }
             .catch {
                 if (_timetable.value !is DataState.Success) {
@@ -126,7 +127,11 @@ class TimetableViewModel @Inject constructor(
                     this@TimetableViewModel.javaClass.simpleName
                 )
             }
-            .launchIn(viewModelScope)
+            .flowOn(Dispatchers.Main)
+            .launchIn(viewModelScope).also {
+                timetableJob?.cancel()
+                timetableJob = it
+            }
 
 
     private fun currentTime() : String{

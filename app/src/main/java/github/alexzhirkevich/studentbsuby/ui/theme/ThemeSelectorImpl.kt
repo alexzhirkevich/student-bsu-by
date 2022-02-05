@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -13,29 +14,24 @@ import github.alexzhirkevich.studentbsuby.ui.theme.Theme.Dark
 private const val PREF_SETTINGS_isInSystemTheme = "PREF_SETTINGS_isInSystemTheme"
 private const val PREF_SETTINGS_isInDarkThemeForced = "PREF_SETTINGS_isInDarkThemeForced"
 
-private class ThemeSelectorImpl private constructor(
+class ThemeSelectorImpl private constructor(
     private val preferences: SharedPreferences,
     initialTheme : Theme
     ) : ThemeSelector{
 
-    private val forcedTheme = mutableStateOf(initialTheme)
+    override val currentTheme = mutableStateOf(initialTheme)
+
 
     override fun setTheme(theme: Theme) {
         setInSystemTheme(preferences, theme == Theme.System)
+        currentTheme.value = theme
+
         if (theme == Dark){
             setInDarkTheme(preferences,true)
         }
         if (theme == Theme.Light){
             setInDarkTheme(preferences,false)
         }
-        forcedTheme.value = theme
-    }
-
-    @Composable
-    override fun isInDarkTheme(): Boolean {
-        return if (forcedTheme.value == Theme.System)
-            isSystemInDarkTheme()
-        else forcedTheme.value == Theme.Dark
     }
 
     companion object {

@@ -2,11 +2,8 @@ package github.alexzhirkevich.studentbsuby.repo
 
 import github.alexzhirkevich.studentbsuby.api.TimetableApi
 import github.alexzhirkevich.studentbsuby.api.dayOfWeek
-import github.alexzhirkevich.studentbsuby.api.isSessionExpired
 import github.alexzhirkevich.studentbsuby.dao.LessonsDao
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
-import github.alexzhirkevich.studentbsuby.util.exceptions.FailResponseException
-import github.alexzhirkevich.studentbsuby.util.exceptions.SessionExpiredException
 import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -16,42 +13,31 @@ import javax.inject.Inject
 
 
 class TimetableRepository @Inject constructor(
-    private val loginRepository: LoginRepository,
+    private val usernameProvider: UsernameProvider,
     private val timetableApi: TimetableApi,
     private val lessonsDao : LessonsDao
-) {
+) : CacheWebRepository<List<List<Lesson>>>() {
 
-    @FlowPreview
-    fun getTimetable(fromWebOnly : Boolean = false) : Flow<List<List<Lesson>>> = flow {
-        val cached = if (!fromWebOnly) getTimetableFromCache().also {
-            if (it.any(Collection<*>::isNotEmpty))
-                emit(it)
-        } else null
-
-        emit(getTimetableFromWeb().also {
-            if (cached != it && it.any(Collection<*>::isNotEmpty))
-                saveTimetableToCache(it)
-        })
+    override fun get(
+        dataSource: DataSource,
+        replaceCacheIf: (cached: List<List<Lesson>>?, new: List<List<Lesson>>) -> Boolean
+    ): Flow<List<List<Lesson>>> {
+        return super.get(dataSource){ old, new ->
+            replaceCacheIf(old,new) && new.any(Collection<*>::isNotEmpty)
+        }
     }
 
-    private suspend fun getTimetableFromWeb(): List<List<Lesson>> {
-
-        val username = loginRepository.cachedLogin.takeIf(String::isNotBlank)
+    override suspend fun getFromWeb(): List<List<Lesson>> {
+        val username = usernameProvider.username.takeIf(String::isNotBlank)
             ?: throw UsernameNotFoundException()
-
+        // TODO: refactor
         return coroutineScope {
             (0..6).map { day ->
                 async {
-                    val resp = timetableApi.timetable(timetableApi.dayOfWeek(day))
-                    if (!resp.isSuccessful)
-                        throw FailResponseException(resp.code())
 
-                    if (resp.body()?.isSessionExpired == true)
-                        throw SessionExpiredException()
-
-                    val bytes = resp.body()?.byteStream()?.readBytes() ?: return@async emptyList()
+                    val string = timetableApi.timetable(timetableApi.dayOfWeek(day)).html()
                     val html =
-                        '<' + String(bytes).substringAfter('<').substringBeforeLast('>') + '>'
+                        '<' + string.substringAfter('<').substringBeforeLast('>') + '>'
                     val jsoup = Jsoup.parse(html)
 
                     val numbers = jsoup.getElementsByClass("styleNumber").mapNotNull {
@@ -145,19 +131,19 @@ class TimetableRepository @Inject constructor(
         }
     }
 
-    private suspend fun getTimetableFromCache(): List<List<Lesson>>{
+    override suspend fun getFromCache(): List<List<Lesson>>{
         return kotlin.runCatching {
-            loginRepository.cachedLogin.takeIf(String::isNotBlank)?.let { username ->
+            usernameProvider.username.takeIf(String::isNotBlank)?.let { username ->
                 lessonsDao.getAll(username)
             }?.groupBy { it.dayOfWeek }?.values?.toList()
         }.getOrNull() ?: emptyList()
     }
 
-    private suspend fun saveTimetableToCache(timetable : List<List<Lesson>> ){
+    override suspend fun saveToCache(value : List<List<Lesson>> ){
         kotlin.runCatching {
-            loginRepository.cachedLogin.takeIf(String::isNotBlank)?.let { username ->
+            usernameProvider.username.takeIf(String::isNotBlank)?.let { username ->
                 lessonsDao.clear(username)
-                timetable.flatten().forEach {
+                value.flatten().forEach {
                     lessonsDao.insert(it)
                 }
             }
