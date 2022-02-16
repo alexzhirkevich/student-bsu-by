@@ -17,10 +17,12 @@ Published in [Google Play](https://play.google.com/store/apps/details?id=github.
 
 ## Built with
 
-* Jetpack Compose
-* Retrofit
-* Room
-* Hilt
+* UI - Jetpack Compose
+* Network - Retrofit2
+* Database - Room
+* DI - Hilt
+* Concurrency - Coroutines, Flow
+* Architecture - MVVM
 
 ## Authors
 
