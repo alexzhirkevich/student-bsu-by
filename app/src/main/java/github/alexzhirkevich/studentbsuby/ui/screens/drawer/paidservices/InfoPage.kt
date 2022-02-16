@@ -85,7 +85,6 @@ internal fun InfoPage(
                     modifier = Modifier.padding(horizontal = 5.dp),
                     textId = text,
                     style = MaterialTheme.typography.body1,
-//                textAlign = TextAlign.Justify,
                     urlSpanStyle = SpanStyle(
                         color = MaterialTheme.colors.primary,
                         textDecoration = TextDecoration.Underline

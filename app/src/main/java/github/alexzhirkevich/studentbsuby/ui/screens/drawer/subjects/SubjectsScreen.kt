@@ -56,6 +56,7 @@ fun SubjectsScreen(
     subjectsViewModel: SubjectsViewModel = hiltViewModel(),
     onMenuClicked : () -> Unit
 ) {
+
     val subjects by subjectsViewModel.subjects.collectAsState()
 
     when (subjects) {
@@ -262,7 +263,8 @@ private fun Toolbar(
                     Checkbox(
                         checked = viewModel.withCredit.value,
                         colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colors.primary
+                            checkedColor = MaterialTheme.colors.primary,
+                            checkmarkColor = MaterialTheme.colors.onPrimary
                         ),
                         onCheckedChange = {
                             viewModel.setFilter(it, viewModel.withExam.value)
@@ -287,7 +289,8 @@ private fun Toolbar(
                     Checkbox(
                         checked = viewModel.withExam.value,
                         colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colors.primary
+                            checkedColor = MaterialTheme.colors.primary,
+                            checkmarkColor = MaterialTheme.colors.onPrimary
                         ),
                         onCheckedChange = {
                             viewModel.setFilter(viewModel.withCredit.value, it)

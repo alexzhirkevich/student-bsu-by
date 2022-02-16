@@ -283,7 +283,7 @@ private class TuitionFeeReceiptsRepository(
     }.getOrNull()
 
     override suspend fun getFromWeb(): List<TuitionFeePayment>? =
-        Jsoup.parse(api.tuitionFee().html())
+        Jsoup.parse(api.tuitionFee().html().also { println(it) })
             .getElementsByTag("tbody")
             .lastOrNull()
             ?.getElementsByTag("tr")

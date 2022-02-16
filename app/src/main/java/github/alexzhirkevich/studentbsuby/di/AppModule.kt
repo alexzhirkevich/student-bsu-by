@@ -55,16 +55,18 @@ class AppModule {
     @Provides
     @Encrypted
     fun provideEncryptedSharedPreferences(@ApplicationContext context: Context) : SharedPreferences {
-        return EncryptedSharedPreferences.create(
-            context,
-            BuildConfig.APPLICATION_ID + "_encryped",
-            MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .setUserAuthenticationRequired(false)
-                .build(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        return kotlin.runCatching {
+            EncryptedSharedPreferences.create(
+                context,
+                BuildConfig.APPLICATION_ID + "_encryped",
+                MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .setUserAuthenticationRequired(false)
+                    .build(),
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        }.getOrElse { provideSharedPreferences(context) }
     }
 
     @Provides

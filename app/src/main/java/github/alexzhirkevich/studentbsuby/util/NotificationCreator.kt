@@ -18,7 +18,9 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.MainActivity
 import github.alexzhirkevich.studentbsuby.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import me.onebone.toolbar.ExperimentalToolbarApi
 
+@ExperimentalToolbarApi
 @ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
@@ -53,9 +55,6 @@ class NotificationCreator(
     ) {
         kotlin.runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                try {
-//                    manager.getNotificationChannel(channelId)
-//                } catch (t: Throwable) {
                     manager.createNotificationChannel(
                         NotificationChannel(
                             channelId,
@@ -76,7 +75,6 @@ class NotificationCreator(
                         }
                     )
                 }
-//            }
             Settings.System.DEFAULT_NOTIFICATION_URI
             val notification = NotificationCompat.Builder(context, channelId)
                 .setContentIntent(intent)

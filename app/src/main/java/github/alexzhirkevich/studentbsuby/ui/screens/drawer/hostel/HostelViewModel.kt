@@ -86,7 +86,16 @@ class HostelViewModel @Inject constructor(
 
         hostelRepository
             .get()
-            .onEmpty { _hostelState.tryEmit(DataState.Empty) }
+            .onStart {
+                if (_hostelState.value !is DataState.Success) {
+                    _hostelState.tryEmit(DataState.Loading)
+                }
+            }
+            .onEmpty {
+                if (_hostelState.value !is DataState.Success) {
+                    _hostelState.tryEmit(DataState.Empty)
+                }
+            }
             .onEach {
                 _hostelState.tryEmit(DataState.Success(it))
             }.onCompletion {

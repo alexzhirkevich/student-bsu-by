@@ -70,7 +70,9 @@ sealed class PreferencePersistence<T>(
     val onChanged: (T) -> Unit,
 ) {
     operator fun getValue(self: Any?, property: KProperty<*>) : T {
-        return preferences.all[property.name] as? T ?: default
+        return preferences.all[property.name] as? T ?: default.also {
+            setValue(self,property,it)
+        }
     }
 
     abstract operator fun setValue(self: Any?, property: KProperty<*>, t: T)

@@ -19,9 +19,6 @@ interface RepoModule {
     @Binds
     fun bindUserRepository(userRepository: UserRepository) : Repository<User>
 
-//    @Binds
-//    fun bindSubjectsRepository(subjectsRepository: SubjectsRepository) : Repository<List<List<Subject>>>
-
     @Binds
     fun bindCurrentSemesterRepository(repository: CurrentSemesterRepository) : Repository<Int>
 }

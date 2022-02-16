@@ -27,9 +27,11 @@ sealed class CacheWebRepository<T> : Repository<T>{
         replaceCacheIf: (cached: T?, new: T) -> Boolean
     ) : Flow<T> = flow {
         val cached = getFromCache()?.also {
-            if (dataSource is DataSource.All || dataSource is DataSource.Local) {
-                emit(it)
-            }
+            if (dataSource is DataSource.All || dataSource is DataSource.Local)
+                if (it !is Collection<*>  || it.isNotEmpty()) {
+                    emit(it)
+                }
+
         }
         if (dataSource is DataSource.All || dataSource is DataSource.Remote) {
             getFromWeb()?.also {

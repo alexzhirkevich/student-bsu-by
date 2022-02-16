@@ -21,7 +21,6 @@ fun NavigationMenuButton(
         onClick = onClick,
         modifier = Modifier
             .padding(3.dp)
-//            .align(Alignment.CenterVertically)
     ) {
         Icon(
             imageVector = icon,

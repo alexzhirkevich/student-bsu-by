@@ -7,7 +7,6 @@ import androidx.compose.foundation.background
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -40,8 +39,6 @@ fun MainScreen() {
         navController.setOnBackPressedDispatcher(it)
     }
 
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-
     AnimatedNavHost(
         modifier = Modifier.background(color = MaterialTheme.colors.background),
         navController = navController,
@@ -60,7 +57,7 @@ fun MainScreen() {
             },
             exitTransition = {
                 fadeOut()
-            }        ) {
+            }) {
             LoginScreen(navController)
         }
         animatedComposable(
@@ -77,24 +74,22 @@ fun MainScreen() {
             exitTransition = {
                 fadeOut()
             }
-        ){
-            CompositionLocalProvider(LocalViewModelStoreOwner provides viewModelStoreOwner) {
-                DrawerScreen(navController)
-            }
+        ) {
+            DrawerScreen(navController)
         }
         animatedComposable(
             Route.SettingsScreen,
             enterTransition = {
-                slideInHorizontally { it/2 } + fadeIn()
+                slideInHorizontally { it / 2 } + fadeIn()
             },
             popEnterTransition = {
-                slideInHorizontally { it/2 } + fadeIn()
+                slideInHorizontally { it / 2 } + fadeIn()
             },
             popExitTransition = {
-                slideOutHorizontally { it/2 } + fadeOut()
+                slideOutHorizontally { it / 2 } + fadeOut()
             },
             exitTransition = {
-                slideOutHorizontally { it/2 } + fadeOut()
+                slideOutHorizontally { it / 2 } + fadeOut()
             }
         ) {
             SettingsScreen()

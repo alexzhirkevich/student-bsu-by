@@ -1,5 +1,7 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer
 
+import android.app.Activity
+import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -18,11 +20,14 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -67,7 +72,6 @@ private sealed class DrawerRoute(
 
 @ExperimentalComposeUiApi
 @ExperimentalToolbarApi
-
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
@@ -87,6 +91,11 @@ fun DrawerScreen(
     val childNavController = rememberAnimatedNavController()
     val initial =  DrawerRoute.Timetable
 
+    val activity = LocalContext.current as ComponentActivity
+
+    LaunchedEffect(Unit) {
+        profileViewModel.provideActivity(activity)
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -189,6 +198,7 @@ fun DrawerScreen(
 }
 
 
+@ExperimentalToolbarApi
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
@@ -204,6 +214,7 @@ private fun DrawerContent(
     profileViewModel: ProfileViewModel,
     onRouteSelected: () -> Unit = {}
 ) {
+
     Column(
         Modifier.background(MaterialTheme.colors.secondary)
     ) {

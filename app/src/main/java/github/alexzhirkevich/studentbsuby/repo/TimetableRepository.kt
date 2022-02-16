@@ -18,15 +18,6 @@ class TimetableRepository @Inject constructor(
     private val lessonsDao : LessonsDao
 ) : CacheWebRepository<List<List<Lesson>>>() {
 
-    override fun get(
-        dataSource: DataSource,
-        replaceCacheIf: (cached: List<List<Lesson>>?, new: List<List<Lesson>>) -> Boolean
-    ): Flow<List<List<Lesson>>> {
-        return super.get(dataSource){ old, new ->
-            replaceCacheIf(old,new) && new.any(Collection<*>::isNotEmpty)
-        }
-    }
-
     override suspend fun getFromWeb(): List<List<Lesson>> {
         val username = usernameProvider.username.takeIf(String::isNotBlank)
             ?: throw UsernameNotFoundException()

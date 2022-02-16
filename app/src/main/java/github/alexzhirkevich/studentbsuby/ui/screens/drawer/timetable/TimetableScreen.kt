@@ -67,7 +67,7 @@ fun TimetableScreen(
 @ExperimentalMaterialApi
 @Composable
 fun SuccessTimetableScreen(
-    timetableViewModel: TimetableViewModel = hiltViewModel(),
+    timetableViewModel: TimetableViewModel,
     onMenuClicked : () -> Unit = {}
 ) {
     val scaffoldState = rememberCollapsingToolbarScaffoldState(
@@ -295,7 +295,6 @@ private fun Body(
             is DataState.Loading -> Box(
                 modifier = Modifier
                     .fillMaxSize()
-//                    .verticalScroll(rememberScrollState())
             ) {
                 BsuProgressBar(
                     Modifier

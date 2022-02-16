@@ -6,7 +6,8 @@ import android.content.SharedPreferences
 import com.franmontiel.persistentcookiejar.cache.CookieCache
 import okhttp3.*
 
-interface LoginCookieManager{
+interface LoginCookieManager {
+
     fun getCookies() : String
 
     fun cleanCookies()

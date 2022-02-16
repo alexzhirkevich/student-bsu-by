@@ -24,19 +24,6 @@ private const val bsuPatternUnit = 20
 private const val bsuPatternDelta = 3
 private const val bsuPatternStrokeWidth = 1f
 
-@Composable
-@Preview
-private fun preview() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.White)
-        .animatedSquaresBackground(
-            color = Color.Gray.copy(alpha = .2f),
-            10,
-            size = 500.dp
-        ))
-}
-
 fun Modifier.bsuBackgroundPattern(
     color : Color,
     clip : Boolean = true,
@@ -232,19 +219,12 @@ fun Modifier.animatedSquaresBackground(
                     left = this.size.width * startPoints[it].first - actualSize / 2,
                     top = this.size.height * startPoints[it].second - actualSize / 2
                 ) {
-//                clipRect(
-//                    left = 0f,
-//                    top = 0f,
-//                    right = actualSize,
-//                    bottom = actualSize
-//                ) {
                     rotate(
                         rotations[it].value,
                         pivot = Offset(actualSize / 2, actualSize / 2)
                     ) {
                         drawRect(color = color, size = Size(actualSize, actualSize))
                     }
-//                }
                 }
             }
         }

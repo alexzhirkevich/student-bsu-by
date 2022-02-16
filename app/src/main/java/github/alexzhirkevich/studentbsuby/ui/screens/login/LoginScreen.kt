@@ -212,13 +212,6 @@ private fun LoginWidget(
                         color = MaterialTheme.colors.error
                     )
                 }
-//                Snackbar(
-//                    snackbarData = it,
-//                    backgroundColor = MaterialTheme.colors.secondary,
-//                    contentColor = MaterialTheme.colors.error,
-//                    actionColor = MaterialTheme.colors.error,
-//
-//                )
             }
         }
     ) {
@@ -323,7 +316,6 @@ private fun LoginWidget(
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier
-//                                    .background(MaterialTheme.colors.background)
                                     .padding(vertical = 10.dp)
                             ) {
                                 CompositionLocalProvider(
@@ -555,7 +547,6 @@ private fun LoginForm(
             }
             Row(
                 modifier = Modifier
-//                    .fillMaxWidth()
                     .clip(MaterialTheme.shapes.medium)
                     .border(.5.dp, MaterialTheme.colors.primary, MaterialTheme.shapes.medium),
                 verticalAlignment = Alignment.CenterVertically
@@ -611,11 +602,6 @@ private fun LoginForm(
             onValueChange = loginViewModel::setCaptchaText,
             singleLine = true,
             enabled = loginViewModel.loggedIn.value !is DataState.Loading,
-//            label = {
-//                Text(
-//                    text = stringResource(id = R.string.captcha),
-//                )
-//            },
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.captcha),

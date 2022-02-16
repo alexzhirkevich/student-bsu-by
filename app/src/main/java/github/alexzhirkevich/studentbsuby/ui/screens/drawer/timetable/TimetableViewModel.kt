@@ -112,6 +112,11 @@ class TimetableViewModel @Inject constructor(
                     _timetable.value is DataState.Empty
                 }
             }
+            .onStart {
+                if (_timetable.value !is DataState.Success){
+                    _timetable.value is DataState.Loading
+                }
+            }
             .onCompletion {
                 _isUpdating.value = false
             }

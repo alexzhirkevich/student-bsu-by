@@ -51,6 +51,8 @@ fun HostelScreen(
     onMenuClicked : () -> Unit,
     hostelViewModel: HostelViewModel = hiltViewModel()
 ) {
+
+
     val state by hostelViewModel.hostelState.collectAsState()
 
     when (state) {
@@ -119,7 +121,10 @@ fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
                 )
             }
         }
-        BsuProgressBar(modifier = Modifier.align(Alignment.Center))
+        BsuProgressBar(
+            modifier = Modifier.align(Alignment.Center),
+            size = 100.dp
+        )
     }
 }
 
@@ -169,7 +174,6 @@ private fun ProvidedHostelScreen(
                     imageModel = it,
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .parallax()
                         .aspectRatio(1.4f)
                         .alpha(scaffoldState.toolbarState.progress),
                     loading = {

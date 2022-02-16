@@ -74,9 +74,7 @@ fun AboutScreen(
             }
 
             Text(
-                text = stringResource(id = R.string.app_name)
-//                    .replace(' ','\n')
-                ,
+                text = stringResource(id = R.string.app_name),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.h2,
                 fontStyle = FontStyle.Italic,

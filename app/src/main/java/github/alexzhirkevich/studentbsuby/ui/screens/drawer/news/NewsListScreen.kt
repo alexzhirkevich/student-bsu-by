@@ -35,7 +35,7 @@ import github.alexzhirkevich.studentbsuby.util.DataState
 @ExperimentalMaterialApi
 @Composable
 fun NewsListScreen(
-    viewModel: NewsViewModel = hiltViewModel(),
+    viewModel: NewsViewModel,
     navController: NavController
 ) {
     val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isUpdating.value)

@@ -125,6 +125,11 @@ class SubjectsViewModel @Inject constructor(
                     DataState.Success(it)
                 else DataState.Empty
             }
+            .onStart {
+                if (_subjects.value !is DataState.Success){
+                    _subjects.value = DataState.Loading
+                }
+            }
             .onEach(_subjects::tryEmit)
             .onEmpty {
                 if (_subjects.value !is DataState.Success) {

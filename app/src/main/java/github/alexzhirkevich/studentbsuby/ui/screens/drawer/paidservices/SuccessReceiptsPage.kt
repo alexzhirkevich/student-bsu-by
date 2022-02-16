@@ -68,18 +68,31 @@ fun <T> SuccessReceiptsPage(
     ) {
 
         receipts.groupBy(complete).let {
+            it[false]?.let { receipts ->
+                stickyHeader {
+                    Text(
+                        text = stringResource(id = R.string.bills),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.subtitle1,
+                    )
+                }
+                Items(receipts)
+            }
+
             it[true]?.let { bills ->
-                it[false]?.let {
-                    stickyHeader {
-                        Text(
-                            text = stringResource(id = R.string.bills),
-                            modifier = Modifier
-                                .padding(5.dp)
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.subtitle1,
-                        )
-                    }
+                stickyHeader {
+                    Text(
+                        text = stringResource(id = R.string.history),
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.subtitle1,
+                    )
+
                 }
                 Items(bills)
                 item {
@@ -87,21 +100,7 @@ fun <T> SuccessReceiptsPage(
                 }
             }
 
-            it[false]?.let { receipts ->
-                it[true]?.let {
-                    stickyHeader {
-                        Text(
-                            text = stringResource(id = R.string.history),
-                            modifier = Modifier
-                                .padding(5.dp)
-                                .fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.subtitle1,
-                        )
-                    }
-                }
-                Items(receipts)
-            }
+
         }
         item { Spacer(modifier = Modifier.navigationBarsWithImePadding()) }
     }

@@ -32,7 +32,6 @@ private val DarkColorPalette = darkColors(
     onPrimary = Color.Black
 )
 
-
 private val LightColorPalette = lightColors(
     primary = Colors.Blue,
     primaryVariant = Colors.DarkBlue,
@@ -52,7 +51,6 @@ fun StudentbsubyTheme(
 
     val themeSelector = rememberThemeSelector()
 
-
     val isDark = if (themeSelector.currentTheme.value == Theme.System)
         isSystemInDarkTheme()
     else themeSelector.currentTheme.value == Theme.Dark
@@ -65,7 +63,7 @@ fun StudentbsubyTheme(
         else R.color.blue_transparent
 
         activity.window.apply {
-            navigationBarColor = ContextCompat.getColor(activity, navBarColor)
+          //  navigationBarColor = ContextCompat.getColor(activity, navBarColor)
             decorView.systemUiVisibility = if (!isDark)
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
             else 0
@@ -91,7 +89,7 @@ fun StudentbsubyTheme(
             )) {
                 MaterialTheme(
                     colors = colors,
-                    typography = Typography,
+                    typography = typography(colors.onBackground),
                     shapes = Shapes,
                     content = content
                 )

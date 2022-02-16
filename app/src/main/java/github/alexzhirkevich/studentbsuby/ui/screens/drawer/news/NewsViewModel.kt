@@ -72,6 +72,16 @@ class NewsViewModel @Inject constructor(
     private fun updateNews(dataSource: DataSource) {
         newsRepo.get(dataSource)
             .flowOn(Dispatchers.IO)
+            .map {
+                if (it.isNotEmpty()){
+                    DataState.Success(it)
+                } else DataState.Empty
+            }
+            .onStart {
+                if (_news.value !is DataState.Success) {
+                    _news.value = DataState.Loading
+                }
+            }
             .onCompletion {
                 _isUpdating.value = false
             }
@@ -92,9 +102,7 @@ class NewsViewModel @Inject constructor(
                 )
             }
             .onEach {
-                _news.value = if (it.isNotEmpty())
-                    DataState.Success(it)
-                else DataState.Empty
+                _news.value = it
             }
             .flowOn(Dispatchers.Main)
             .launchIn(viewModelScope)

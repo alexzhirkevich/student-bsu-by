@@ -1,34 +1,45 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.settings
 
 import android.app.Activity
+import android.text.Html
+import android.text.Spanned
+import android.text.SpannedString
+import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.pager.ExperimentalPagerApi
 import de.charlex.compose.HtmlText
+import de.charlex.compose.toAnnotatedString
 import github.alexzhirkevich.studentbsuby.BuildConfig
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.ui.theme.LocalThemeSelector
 import github.alexzhirkevich.studentbsuby.ui.theme.Theme
-import github.alexzhirkevich.studentbsuby.ui.theme.ThemeSelector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
@@ -101,6 +112,54 @@ private fun Toolbar() {
 @Composable
 private fun Body(viewModel: SettingsViewModel) {
 
+//    var needShowNotificationDialog by rememberSaveable {
+//        mutableStateOf(false)
+//    }
+//
+//    if (needShowNotificationDialog) {
+//        Dialog(onDismissRequest = { needShowNotificationDialog = false }) {
+//            Card(backgroundColor = MaterialTheme.colors.secondary) {
+//                Column(
+//                    Modifier.padding(10.dp),
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                ) {
+//                    Text(
+//                        text = stringResource(R.string.settings_update_notifications_helper_why),
+//                        style = MaterialTheme.typography.subtitle1,
+//                        textAlign = TextAlign.Center
+//                    )
+//                    Spacer(modifier = Modifier.height(10.dp))
+//                    Text(
+//                        text = stringResource(R.string.settings_update_notifications_helper_why_text),
+//                        style = MaterialTheme.typography.body1,
+//                        textAlign = TextAlign.Center
+//                    )
+//                    Spacer(modifier = Modifier.height(10.dp))
+//                    val context = LocalContext.current
+//                    Row {
+//                        TextButton(onClick = { viewModel.dontKillMyApp(context) }) {
+//                            Text(
+//                                text = stringResource(R.string.settings_update_notifications_helper_why_text_more),
+//                                style = MaterialTheme.typography.body1,
+//                                textAlign = TextAlign.Center,
+//                                color = MaterialTheme.colors.primary
+//                            )
+//                        }
+//                        Spacer(modifier = Modifier.width(5.dp))
+//                        Button(onClick = { needShowNotificationDialog = false }) {
+//                            Text(
+//                                text = stringResource(R.string.settings_update_notifications_helper_why_close),
+//                                style = MaterialTheme.typography.body1,
+//                                textAlign = TextAlign.Center,
+//                                color = MaterialTheme.colors.onPrimary
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
     Column(
         Modifier
             .fillMaxSize()
@@ -115,7 +174,7 @@ private fun Body(viewModel: SettingsViewModel) {
         TogglePreference(
             title = R.string.settings_dark_theme_system,
             checked = themeSelector.currentTheme.value == Theme.System,
-            ) {
+        ) {
             themeSelector.setTheme(
                 when {
                     it -> Theme.System
@@ -126,7 +185,7 @@ private fun Body(viewModel: SettingsViewModel) {
         }
         TogglePreference(
             title = R.string.settings_dark_theme_forsed,
-            enabled= themeSelector.currentTheme.value != Theme.System,
+            enabled = themeSelector.currentTheme.value != Theme.System,
             checked = !MaterialTheme.colors.isLight
         ) {
             themeSelector.setTheme(
@@ -135,36 +194,102 @@ private fun Body(viewModel: SettingsViewModel) {
         }
 
         GroupName(name = stringResource(id = R.string.notifications))
+        val helper = stringResource(R.string.settings_update_notifications_helper)
+//        val whyRange =
+//            stringResource(id = R.string.settings_update_notifications_helper_why).let { text ->
+//            helper.indexOf(text).let { it..it + text.length }
+//        }
+        val autoStartRange =
+            stringResource(id = R.string.settings_update_notifications_helper_autostart).let { text ->
+                helper.indexOf(text).let { it..it + text.length }
+            }
+        val backgroundRange =
+            stringResource(id = R.string.settings_update_notifications_helper_background).let { text ->
+                helper.indexOf(text).let { it..it + text.length }
+            }
+        val attentionRange =
+            stringResource(id = R.string.settings_update_notifications_helper_attention).let { text ->
+                helper.indexOf(text).let { it..it + text.length }
+            }
+        val cont = LocalContext.current
         TogglePreference(
             title = R.string.settings_update_notifications,
-            helper = R.string.settings_update_notifications_helper,
+            helper = AnnotatedString(
+                text = helper,
+                spanStyles = listOf(
+                    AnnotatedString.Range(
+                        SpanStyle(fontWeight = FontWeight.Bold),
+                      start = attentionRange.first,
+                      end = attentionRange.last
+                    ),
+                    AnnotatedString.Range(
+                        SpanStyle(
+                            color = MaterialTheme.colors.primary,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        start = autoStartRange.first,
+                        end = autoStartRange.last,
+                    ),
+                    AnnotatedString.Range(
+                        SpanStyle(
+                            color = MaterialTheme.colors.primary,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        start = backgroundRange.first,
+                        end = backgroundRange.last
+                    ),
+//                    AnnotatedString.Range(
+//                        SpanStyle(
+//                            color = MaterialTheme.colors.primary,
+//                            textDecoration = TextDecoration.Underline
+//                        ),
+//                        start = whyRange.first,
+//                        end = whyRange.last
+//                    )
+                ),
+            ),
+            onHelperClicked = {
+                if (it in autoStartRange) {
+                    viewModel.onAutoStartClicked(cont)
+                }
+                if (it in backgroundRange) {
+                    viewModel.onBackgroundActivityClicked(cont)
+                }
+//                if (it in whyRange){
+//                    needShowNotificationDialog = true
+//                }
+            },
             checked = viewModel.notificationsEnabled.value,
-            onChanged = viewModel::setNotificationsEnabled)
+            onChanged = viewModel::setNotificationsEnabled
+        )
 
         GroupName(name = stringResource(id = R.string.other))
         TogglePreference(
             title = R.string.setting_collect_statistics,
-            helper = R.string.setting_collect_statistics_helper,
+            helper = stringResource(R.string.setting_collect_statistics_helper).toAnnotatedString(),
             checked = viewModel.collectStatistics.value,
-            onChanged = viewModel::setCollectStatistics)
+            onChanged = viewModel::setCollectStatistics
+        )
         TogglePreference(
             title = R.string.setting_collect_crashlytics,
-            helper = R.string.setting_collect_crashlytics_helper,
+            helper = stringResource(R.string.setting_collect_crashlytics_helper).toAnnotatedString(),
             checked = viewModel.collectCrashlytics.value,
-            onChanged = viewModel::setCollectCrashlytics)
+            onChanged = viewModel::setCollectCrashlytics
+        )
 
         val context = LocalContext.current
         ButtonPreference(
             title = R.string.share_logs,
             helper = R.string.share_logs_helper
-        ){
+        ) {
             viewModel.shareLogs(context)
         }
         Text(
             text = BuildConfig.VERSION_NAME,
             style = MaterialTheme.typography.caption,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(vertical = 15.dp)
         )
         Spacer(modifier = Modifier.navigationBarsWithImePadding())
@@ -218,7 +343,8 @@ fun ButtonPreference(
 @Composable
 fun TogglePreference(
     @StringRes title : Int,
-    @StringRes helper : Int?=null,
+    helper : AnnotatedString?=null,
+    onHelperClicked : (Int) -> Unit = {},
     enabled : Boolean = true,
     checked : Boolean,
     onChanged : (Boolean) -> Unit) {
@@ -261,10 +387,11 @@ fun TogglePreference(
             }
         }
         helper?.let {
-            HtmlText(
+            ClickableText(
                 modifier = Modifier.padding(15.dp),
-                textId = it,
-                style = MaterialTheme.typography.caption
+                text = it,
+                style = MaterialTheme.typography.caption,
+                onClick = onHelperClicked
             )
         }
     }

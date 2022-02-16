@@ -1,6 +1,9 @@
 package github.alexzhirkevich.studentbsuby.ui.theme.values
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.sp
@@ -18,10 +21,11 @@ val UbuntuFontFamily = FontFamily(
 )
 
 
-val Typography = Typography(
+fun typography(color : Color) = Typography(
     defaultFontFamily = UbuntuFontFamily,
     body1 = TextStyle(
-        fontSize = 16.sp
+        fontSize = 16.sp,
+        color = color
     ),
     body2 = TextStyle(
         fontSize = 16.sp,
@@ -36,14 +40,17 @@ val Typography = Typography(
     subtitle1 = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 20.sp,
+        color = color
     ),
     h1 = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 70.sp
+        fontSize = 70.sp,
+        color = color
     ),
     h2 = TextStyle(
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp
+        fontSize = 32.sp,
+        color = color
     )
     /* Other default text styles to override
     button = TextStyle(

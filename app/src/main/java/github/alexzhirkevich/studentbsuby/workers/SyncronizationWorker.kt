@@ -17,12 +17,15 @@ import github.alexzhirkevich.studentbsuby.util.NotificationCreator
 import github.alexzhirkevich.studentbsuby.util.WorkerManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import me.onebone.toolbar.ExperimentalToolbarApi
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val HostelUpdateNotification  = 494376142
+private const val HostelUpdateNotification  = 1000001
+private const val TimetableUpdateNotification  = 1000092
 
+@ExperimentalToolbarApi
 @ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
@@ -64,6 +67,7 @@ class SynchronizationWorkerManager @Inject constructor(
 
 }
 
+@ExperimentalToolbarApi
 @ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi
@@ -90,7 +94,10 @@ class SynchronizationWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return if (login())
-            update()
+            update().also {
+                if (!loginRepository.autoLogin)
+                    loginRepository.logout()
+            }
         else Result.retry()
     }
 
@@ -125,7 +132,10 @@ class SynchronizationWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun <T> update(repo : CacheWebRepository<T>, notify : (T,T) -> Unit) = with(repo){
+    private suspend fun <T> update(
+        repo : CacheWebRepository<T>,
+        notify : (T,T) -> Unit
+    ) = with(repo) {
         val cached = getFromCache() ?: return@with
         val new = getFromWeb() ?: return@with
 
@@ -158,7 +168,7 @@ class SynchronizationWorker @AssistedInject constructor(
         }
         if (changedWeekdays.isNotEmpty()) {
             notificationCreator.sendNotification(
-                id = HostelUpdateNotification,
+                id = TimetableUpdateNotification,
                 sub = applicationContext.getString(R.string.timetable),
                 title= applicationContext.getString(R.string.timetable_changed),
                 text = changedWeekdays.joinToString(separator = ", ")

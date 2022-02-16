@@ -51,7 +51,6 @@ fun SubjectWidget(
         backgroundColor = MaterialTheme.colors.secondary,
         onClick = {
             animationEnabled = true
-//            isOpenedInternal = !isOpenedInternal
             onClick()
         }
     ) {
