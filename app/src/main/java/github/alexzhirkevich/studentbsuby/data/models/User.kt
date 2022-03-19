@@ -11,3 +11,10 @@ data class User(
     val info : String = "",
     val avgGrade : String ="",
 )
+
+val User.course : Int?
+    get() = info[0].digitToIntOrNull()
+
+val User.group : String
+get() = info.substringAfter("группа ")
+    .substringBefore(',')

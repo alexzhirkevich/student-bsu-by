@@ -129,7 +129,9 @@ class TimetableViewModel @Inject constructor(
                 }
                 logger.log(
                     "Failed to get timetable",
-                    this@TimetableViewModel.javaClass.simpleName
+                    this@TimetableViewModel.javaClass.simpleName,
+                    logLevel = Logger.LogLevel.Error,
+                    cause =  it
                 )
             }
             .flowOn(Dispatchers.Main)

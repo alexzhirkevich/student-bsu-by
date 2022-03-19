@@ -244,7 +244,6 @@ class LoginViewModel @Inject constructor(
                     }
                     false
                 }
-
             }
         }.onFailure {
             setState {
