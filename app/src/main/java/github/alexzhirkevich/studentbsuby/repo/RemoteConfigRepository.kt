@@ -2,8 +2,8 @@ package github.alexzhirkevich.studentbsuby.repo
 
 import android.content.SharedPreferences
 import com.google.android.gms.tasks.Task
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+//import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+//import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import github.alexzhirkevich.studentbsuby.BuildConfig
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.util.sharedPreferences
@@ -37,24 +37,30 @@ class RemoteConfigRepository @Inject constructor(
     private var lastUpdateProp by sharedPreferences(preferences, 0L)
 
     fun init() {
-        val config = FirebaseRemoteConfig.getInstance()
 
-        val settings = FirebaseRemoteConfigSettings.Builder()
-            .setMinimumFetchIntervalInSeconds(10)
-            .build()
+//        val config = FirebaseRemoteConfig.getInstance()
 
-        config.setConfigSettingsAsync(settings)
+
+//
+//        val settings = FirebaseRemoteConfigSettings.Builder()
+//            .setMinimumFetchIntervalInSeconds(10)
+//            .build()
+//
+//        config.setConfigSettingsAsync(settings)
+//        config.fetchAndActivate()
+
     }
 
     private suspend fun getVersion(name: String) : ApplicationVersion? = kotlin.runCatching {
-        FirebaseRemoteConfig.getInstance().fetchAndActivate().await()
-        val version = JSONObject(FirebaseRemoteConfig.getInstance().getString(name))
-
-        return ApplicationVersion(
-            code = version.getInt(VER_CODE),
-            name = version.getString(VER_NAME),
-            desc = version.getString(VER_DESC)
-        )
+//        FirebaseRemoteConfig.getInstance().fetchAndActivate().await()
+//        val version = JSONObject(FirebaseRemoteConfig.getInstance().getString(name))
+//
+//        return ApplicationVersion(
+//            code = version.getInt(VER_CODE),
+//            name = version.getString(VER_NAME),
+//            desc = version.getString(VER_DESC)
+//        )
+        null
     }.getOrNull()
 
     suspend fun getLatestVersionIfNeeded() : ApplicationVersion? =
@@ -67,16 +73,19 @@ class RemoteConfigRepository @Inject constructor(
         getVersion(STABLE_VER)?.takeIf { BuildConfig.VERSION_CODE < it.code }
 
     fun telegram() : String = kotlin.runCatching{
-       return  FirebaseRemoteConfig.getInstance()
-           .getString(TELEGRAM)
+//       return  FirebaseRemoteConfig.getInstance()
+//           .getString(TELEGRAM)
+        null
     }.getOrNull().orEmpty()
 
     fun mail() : String = kotlin.runCatching {
-        FirebaseRemoteConfig.getInstance().getString(MAIL)
+//        FirebaseRemoteConfig.getInstance().getString(MAIL)
+        null
     }.getOrNull().orEmpty()
 
     fun googlePlay()= kotlin.runCatching {
-        FirebaseRemoteConfig.getInstance().getString(G_PLAY)
+//        FirebaseRemoteConfig.getInstance().getString(G_PLAY)
+        null
     }.getOrNull().orEmpty()
 
 }

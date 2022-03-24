@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+//import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.R
@@ -18,10 +18,6 @@ class AboutViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val configRepository: RemoteConfigRepository
 ) : ViewModel() {
-
-    init {
-        FirebaseRemoteConfig.getInstance().fetchAndActivate()
-    }
 
     fun onEmailClicked() {
         kotlin.runCatching {

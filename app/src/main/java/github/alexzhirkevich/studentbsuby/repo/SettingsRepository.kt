@@ -7,9 +7,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
+//import com.google.firebase.analytics.FirebaseAnalytics
+//import com.google.firebase.crashlytics.FirebaseCrashlytics
+//import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.util.WorkerManager
 import github.alexzhirkevich.studentbsuby.util.sharedPreferences
@@ -36,10 +36,10 @@ class SettingsRepository @Inject constructor(
     }
 
     var collectStatistics by sharedPreferences(preferences,true){
-        FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(it)
+//        FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(it)
     }
 
     var collectCrashlytics by sharedPreferences(preferences,true){
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(it)
+//        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(it)
     }
 }
