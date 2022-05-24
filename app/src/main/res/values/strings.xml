@@ -104,14 +104,11 @@
     <string name="news_empty">Новостей нет</string>
     <string name="notifications">Уведомления</string>
     <string name="settings_update_notifications">Уведомления об изменениях</string>
-    <string name="settings_update_notifications_helper">Получать уведомления при изменении в расписании и предоставлении общежития. Задержка уведомления может быть в пределах 1 часа.\n\n<b>Внимание:</b> Функция может не работать на устройствах китайских производителей а так же на новых устройствах Samsung. Если Вы действительно хотите получать уведомления, разрешите автозапуск и отключите контроль фоновой активности приложения в настройках устройства. Почему?</string>
-<!--    <string name="settings_update_notifications_helper_why">@string/update_required_why</string>-->
-<!--    <string name="settings_update_notifications_helper_why_text">Заботливые китайские мастера модифицируют Android с целью максимальной экономии заряда аккумулятора. Полноценная работа в фоне доступна только популярным приложениям из «белого списка».</string>-->
-<!--    <string name="settings_update_notifications_helper_why_text_more">Подробнее</string>-->
-<!--    <string name="settings_update_notifications_helper_why_close">Топ за свои деньги</string>-->
+    <string name="settings_update_notifications_helper">Получать уведомления при изменении в расписании и предоставлении общежития. Задержка уведомления может быть в пределах 1 часа.\n\n<b>Внимание:</b> Функция может не работать на некоторых устройствах. Если Вы действительно хотите получать уведомления, разрешите автозапуск и отключите контроль фоновой активности приложения в настройках устройства. Почему?</string>
     <string name="settings_update_notifications_helper_attention">Внимание: </string>
     <string name="settings_update_notifications_helper_autostart">разрешите автозапуск</string>
     <string name="settings_update_notifications_helper_background">отключите контроль</string>
+    <string name="settings_update_notifications_helper_why">Почему?</string>
     <string name="other">Прочее</string>
     <string name="setting_collect_statistics">Разрешить сбор статистики</string>
     <string name="setting_collect_statistics_helper">Вся статистика собирается анонимно и не содержит информации, относящейся к БГУ.</string>
@@ -130,7 +127,7 @@
     <string name="update_required_text">Версия приложения неактуальна. Для корректной работы требуется обновление.</string>
     <string name="update_required_why">Почему?</string>
     <string name="update_required_what_new">Что нового?</string>
-    <string name="update_required_why_text">"У student.bsu.by нет открытого API, из-за чего приложение вынуждено брать информацию с  HTML-страниц сайта. При изменени внешнего вида/структуры страницы, функции приложения могут переставать работать "</string>
+    <string name="update_required_why_text">"У student.bsu.by нет открытого API, из-за чего приложение вынуждено брать информацию с HTML-страниц сайта. При изменени внешнего вида/структуры страницы, функции приложения могут переставать работать "</string>
     <string name="back">Назад</string>
     <string name="update_proposal">Обновление</string>
     <string name="update_proposal_text">Доступна новая версия</string>

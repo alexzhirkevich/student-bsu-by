@@ -21,10 +21,10 @@ object Colors {
     }
 
     val Green by lazy {
-        Color(0xff90ee90)
+        Color(0xff70ee70)
     }
 
     val Red by lazy {
-        Color(0xffee9090)
+        Color(0xffff7070)
     }
 }

@@ -24,6 +24,12 @@ private const val bsuPatternUnit = 20
 private const val bsuPatternDelta = 3
 private const val bsuPatternStrokeWidth = 1f
 
+fun Modifier.applyIf(boolean: Boolean, action : (Modifier) -> Modifier)= composed{
+    if (boolean)
+        action(this)
+    else this
+}
+
 fun Modifier.bsuBackgroundPattern(
     color : Color,
     clip : Boolean = true,

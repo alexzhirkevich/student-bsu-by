@@ -1,7 +1,6 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.login
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
@@ -23,13 +22,12 @@ import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import github.alexzhirkevich.studentbsuby.util.setState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
-import github.alexzhirkevich.studentbsuby.workers.SynchronizationWorkerManager
+import github.alexzhirkevich.studentbsuby.workers.SyncWorkerManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
@@ -40,7 +38,7 @@ import javax.inject.Singleton
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
-    private val synchronizationWorkerManager: SynchronizationWorkerManager,
+    private val syncWorkerManager: SyncWorkerManager,
     private val settingsRepository: SettingsRepository,
     private val resources: Resources,
     private val logger: Logger
@@ -79,29 +77,21 @@ class LoginViewModel @Inject constructor(
     val passwordText : State<String>
         get()= _passwordText
 
+    @Volatile private var initialized = false
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
-
-            var lastResult: Result<Boolean>?=null
-
-            do {
-                val result = init()
-                if (result.isFailure && lastResult != result) {
-                    logger.log(
-                        "Failed to initialize login page",
-                        this@LoginViewModel.javaClass.simpleName,
-                        Logger.LogLevel.Error,
-                        result.exceptionOrNull()
-                    )
-                }
-                lastResult = result
-            } while (result.isFailure || !result.getOrDefault(false))
+            init()
         }
     }
 
     fun updateCaptcha() {
         viewModelScope.launch(Dispatchers.IO) {
-            updateCaptchaInternal()
+            if (initialized) {
+                updateCaptchaInternal()
+            } else {
+                init()
+            }
         }
     }
 
@@ -135,7 +125,7 @@ class LoginViewModel @Inject constructor(
                     _loggedIn.value = if (res.loggedIn) {
                         loginRepository.autoLogin = autoLogin.value
                         if (autoLogin.value && settingsRepository.synchronizationEnabled){
-                            synchronizationWorkerManager.run()
+                            syncWorkerManager.run()
                         }
                         DataState.Success(true)
                     } else {
@@ -165,7 +155,8 @@ class LoginViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        captchaBitmap.value.valueOrNull()?.asAndroidBitmap()?.recycle()
+        captchaBitmap.value.valueOrNull()
+            ?.asAndroidBitmap()?.recycle()
     }
 
     private suspend fun updateCaptchaInternal(){
@@ -176,82 +167,80 @@ class LoginViewModel @Inject constructor(
             withContext(Dispatchers.Default) {
                 _captchaText.tryEmit(loginRepository.getCaptchaText(it))
             }
-        } ?: updateCaptcha()
+        }
     }
 
-    private suspend fun init() : Result<Boolean>{
+    private suspend fun init() : Result<Boolean> {
         return kotlin.runCatching {
             coroutineScope {
-                val a = async {
+                async {
                     delay(5000)
                     setState {
                         _shouldShowSplashScreen.value = false
                     }
                 }
 
-                try {
-
-                    setState {
-                        _loggedIn.value = DataState.Loading
-                        if (!loginRepository.canRestoreSession()) {
-                            _shouldShowSplashScreen.value = false
-                        }
-                        _splashText.value = resources.getString(R.string.restoring_session)
-                    }
-
-                    val (success, logged, _) = loginRepository.initialize()
-
-                    if (logged){
-                        setState {
-                            _loggedIn.value = DataState.Success(true)
-                        }
-                        return@coroutineScope true
-                    }
-
-                    setState {
-                        if (!loginRepository.autoLogin) {
-                            _loggedIn.value = if (success)
-                                DataState.Success(logged)
-                            else DataState.Error(R.string.error_connection, null)
-                        }
-                        if (!loginRepository.autoLogin && !logged){
-                            _shouldShowSplashScreen.value = false
-                        }
-                    }
-                    if (success && !logged && loginRepository.autoLogin){
-                        setState {
-                            _splashText.value = resources.getString(R.string.loading_captcha)
-                        }
-                        updateAndRecognizeSameCaptcha(true) {
-                            setState {
-                                _splashText.value =
-                                    resources.getString(R.string.recognizing_captcha)
-                            }
-                        }
-                        setState {
-                            _splashText.value = resources.getString(R.string.trying_to_singin)
-                        }
-                        login()
-                    } else {
-                        updateCaptcha()
-                    }
-                    success
-                } catch (t: Throwable) {
-                    a.cancel()
-                    setState {
+                setState {
+                    _loggedIn.value = DataState.Loading
+                    if (!loginRepository.canRestoreSession()) {
                         _shouldShowSplashScreen.value = false
-                        _loggedIn.value = DataState.Error(R.string.error_connection, null)
                     }
-                    false
+                    _splashText.value = resources.getString(R.string.restoring_session)
                 }
 
+                val (success, logged, _) = loginRepository.initialize()
+
+                if (logged) {
+                    setState {
+                        _loggedIn.value = DataState.Success(true)
+                    }
+                    return@coroutineScope true
+                }
+
+                setState {
+                    if (!loginRepository.autoLogin) {
+                        _loggedIn.value = if (success)
+                            DataState.Success(logged)
+                        else DataState.Error(R.string.error_connection, null)
+                    }
+                    if (!loginRepository.autoLogin && !logged) {
+                        _shouldShowSplashScreen.value = false
+                    }
+                }
+                if (success && !logged && loginRepository.autoLogin) {
+                    setState {
+                        _splashText.value = resources.getString(R.string.loading_captcha)
+                    }
+                    updateAndRecognizeSameCaptcha(true) {
+                        setState {
+                            _splashText.value =
+                                resources.getString(R.string.recognizing_captcha)
+                        }
+                    }
+                    setState {
+                        _splashText.value = resources.getString(R.string.trying_to_singin)
+                    }
+                    login()
+                } else {
+                    initialized = false
+                    updateCaptchaInternal()
+                }
+                success
             }
         }.onFailure {
+            initialized = false
+            logger.log(
+                "Failed to initialize login page",
+                this@LoginViewModel.javaClass.simpleName,
+                Logger.LogLevel.Error,
+                it
+            )
             setState {
-                Log.e("","",it)
                 _shouldShowSplashScreen.value = false
                 _loggedIn.value = DataState.Error(R.string.error_connection, null)
             }
+        }.onSuccess {
+            initialized = true
         }
     }
     

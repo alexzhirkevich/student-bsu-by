@@ -1,6 +1,9 @@
 package github.alexzhirkevich.studentbsuby.workers
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
@@ -16,7 +19,6 @@ import github.alexzhirkevich.studentbsuby.repo.*
 import github.alexzhirkevich.studentbsuby.util.NotificationCreator
 import github.alexzhirkevich.studentbsuby.util.WorkerManager
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import me.onebone.toolbar.ExperimentalToolbarApi
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -33,17 +35,17 @@ private const val TimetableUpdateNotification  = 1000092
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
 @Singleton
-class SynchronizationWorkerManager @Inject constructor(
+class SyncWorkerManager @Inject constructor(
     private val workManager: WorkManager,
 ) : WorkerManager {
 
     override suspend fun isEnabled(): Boolean {
-        return workManager.getWorkInfosForUniqueWork(SynchronizationWorker.TAG)
+        return workManager.getWorkInfosForUniqueWork(SyncWorker.TAG)
             .await().isNotEmpty()
     }
 
     override fun run() {
-        val request = PeriodicWorkRequestBuilder<SynchronizationWorker>(1, TimeUnit.HOURS)
+        val request = PeriodicWorkRequestBuilder<SyncWorker>(1, TimeUnit.HOURS)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 15, TimeUnit.MINUTES)
             .setConstraints(
                 Constraints.Builder()
@@ -55,14 +57,14 @@ class SynchronizationWorkerManager @Inject constructor(
 
        workManager
             .enqueueUniquePeriodicWork(
-                SynchronizationWorker.TAG,
+                SyncWorker.TAG,
                 ExistingPeriodicWorkPolicy.KEEP,
                 request)
 
     }
 
     override fun stop() {
-        workManager.cancelUniqueWork(SynchronizationWorker.TAG)
+        workManager.cancelUniqueWork(SyncWorker.TAG)
     }
 
 }
@@ -75,7 +77,7 @@ class SynchronizationWorkerManager @Inject constructor(
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
 @HiltWorker
-class SynchronizationWorker @AssistedInject constructor(
+class SyncWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted parameters: WorkerParameters,
     private val hostelRepository: HostelRepository,
@@ -173,6 +175,22 @@ class SynchronizationWorker @AssistedInject constructor(
                 title= applicationContext.getString(R.string.timetable_changed),
                 text = changedWeekdays.joinToString(separator = ", ")
             )
+        }
+    }
+}
+
+@ExperimentalCoroutinesApi
+@ExperimentalToolbarApi
+@ExperimentalPagerApi
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
+@ExperimentalMaterialApi
+@ExperimentalComposeUiApi
+class SyncWorkerReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action in listOf(Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_REBOOT)) {
+            SyncWorkerManager(WorkManager.getInstance(context))
+                .run()
         }
     }
 }

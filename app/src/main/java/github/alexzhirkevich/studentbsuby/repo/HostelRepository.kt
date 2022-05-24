@@ -107,12 +107,14 @@ class HostelRepository @Inject constructor(
                     preferences.edit()
                         .putString(PREF_HOSTEL_ADDRESS_ + username, value.address)
                         .apply()
-                is HostelState.NotProvided ->
-                    with(hostelDao) {
+                is HostelState.NotProvided -> with(hostelDao) {
                         clear()
                         value.adverts.forEach {
                             insert(it)
                         }
+                        preferences.edit()
+                            .remove(PREF_HOSTEL_ADDRESS_ + username)
+                            .apply()
                     }
             }
         }

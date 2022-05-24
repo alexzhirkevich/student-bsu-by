@@ -1,6 +1,5 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,8 +7,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,7 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
-
 
 const val LessonTimeWidth = 60
 const val LessonTimeLineOffsetX = LessonTimeWidth + 12
@@ -83,9 +84,8 @@ fun LessonWidget(
                     Text(
                         text = lesson.name,
                         style = MaterialTheme.typography.subtitle1,
-                        color = MaterialTheme.colors.onSecondary
+                        color = MaterialTheme.colors.onSecondary,
                     )
-
 
                     if (expanded) {
 

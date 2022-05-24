@@ -24,6 +24,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBarSwipeRefreshIndicator
 import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
+import github.alexzhirkevich.studentbsuby.util.applyIf
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.CollapsingToolbarScope
@@ -131,13 +132,11 @@ private fun Body(
                 Box {
                     Spacer(
                         modifier = Modifier
-                            .let {
-                                if (pagerState.pageCount == tabs.size) {
-                                    it.pagerTabIndicatorOffset(
-                                        pagerState = pagerState,
-                                        tabs
-                                    )
-                                } else it
+                            .applyIf(pagerState.pageCount == tabs.size) {
+                                it.pagerTabIndicatorOffset(
+                                    pagerState = pagerState,
+                                    tabs
+                                )
                             }
                             .height(2.dp)
                             .zIndex(Float.MAX_VALUE)

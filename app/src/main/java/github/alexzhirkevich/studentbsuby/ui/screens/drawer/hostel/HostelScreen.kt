@@ -52,7 +52,6 @@ fun HostelScreen(
     hostelViewModel: HostelViewModel = hiltViewModel()
 ) {
 
-
     val state by hostelViewModel.hostelState.collectAsState()
 
     when (state) {
@@ -123,7 +122,7 @@ fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
         }
         BsuProgressBar(
             modifier = Modifier.align(Alignment.Center),
-            size = 100.dp
+            tint = MaterialTheme.colors.primary
         )
     }
 }

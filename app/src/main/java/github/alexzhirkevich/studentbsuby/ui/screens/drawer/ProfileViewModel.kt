@@ -1,6 +1,5 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer
 
-import android.content.Context
 import android.graphics.Bitmap
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -17,17 +16,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.pager.ExperimentalPagerApi
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.User
-import github.alexzhirkevich.studentbsuby.repo.LoginRepository
-import github.alexzhirkevich.studentbsuby.repo.Repository
-import github.alexzhirkevich.studentbsuby.repo.ReviewRepository
+import github.alexzhirkevich.studentbsuby.repo.*
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
-import github.alexzhirkevich.studentbsuby.workers.SynchronizationWorkerManager
+import github.alexzhirkevich.studentbsuby.workers.SyncWorkerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -43,12 +39,12 @@ import javax.inject.Inject
 @ExperimentalPagerApi
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val photoRepository: Repository<Bitmap>,
-    private val userRepository: Repository<User>,
+    private val photoRepository: PhotoRepository,
+    private val userRepository: UserRepository,
     private val loginRepository: LoginRepository,
     private val reviewRepository: ReviewRepository,
     private val logger: Logger,
-    private val synchronizationWorkerManager: SynchronizationWorkerManager
+    private val synchronizationWorkerManager: SyncWorkerManager
 ) : ViewModel(), Updatable {
 
     private val _photo = mutableStateOf<DataState<ImageBitmap>>(DataState.Empty)

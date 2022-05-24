@@ -35,10 +35,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Subject
 import github.alexzhirkevich.studentbsuby.ui.common.*
-import github.alexzhirkevich.studentbsuby.util.DataState
-import github.alexzhirkevich.studentbsuby.util.Updatable
-import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
-import github.alexzhirkevich.studentbsuby.util.valueOrNull
+import github.alexzhirkevich.studentbsuby.util.*
 import kotlinx.coroutines.*
 import me.onebone.toolbar.*
 import kotlin.math.ceil
@@ -318,7 +315,6 @@ private fun Body(
     onSemesterChanged: (Int) -> Unit
 ) {
 
-
     if (searchText.isNotBlank())
         SearchSubjectsBody(
             visibleSubjects = visibleSubjects,
@@ -436,13 +432,11 @@ private fun AllSemestersBody(
                         Spacer(
                             modifier =
                             Modifier
-                                .let {
-                                    if (state.pageCount == tabs.size) {
-                                        it.pagerTabIndicatorOffset(
-                                            pagerState = state,
-                                            tabs
-                                        )
-                                    } else it
+                                .applyIf(state.pageCount == tabs.size) {
+                                    it.pagerTabIndicatorOffset(
+                                        pagerState = state,
+                                        tabs
+                                    )
                                 }
                                 .height(2.dp)
                                 .zIndex(Float.MAX_VALUE)
@@ -630,18 +624,13 @@ private fun Page(
                                 subject = subj,
                                 isOpened = subj in opened,
                                 modifier = Modifier
-                                    .let {
-
-                                        if (idx == list.lastIndex) {
-                                            it.onSizeChanged {
-                                                lastElemHeight[columnIndex].value =
-                                                    it.height
-                                            }
-                                        } else it
+                                    .applyIf(idx == list.lastIndex) {
+                                        it.onSizeChanged {
+                                            lastElemHeight[columnIndex].value = it.height
+                                        }
                                     }
-
                             ) {
-                                scope.launch {
+                                scope.launch(Dispatchers.Default) {
                                     if (!opened.remove(subj)) {
                                         opened.add(subj)
                                     }

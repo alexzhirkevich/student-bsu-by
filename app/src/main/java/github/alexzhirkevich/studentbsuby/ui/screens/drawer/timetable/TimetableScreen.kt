@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,6 +35,7 @@ import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.*
+import kotlin.math.roundToInt
 
 private const val TabsHeight = 40
 
@@ -255,8 +257,7 @@ private fun Body(
     val timetable by viewModel.timetable.collectAsState()
 
 
-    Column{
-
+    Column {
         when (val tt = timetable) {
             is DataState.Success,is DataState.Empty -> {
                 SwipeRefresh(

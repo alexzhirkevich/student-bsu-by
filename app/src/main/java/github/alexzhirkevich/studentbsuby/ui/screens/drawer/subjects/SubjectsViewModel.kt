@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SubjectsViewModel @Inject constructor(
     private val subjectsRepository: SubjectsRepository,
-    private val currentSemesterRepository: Repository<Int>,
+    private val currentSemesterRepository: CurrentSemesterRepository,
     private val logger : Logger,
 ) : ViewModel(), Updatable {
 

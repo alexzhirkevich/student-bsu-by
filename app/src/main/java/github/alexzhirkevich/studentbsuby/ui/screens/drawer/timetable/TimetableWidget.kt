@@ -1,8 +1,7 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import android.util.Log
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -25,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsHeight
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
+import github.alexzhirkevich.studentbsuby.util.applyIf
 
 
 private const val HorizontalPadding = 10
@@ -50,29 +50,26 @@ fun TimetableWidget(
     LazyColumn(
         state = state,
         modifier = modifier
-            .let {
-                if (list.size > 1) {
-                    it.drawBehind {
-                        drawLine(
-                            color = lineColor,
-                            strokeWidth = 1 * density,
-                            start = Offset(
-                                x = density * (LessonTimeLineOffsetX + HorizontalPadding),
-                                y = if (state.firstVisibleItemIndex == 0)
-                                    timelineStart - state.firstVisibleItemScrollOffset
-                                else 0f
-                            ),
-                            end = Offset(
-                                x = density * (LessonTimeLineOffsetX + HorizontalPadding),
-                                y = timelineEnd
-                            ),
-                        )
-                    }
-                } else it
+            .applyIf(list.size>1) {
+                it.drawBehind {
+                    drawLine(
+                        color = lineColor,
+                        strokeWidth = 1 * density,
+                        start = Offset(
+                            x = density * (LessonTimeLineOffsetX + HorizontalPadding),
+                            y = if (state.firstVisibleItemIndex == 0)
+                                timelineStart - state.firstVisibleItemScrollOffset
+                            else 0f
+                        ),
+                        end = Offset(
+                            x = density * (LessonTimeLineOffsetX + HorizontalPadding),
+                            y = timelineEnd
+                        ),
+                    )
+                }
             }
     ) {
-
-        items(list.size){ idx ->
+        items(list.size, key = { list[it].first.number }){ idx ->
             LessonWidget(
                 lesson = list[idx].first,
                 state = list[idx].second,

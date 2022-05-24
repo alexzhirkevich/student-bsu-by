@@ -9,11 +9,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.internal.common.CrashlyticsCore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import github.alexzhirkevich.studentbsuby.util.WorkerManager
 import github.alexzhirkevich.studentbsuby.util.sharedPreferences
-import github.alexzhirkevich.studentbsuby.workers.SynchronizationWorkerManager
+import github.alexzhirkevich.studentbsuby.workers.SyncWorkerManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 
@@ -27,7 +25,7 @@ import javax.inject.Inject
 class SettingsRepository @Inject constructor(
     preferences: SharedPreferences,
     @ApplicationContext context: Context,
-    private val synchronizationWorkerManager: SynchronizationWorkerManager,
+    private val synchronizationWorkerManager: SyncWorkerManager,
 ) {
     var synchronizationEnabled by sharedPreferences(preferences,true){
         with(synchronizationWorkerManager){

@@ -24,11 +24,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Subject
+import github.alexzhirkevich.studentbsuby.ui.theme.values.Colors
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
 
 @ExperimentalAnimationApi
@@ -74,6 +76,8 @@ fun SubjectWidget(
                     color = MaterialTheme.colors.surface,
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Center,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -112,7 +116,7 @@ fun SubjectWidget(
                             val (icon, color) = when {
                                 subject.creditPassed != null ->
                                     if (subject.creditPassed)
-                                        Icons.Default.TaskAlt to MaterialTheme.colors.onError
+                                        Icons.Default.TaskAlt to Colors.Green
                                     else Icons.Default.HighlightOff to MaterialTheme.colors.error
                                 else -> Icons.Default.Schedule to MaterialTheme.colors.onSecondary
                             }
@@ -122,17 +126,17 @@ fun SubjectWidget(
                                 if (subject.creditRetakes != 0) {
                                     Box {
                                         Icon(
-                                            imageVector = Icons.Default.Replay,
+                                            imageVector = Icons.Default.Repeat,
                                             contentDescription = "",
                                             tint = MaterialTheme.colors.error,
-                                            modifier = Modifier.align(Alignment.Center)
+                                            modifier = Modifier.align(Center)
                                                 .size(28.dp)
                                         )
                                         Text(
                                             text = subject.creditRetakes.toString(),
                                             style = MaterialTheme.typography.caption,
                                             color = MaterialTheme.colors.error,
-                                            modifier = Modifier.align(Alignment.Center)
+                                            modifier = Modifier.align(Center)
                                         )
                                     }
                                 }
@@ -148,7 +152,7 @@ fun SubjectWidget(
                                         style = MaterialTheme.typography.subtitle1,
                                         color = when {
                                             subject.creditMark in 1..3 -> MaterialTheme.colors.error
-                                            subject.creditMark > 3 -> MaterialTheme.colors.onError
+                                            subject.creditMark > 3 -> Colors.Green
                                             else -> MaterialTheme.colors.onSecondary
                                         },
                                         modifier = Modifier.padding(end = 5.dp)
@@ -166,7 +170,6 @@ fun SubjectWidget(
                             modifier = Modifier.fillMaxWidth()
                         ) {
 
-                            Icons.Default.Replay10
                             Text(
                                 text = stringResource(R.string.exam),
                                 style = MaterialTheme.typography.body1
@@ -179,16 +182,16 @@ fun SubjectWidget(
                                 if (subject.examRetakes != 0) {
                                     Box {
                                         Icon(
-                                            imageVector = Icons.Default.Replay,
+                                            imageVector = Icons.Default.Repeat,
                                             contentDescription = "",
-                                            modifier = Modifier.align(Alignment.Center)
+                                            modifier = Modifier.align(Center)
                                                 .size(28.dp)
                                         )
                                         Text(
                                             text = subject.examMark.toString(),
                                             style = MaterialTheme.typography.caption,
                                             color = MaterialTheme.typography.body1.color,
-                                            modifier = Modifier.align(Alignment.Center)
+                                            modifier = Modifier.align(Center)
                                         )
                                     }
                                 }
@@ -199,7 +202,7 @@ fun SubjectWidget(
                                         style = MaterialTheme.typography.subtitle1,
                                         color = when {
                                             subject.examMark in 1..3 -> MaterialTheme.colors.error
-                                            subject.examMark > 3 -> MaterialTheme.colors.onError
+                                            subject.examMark > 3 -> Colors.Green
                                             else -> MaterialTheme.colors.onSecondary
                                         },
                                         modifier = Modifier.padding(end = 5.dp)

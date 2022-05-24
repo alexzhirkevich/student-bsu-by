@@ -13,12 +13,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.util.Updatable
 
+@Composable
+fun LazyItemScope.Header(text: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)) {
+
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colors.background.copy(alpha = .9f))
+                .padding(vertical = 5.dp, horizontal = 10.dp)
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body1,
+//                fontWeight = FontWeight.,
+            )
+        }
+    }
+}
 @ExperimentalFoundationApi
 @Composable
 fun <T> SuccessReceiptsPage(
@@ -27,25 +50,7 @@ fun <T> SuccessReceiptsPage(
     complete: (T) -> Boolean,
     widget: @Composable (T) -> Unit
 ) {
-    @Composable
-    fun LazyItemScope.Header(text: String) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
 
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colors.background.copy(.9f))
-                    .padding(vertical = 5.dp, horizontal = 10.dp)
-                    .align(Alignment.TopCenter)
-            )
-        }
-    }
 
     fun LazyListScope.Items(items: List<T>) {
         header?.let {
@@ -70,29 +75,15 @@ fun <T> SuccessReceiptsPage(
         receipts.groupBy(complete).let {
             it[false]?.let { receipts ->
                 stickyHeader {
-                    Text(
-                        text = stringResource(id = R.string.bills),
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.subtitle1,
-                    )
+                    Header(text = stringResource(id = R.string.bills))
+
                 }
                 Items(receipts)
             }
 
             it[true]?.let { bills ->
                 stickyHeader {
-                    Text(
-                        text = stringResource(id = R.string.history),
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.subtitle1,
-                    )
-
+                    Header(text = stringResource(id = R.string.history))
                 }
                 Items(bills)
                 item {

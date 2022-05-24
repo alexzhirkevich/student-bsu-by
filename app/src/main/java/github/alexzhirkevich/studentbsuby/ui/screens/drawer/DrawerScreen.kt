@@ -17,6 +17,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -57,6 +58,7 @@ import me.onebone.toolbar.ExperimentalToolbarApi
 
 private val AvatarWidth = 150.dp
 private val AvatarHeight = 200.dp
+private val AvatarOffset  = AvatarHeight/3.5f
 private val CardTopPadding = 60.dp
 private val CardPaddings = 12.dp
 
@@ -124,9 +126,6 @@ fun DrawerScreen(
             }
 
         },
-        topBar = {
-
-        }
     ) {
 
         val onMenuClicked : () -> Unit = remember {{
@@ -215,62 +214,40 @@ private fun DrawerContent(
     onRouteSelected: () -> Unit = {}
 ) {
 
+    var currentRoute by rememberSaveable {
+        mutableStateOf(initial.route.route)
+    }
+
     Column(
         Modifier.background(MaterialTheme.colors.secondary)
     ) {
-        Box(
-            Modifier
-                .clip(ProfileRoundShape())
-                .background(MaterialTheme.colors.primaryVariant)
-                .bsuBackgroundPattern(
-                    MaterialTheme.colors.onPrimary
-                        .copy(alpha = .1f)
-                )
-                .statusBarsPadding()
-        ) {
-            Box(
-                Modifier
-                    .padding(
-                        start = CardPaddings + AvatarWidth,
-                        end = CardPaddings,
-                    )
-                    .height(CardTopPadding)
-                    .fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_text),
-                    contentDescription = "Logo",
-                    modifier = Modifier
-                        .scale(1.4f)
-                        .align(Alignment.Center)
-                )
-            }
-
-            ProfileCard(
-                photo = profileViewModel.photo.value,
-                user = profileViewModel.user.value,
-                modifier = Modifier.padding(
-                    top = CardTopPadding,
-                    start = CardPaddings,
-                    end = CardPaddings,
-                    bottom = CardPaddings
-                )
-            )
-        }
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
                 .navigationBarsWithImePadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
 
-            var currentRoute by rememberSaveable {
-                mutableStateOf(initial.route.route)
+            Box(
+                Modifier
+                    .clip(ProfileRoundShape())
+                    .background(MaterialTheme.colors.primaryVariant)
+                    .bsuBackgroundPattern(
+                        MaterialTheme.colors.onPrimary
+                            .copy(alpha = .1f)
+                    )
+                    .statusBarsPadding()
+            ) {
+                ProfileCard(
+                    photo = profileViewModel.photo.value,
+                    user = profileViewModel.user.value,
+                    modifier = Modifier
+                        .padding(CardPaddings)
+                )
             }
+            Spacer(modifier = Modifier.height(5.dp))
+
             Column {
-                Spacer(modifier = Modifier.height(10.dp))
                 routes.forEach {
                     DrawerButton(
                         icon = it.icon,
@@ -310,6 +287,7 @@ private fun DrawerContent(
                     })
 
             }
+            Spacer(modifier = Modifier.weight(1f))
 
             DrawerButton(
                 icon = Icons.Default.Logout,
@@ -374,69 +352,88 @@ private fun ProfileCard(
     user: DataState<User>,
     modifier: Modifier = Modifier
 ) {
+
     Box(modifier) {
-        Card(
-            shape = MaterialTheme.shapes.medium,
-            backgroundColor = MaterialTheme.colors.secondary,
-            elevation = 5.dp,
-            modifier = Modifier
-                .offset(y = (-AvatarWidth / 3))
-                .zIndex(2f)
-        ) {
-            val photoValue = photo.valueOrNull()
-            if (photoValue != null) {
-                Image(
-                    bitmap = photoValue,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = "Photo",
+        Row(modifier = Modifier.zIndex(2f)) {
+            Card(
+                shape = MaterialTheme.shapes.medium,
+                backgroundColor = MaterialTheme.colors.secondary,
+                elevation = 5.dp,
+                modifier = Modifier
+            ) {
+
+                val photoValue = photo.valueOrNull()
+                if (photoValue != null) {
+                    Image(
+                        bitmap = photoValue,
+                        contentScale = ContentScale.Crop,
+                        contentDescription = "Photo",
+                        modifier = Modifier
+                            .width(AvatarWidth)
+                            .height(AvatarHeight)
+                    )
+                } else Spacer(
                     modifier = Modifier
                         .width(AvatarWidth)
                         .height(AvatarHeight)
                 )
-            } else Spacer(modifier = Modifier
-                .width(AvatarWidth)
-                .height(AvatarHeight))
+            }
+            Box(
+                Modifier
+                    .height(AvatarOffset)
+                    .weight(1f)
+                    .padding(10.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo_text),
+                    contentDescription = "Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                )
+            }
         }
-        
+
         Card(
             shape = MaterialTheme.shapes.medium,
             elevation = 5.dp,
             backgroundColor = MaterialTheme.colors.secondary,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = AvatarOffset)
                 .zIndex(1f)
         ) {
 
             val userValue = user.valueOrNull() ?: User()
 
-            Column(Modifier.padding(CardPaddings)) {
-
-                Text(
-                    text = userValue.name,
-                    modifier = Modifier
-                        .padding(start = AvatarWidth),
-                    maxLines = 3,
-                    overflow =TextOverflow.Ellipsis,
-                    color = MaterialTheme.colors.onSecondary,
-                    style = MaterialTheme.typography.subtitle1
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    text = userValue.faculty,
-                    modifier = Modifier.padding(start = AvatarWidth),
-                    maxLines = 4,
-                    overflow =TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.caption
-                )
-            }
-            Column(Modifier
-                    .padding(
-                        top = AvatarHeight *2/3 + CardPaddings + 10.dp,
-                        start = CardPaddings,
-                        end = CardPaddings,
-                        bottom = CardPaddings
-                    )
+            Column(
+                modifier = Modifier
+                    .padding(CardPaddings)
             ) {
+
+                Column(
+                    Modifier.heightIn(min = AvatarHeight - AvatarOffset + 5.dp)
+                ) {
+
+                    Text(
+                        text = userValue.name,
+                        modifier = Modifier
+                            .padding(start = AvatarWidth),
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colors.onSecondary,
+                        style = MaterialTheme.typography.subtitle1
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = userValue.faculty,
+                        modifier = Modifier.padding(start = AvatarWidth),
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.caption
+                    )
+                }
                 Text(
                     text = userValue.info,
                     color = MaterialTheme.colors.onSecondary,

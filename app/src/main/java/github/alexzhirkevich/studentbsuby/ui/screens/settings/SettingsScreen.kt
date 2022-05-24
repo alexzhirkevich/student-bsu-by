@@ -112,54 +112,6 @@ private fun Toolbar() {
 @Composable
 private fun Body(viewModel: SettingsViewModel) {
 
-//    var needShowNotificationDialog by rememberSaveable {
-//        mutableStateOf(false)
-//    }
-//
-//    if (needShowNotificationDialog) {
-//        Dialog(onDismissRequest = { needShowNotificationDialog = false }) {
-//            Card(backgroundColor = MaterialTheme.colors.secondary) {
-//                Column(
-//                    Modifier.padding(10.dp),
-//                    horizontalAlignment = Alignment.CenterHorizontally
-//                ) {
-//                    Text(
-//                        text = stringResource(R.string.settings_update_notifications_helper_why),
-//                        style = MaterialTheme.typography.subtitle1,
-//                        textAlign = TextAlign.Center
-//                    )
-//                    Spacer(modifier = Modifier.height(10.dp))
-//                    Text(
-//                        text = stringResource(R.string.settings_update_notifications_helper_why_text),
-//                        style = MaterialTheme.typography.body1,
-//                        textAlign = TextAlign.Center
-//                    )
-//                    Spacer(modifier = Modifier.height(10.dp))
-//                    val context = LocalContext.current
-//                    Row {
-//                        TextButton(onClick = { viewModel.dontKillMyApp(context) }) {
-//                            Text(
-//                                text = stringResource(R.string.settings_update_notifications_helper_why_text_more),
-//                                style = MaterialTheme.typography.body1,
-//                                textAlign = TextAlign.Center,
-//                                color = MaterialTheme.colors.primary
-//                            )
-//                        }
-//                        Spacer(modifier = Modifier.width(5.dp))
-//                        Button(onClick = { needShowNotificationDialog = false }) {
-//                            Text(
-//                                text = stringResource(R.string.settings_update_notifications_helper_why_close),
-//                                style = MaterialTheme.typography.body1,
-//                                textAlign = TextAlign.Center,
-//                                color = MaterialTheme.colors.onPrimary
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     Column(
         Modifier
             .fillMaxSize()
@@ -195,21 +147,21 @@ private fun Body(viewModel: SettingsViewModel) {
 
         GroupName(name = stringResource(id = R.string.notifications))
         val helper = stringResource(R.string.settings_update_notifications_helper)
-//        val whyRange =
-//            stringResource(id = R.string.settings_update_notifications_helper_why).let { text ->
-//            helper.indexOf(text).let { it..it + text.length }
-//        }
+        val whyRange =
+            stringResource(id = R.string.settings_update_notifications_helper_why).let { text ->
+            helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
+        }
         val autoStartRange =
             stringResource(id = R.string.settings_update_notifications_helper_autostart).let { text ->
-                helper.indexOf(text).let { it..it + text.length }
+                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
             }
         val backgroundRange =
             stringResource(id = R.string.settings_update_notifications_helper_background).let { text ->
-                helper.indexOf(text).let { it..it + text.length }
+                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
             }
         val attentionRange =
             stringResource(id = R.string.settings_update_notifications_helper_attention).let { text ->
-                helper.indexOf(text).let { it..it + text.length }
+                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
             }
         val cont = LocalContext.current
         TogglePreference(
@@ -238,14 +190,14 @@ private fun Body(viewModel: SettingsViewModel) {
                         start = backgroundRange.first,
                         end = backgroundRange.last
                     ),
-//                    AnnotatedString.Range(
-//                        SpanStyle(
-//                            color = MaterialTheme.colors.primary,
-//                            textDecoration = TextDecoration.Underline
-//                        ),
-//                        start = whyRange.first,
-//                        end = whyRange.last
-//                    )
+                    AnnotatedString.Range(
+                        SpanStyle(
+                            color = MaterialTheme.colors.primary,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        start = whyRange.first,
+                        end = whyRange.last
+                    )
                 ),
             ),
             onHelperClicked = {
@@ -255,9 +207,9 @@ private fun Body(viewModel: SettingsViewModel) {
                 if (it in backgroundRange) {
                     viewModel.onBackgroundActivityClicked(cont)
                 }
-//                if (it in whyRange){
-//                    needShowNotificationDialog = true
-//                }
+                if (it in whyRange){
+                    viewModel.dontKillMyApp(cont)
+                }
             },
             checked = viewModel.notificationsEnabled.value,
             onChanged = viewModel::setNotificationsEnabled

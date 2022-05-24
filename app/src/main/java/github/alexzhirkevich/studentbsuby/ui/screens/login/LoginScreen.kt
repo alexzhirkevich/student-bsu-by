@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -200,7 +201,7 @@ private fun LoginWidget(
             ) {
                 Card(
                     elevation = 5.dp,
-                    backgroundColor = MaterialTheme.colors.secondary,
+                    backgroundColor = MaterialTheme.colors.error,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)
@@ -209,7 +210,8 @@ private fun LoginWidget(
                         modifier = Modifier.padding(10.dp),
                         text = it.message,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colors.error
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.onError
                     )
                 }
             }

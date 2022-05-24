@@ -25,11 +25,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalMaterialApi
 class MainApplication : Application(), Configuration.Provider {
 
-
-    override fun onCreate() {
-        super.onCreate()
-    }
-
     override fun getWorkManagerConfiguration() =
         Configuration.Builder()
             .setWorkerFactory(
