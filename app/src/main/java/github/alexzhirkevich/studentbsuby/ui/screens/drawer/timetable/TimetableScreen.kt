@@ -191,6 +191,7 @@ private fun CollapsingToolbarScope.Toolbar(
 
     Box(
         Modifier
+            .zIndex(2f)
             .road(
                 whenExpanded = Alignment.BottomCenter,
                 whenCollapsed = Alignment.BottomCenter
