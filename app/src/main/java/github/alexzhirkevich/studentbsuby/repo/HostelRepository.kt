@@ -95,7 +95,7 @@ class HostelRepository @Inject constructor(
                 else null
             } ?: throw IncorrectResponseException()
 
-        return HostelState.NotProvided(ads)
+        return HostelState.NotProvided(ads.filter { it.address != null })
     }
 
     override suspend fun saveToCache(value: HostelState) {
@@ -103,19 +103,23 @@ class HostelRepository @Inject constructor(
             val username = usernameProvider.username.takeIf(String::isNotBlank)
                 ?: return@runCatching
             when (value) {
-                is HostelState.Provided ->
+                is HostelState.Provided -> {
                     preferences.edit()
                         .putString(PREF_HOSTEL_ADDRESS_ + username, value.address)
                         .apply()
+                }
                 is HostelState.NotProvided -> with(hostelDao) {
-                        clear()
-                        value.adverts.forEach {
-                            insert(it)
-                        }
+                    kotlin.runCatching {
                         preferences.edit()
                             .remove(PREF_HOSTEL_ADDRESS_ + username)
-                            .apply()
+                            .commit()
                     }
+                    clear()
+                    value.adverts.forEach {
+                        insert(it)
+                    }
+
+                }
             }
         }
     }

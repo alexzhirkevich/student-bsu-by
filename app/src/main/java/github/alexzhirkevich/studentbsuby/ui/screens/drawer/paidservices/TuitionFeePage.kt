@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.TuitionFeePayment
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import java.text.DateFormat
 import java.util.*
 
@@ -21,7 +22,8 @@ fun TuitionFeePage(
     viewModel : PaidServicesViewModel
 ) {
     ReceiptsPage(
-        receipts = viewModel.tuitionFeeReceipts.value,
+        receipts = viewModel.tutionFeeCommunication.collectAsState()
+            .value,
         header = { it.year },
         complete = { it.date != null },
         emptyErrorMsg = stringResource(id = R.string.tuition_fees_empty)

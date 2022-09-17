@@ -38,6 +38,7 @@ import github.alexzhirkevich.studentbsuby.ui.common.ErrorScreen
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.Updatable
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ExperimentalToolbarApi
@@ -48,25 +49,32 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @ExperimentalMaterialApi
 @Composable
 fun HostelScreen(
+    isTablet : Boolean,
     onMenuClicked : () -> Unit,
     hostelViewModel: HostelViewModel = hiltViewModel()
 ) {
 
-    val state by hostelViewModel.hostelState.collectAsState()
+    val state by hostelViewModel.hostelStateCommunication
+        .collectAsState()
 
     when (state) {
         is DataState.Success<*> -> {
             when (val value = state.valueOrNull()) {
                 is HostelState.Provided -> ProvidedHostelScreen(
+                    isTablet = isTablet,
                     address = value.address,
                     onMenuClicked = onMenuClicked,
                     onShowOnMapClicked = {
-                        hostelViewModel.showOnMap(value)
+                        hostelViewModel.handle(HostelEvent.ShowHostelOnMapClicked(
+                            value
+                        ))
+
                     },
                     image = hostelViewModel.getHostelImage(value),
                     updater = hostelViewModel
                 )
                 is HostelState.NotProvided -> NonProvidedHostelScreen(
+                    isTablet,
                     ads = value.adverts,
                     viewModel = hostelViewModel,
                     onMenuClicked = onMenuClicked
@@ -74,15 +82,18 @@ fun HostelScreen(
             }
         }
         is DataState.Loading -> LoadingHostelScreen(
+            isTablet = isTablet,
             onMenuClicked = onMenuClicked,
         )
         is DataState.Empty -> ErrorScreen(
+            isTablet=isTablet,
             toolbarText = stringResource(id = R.string.hostel),
             onMenuClicked = onMenuClicked,
             updater = hostelViewModel,
             error = stringResource(id = R.string.error_load_timetable)
         )
         is DataState.Error -> ErrorScreen(
+            isTablet = isTablet,
             toolbarText = stringResource(id = R.string.hostel),
             onMenuClicked = onMenuClicked,
             updater = hostelViewModel,
@@ -92,7 +103,10 @@ fun HostelScreen(
 }
 
 @Composable
-fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
+fun LoadingHostelScreen(
+    isTablet: Boolean,
+    onMenuClicked: () -> Unit = {}
+) {
 
     Box(
         Modifier
@@ -112,7 +126,9 @@ fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
                 elevation = 0.dp,
                 backgroundColor = Color.Transparent
             ) {
-                NavigationMenuButton(onClick = onMenuClicked)
+                if (!isTablet) {
+                    NavigationMenuButton(onClick = onMenuClicked)
+                }
                 Text(
                     text = stringResource(id = R.string.hostel),
                     color = MaterialTheme.colors.onSecondary,
@@ -131,15 +147,18 @@ fun LoadingHostelScreen(onMenuClicked: () -> Unit = {}) {
 @ExperimentalToolbarApi
 @Composable
 private fun ProvidedHostelScreen(
+    isTablet: Boolean,
     address : String,
     onMenuClicked: () -> Unit,
     onShowOnMapClicked : () -> Unit,
     image : String?=null,
     updater : Updatable
 ) {
+
     val scaffoldState = rememberCollapsingToolbarScaffoldState()
     val refreshState = rememberSwipeRefreshState(
-        isRefreshing = updater.isUpdating.value)
+        isRefreshing = updater.isUpdating.collectAsState().value
+    )
     LaunchedEffect(Unit) {
         scaffoldState.toolbarState.collapse(0)
         scaffoldState.toolbarState.expand(500)
@@ -158,7 +177,9 @@ private fun ProvidedHostelScreen(
                     backgroundColor = Color.Transparent,
                     elevation = 0.dp
                 ) {
-                    NavigationMenuButton(onClick = onMenuClicked)
+                    if (!isTablet) {
+                        NavigationMenuButton(onClick = onMenuClicked)
+                    }
                     AnimatedVisibility(visible = scaffoldState.toolbarState.progress == 0f) {
                         Text(
                             text = stringResource(id = R.string.hostel),
@@ -264,6 +285,7 @@ private fun ProvidedHostelScreen(
 @ExperimentalMaterialApi
 @Composable
 private fun NonProvidedHostelScreen(
+    isTablet: Boolean,
     ads : List<HostelAdvert>,
     viewModel: HostelViewModel,
     onMenuClicked: () -> Unit,
@@ -313,7 +335,7 @@ private fun NonProvidedHostelScreen(
 
     val scaffoldState = rememberCollapsingToolbarScaffoldState()
     val refreshState = rememberSwipeRefreshState(
-        isRefreshing = viewModel.isUpdating.value
+        isRefreshing = viewModel.isUpdating.collectAsState().value
     )
 
     Column {
@@ -338,9 +360,11 @@ private fun NonProvidedHostelScreen(
 
                     TopAppBar(
                         backgroundColor = Color.Transparent,
-                        elevation = 0.dp
+                        elevation = 1.dp
                     ) {
-                        NavigationMenuButton(onClick = onMenuClicked)
+                        if (!isTablet) {
+                            NavigationMenuButton(onClick = onMenuClicked)
+                        }
                         Text(
                             text = stringResource(id = R.string.hostel),
                             color = MaterialTheme.colors.onSecondary,
@@ -352,7 +376,7 @@ private fun NonProvidedHostelScreen(
             SwipeRefresh(
                 state = refreshState,
                 onRefresh = viewModel::update,
-                indicator = { state,offset->
+                indicator = { state, offset ->
                     BsuProgressBarSwipeRefreshIndicator(state = state, trigger = offset)
                 },
                 modifier = Modifier
@@ -366,7 +390,6 @@ private fun NonProvidedHostelScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .navigationBarsWithImePadding()
                         .graphicsLayer {
                             translationY = refreshState.indicatorOffset
                         }
@@ -378,13 +401,14 @@ private fun NonProvidedHostelScreen(
                                 .padding(5.dp),
                             ad = ads[it],
                             onLocateClicked = {
-                                viewModel.showOnMap(ads[it])
+                                viewModel.handle(HostelEvent.ShowAdOnMapClicked(ads[it]))
                             },
                             onCallClicked = {
-                                viewModel.call(ads[it])
+                                viewModel.handle(HostelEvent.CallClicked(ads[it]))
                             }
                         )
                     }
+                    item { Spacer(modifier = Modifier.navigationBarsWithImePadding()) }
                 }
             }
         }

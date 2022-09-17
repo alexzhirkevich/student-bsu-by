@@ -1,9 +1,6 @@
 package github.alexzhirkevich.studentbsuby
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -30,6 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import github.alexzhirkevich.studentbsuby.repo.ApplicationVersion
 import github.alexzhirkevich.studentbsuby.ui.screens.MainScreen
 import github.alexzhirkevich.studentbsuby.ui.theme.StudentbsubyTheme
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import me.onebone.toolbar.ExperimentalToolbarApi
 
@@ -48,25 +46,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainActivityViewModel.provideActivity(this)
+        mainActivityViewModel.handle(MainActivityEvent.TestForAppUpdate(this))
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-//        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-//        val uri = Uri.fromParts("package", packageName, null)
-//        intent.data = uri
-//        startActivity(intent)
 
         setContent {
             StudentbsubyTheme {
                 MainScreen()
-                if (mainActivityViewModel.showUpdateDialog.value){
+                if (mainActivityViewModel.showUpdateDialog.collectAsState().value){
                     UpdateRequiredDialog()
                 }
             }
         }
     }
 
-    
+
 
     @Composable
     fun UpdateRequiredDialog() {
@@ -81,11 +74,7 @@ class MainActivity : ComponentActivity() {
                 dismissOnBackPress = false,
                 dismissOnClickOutside = false
             ),
-            buttonClose = stringResource(id = R.string.exit),
-            onCloseClick = {
-                finish()
-                false
-            }
+            buttonClose = stringResource(id = R.string.exit)
         )
     }
 
@@ -96,21 +85,19 @@ class MainActivity : ComponentActivity() {
             text = stringResource(R.string.update_proposal_text),
             desc = stringResource(id = R.string.update_proposal_what_new),
             destText = applicationVersion.desc,
-            buttonClose = stringResource(id = R.string.exit),
             properties = DialogProperties(usePlatformDefaultWidth = false),
-            onCloseClick = { true }
+            buttonClose = stringResource(id = R.string.exit)
         )
     }
 
     @Composable
     fun UpdateDialog(
-        title : String,
-        text : String,
-        desc : String,
-        destText : String,
+        title: String,
+        text: String,
+        desc: String,
+        destText: String,
         properties: DialogProperties,
-        buttonClose : String,
-        onCloseClick : () -> Boolean,
+        buttonClose: String,
     ) {
         var descVisible by rememberSaveable {
             mutableStateOf(false)
@@ -187,8 +174,10 @@ class MainActivity : ComponentActivity() {
                             TextButton(
                                 modifier = Modifier.weight(1f),
                                 onClick = {
-                                    if (onCloseClick())
-                                        dialogVisible = false
+                                    mainActivityViewModel.handle(
+                                        MainActivityEvent.ExitClicked(this@MainActivity)
+                                    )
+                                    dialogVisible = false
                                 }
                             ) {
                                 Text(text = buttonClose)
@@ -197,7 +186,8 @@ class MainActivity : ComponentActivity() {
                             Button(
                                 modifier = Modifier.weight(1f),
                                 onClick = {
-                                    mainActivityViewModel.onUpdateClicked(this@MainActivity)
+                                    mainActivityViewModel.handle(
+                                        MainActivityEvent.UpdateClicked(this@MainActivity))
                                 },
                             ) {
                                 Text(

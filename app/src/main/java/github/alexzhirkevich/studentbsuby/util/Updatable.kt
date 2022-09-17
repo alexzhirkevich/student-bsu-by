@@ -1,12 +1,12 @@
 package github.alexzhirkevich.studentbsuby.util
 
-import androidx.compose.runtime.State
+import github.alexzhirkevich.studentbsuby.util.communication.StateCommunication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 interface Updatable {
 
-    val isUpdating : State<Boolean>
+    val isUpdating : StateCommunication<Boolean>
 
     fun update()
 }

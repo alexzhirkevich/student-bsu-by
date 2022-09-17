@@ -10,8 +10,9 @@ inline fun <reified T> sharedPreferences(
     default: T,
     noinline onChanged : (T) -> Unit = {},
 ) : PreferencePersistence<T>{
-    return sharedPreferences(T::class,preferences, default,onChanged)
+    return sharedPreferences(T::class, preferences, default, onChanged)
 }
+
 @Suppress("unchecked_cast")
 fun <T> sharedPreferences(
     clazz: KClass<*>,

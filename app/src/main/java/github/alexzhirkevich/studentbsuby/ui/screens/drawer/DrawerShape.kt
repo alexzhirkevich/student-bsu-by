@@ -8,7 +8,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 
-class DrawerShape : Shape {
+object DrawerShape : Shape {
+
+    const val width = 350
+
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -16,7 +19,7 @@ class DrawerShape : Shape {
     ): Outline {
 
        return Outline.Rounded(
-            RoundRect(0f,0f,size.width,size.height,
+            RoundRect(0f,0f, minOf(size.width,width*density.density),size.height,
                 bottomRightCornerRadius = CornerRadius(x = size.width/2, y=size.height/2)
             )
         )

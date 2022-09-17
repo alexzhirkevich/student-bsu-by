@@ -7,17 +7,20 @@ import androidx.compose.foundation.background
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.navigation.Route
 import github.alexzhirkevich.studentbsuby.ui.common.animatedComposable
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.DrawerScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginViewModel
 import github.alexzhirkevich.studentbsuby.ui.screens.settings.SettingsScreen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import me.onebone.toolbar.ExperimentalToolbarApi
@@ -39,10 +42,19 @@ fun MainScreen() {
         navController.setOnBackPressedDispatcher(it)
     }
 
+
+    val loginVm = hiltViewModel<LoginViewModel>()
+
+
+    LaunchedEffect(null) {
+        loginVm.handle(LoginEvent.InitLogin(navController))
+    }
+
     AnimatedNavHost(
         modifier = Modifier.background(color = MaterialTheme.colors.background),
         navController = navController,
-        startDestination = Route.AuthScreen.route,
+        startDestination = if (loginVm.skipLogin)
+            Route.DrawerScreen.route else Route.AuthScreen.route,
     ) {
         animatedComposable(
             Route.AuthScreen,
@@ -58,6 +70,7 @@ fun MainScreen() {
             exitTransition = {
                 fadeOut()
             }) {
+
             LoginScreen(navController)
         }
         animatedComposable(

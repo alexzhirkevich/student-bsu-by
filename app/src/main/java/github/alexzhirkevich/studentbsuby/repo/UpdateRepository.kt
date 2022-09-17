@@ -2,7 +2,6 @@ package github.alexzhirkevich.studentbsuby.repo
 
 import android.app.Activity
 import android.content.Context
-import android.provider.Settings
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -32,23 +31,19 @@ class UpdateRepository @Inject constructor(
         activity: Activity,
         immediate : Boolean,
         onFailedToInAppUpdate : () -> Unit,
-        onShowInformDialog : suspend () -> Unit
-    ) {
-        kotlin.runCatching {
-            val info = appUpdateManager.requestAppUpdateInfo()
-            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-                val listener = newUpdateListener(activity)
-                appUpdateManager.registerListener(listener)
-                while (!tryUpdateInternal(
-                        activity = activity,
-                        immediate = immediate || info.updatePriority() == 5,
-                        info = info,
-                        onFailedToInAppUpdate = onFailedToInAppUpdate)
-                ) {
-                    onShowInformDialog.invoke()
-                }
+    ) = kotlin.runCatching {
+        val info = appUpdateManager.requestAppUpdateInfo()
+        if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+            val listener = newUpdateListener(activity)
+            appUpdateManager.registerListener(listener)
+            while (!tryUpdateInternal(
+                    activity = activity,
+                    immediate = immediate || info.updatePriority() == 5,
+                    info = info,
+                    onFailedToInAppUpdate = onFailedToInAppUpdate
+                )
+            )
                 appUpdateManager.unregisterListener(listener)
-            }
         }
     }
 
@@ -56,8 +51,8 @@ class UpdateRepository @Inject constructor(
         activity: Activity,
         immediate: Boolean,
         info: AppUpdateInfo,
-        onFailedToInAppUpdate: () -> Unit): Boolean {
-        return when {
+        onFailedToInAppUpdate: () -> Unit
+    ): Boolean = when {
             info.isImmediateUpdateAllowed && immediate ->
                 AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE)
                     .setAllowAssetPackDeletion(true)
@@ -77,7 +72,6 @@ class UpdateRepository @Inject constructor(
                 appUpdateManager.startUpdateFlow(info, activity, it).await()
             }.getOrDefault(ActivityResult.RESULT_IN_APP_UPDATE_FAILED)
         }?.let { it == Activity.RESULT_OK  } ?: true
-    }
 
     private fun newUpdateListener(activity: Activity) =
         InstallStateUpdatedListener { state ->

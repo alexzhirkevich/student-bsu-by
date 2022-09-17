@@ -1,20 +1,20 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.settings
 
 import android.app.Activity
-import android.text.Html
-import android.text.Spanned
-import android.text.SpannedString
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.*
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsWithImePadding
@@ -40,6 +39,7 @@ import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.ui.theme.LocalThemeSelector
 import github.alexzhirkevich.studentbsuby.ui.theme.Theme
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
@@ -60,13 +60,15 @@ fun SettingsScreen(viewModel : SettingsViewModel = hiltViewModel()) {
         Spacer(modifier = Modifier
             .fillMaxWidth()
             .statusBarsHeight()
-            .background(MaterialTheme.colors.secondary)
+            .background(animateColorAsState(MaterialTheme.colors.secondary).value)
             .zIndex(1f)
         )
         CollapsingToolbarScaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background),
+                .background(
+                    animateColorAsState(MaterialTheme.colors.background).value
+                ),
             state = scaffoldState,
             scrollStrategy = ScrollStrategy.EnterAlways,
             toolbar = {
@@ -81,9 +83,10 @@ fun SettingsScreen(viewModel : SettingsViewModel = hiltViewModel()) {
 private fun Toolbar() {
     val activity = LocalContext.current as Activity
 
-    Column() {
+    Column {
         TopAppBar(
-            backgroundColor = MaterialTheme.colors.secondary
+            backgroundColor = animateColorAsState(
+                MaterialTheme.colors.secondary).value
         ) {
             NavigationMenuButton(
                 icon = Icons.Default.ArrowBack,
@@ -92,14 +95,15 @@ private fun Toolbar() {
             )
             Text(
                 text = stringResource(id = R.string.settings),
-                color = MaterialTheme.colors.onSecondary,
+                color = animateColorAsState(MaterialTheme.colors.onSecondary)
+                    .value,
                 style = MaterialTheme.typography.subtitle1
             )
         }
         Spacer(modifier = Modifier
             .height(1.dp)
             .fillMaxWidth()
-            .background(LocalContentColor.current.copy(.05f)))
+            .background(animateColorAsState(LocalContentColor.current.copy(.05f)).value))
     }
 }
 
@@ -163,7 +167,8 @@ private fun Body(viewModel: SettingsViewModel) {
             stringResource(id = R.string.settings_update_notifications_helper_attention).let { text ->
                 helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
             }
-        val cont = LocalContext.current
+
+        val state by viewModel.state.collectAsState()
         TogglePreference(
             title = R.string.settings_update_notifications,
             helper = AnnotatedString(
@@ -202,39 +207,44 @@ private fun Body(viewModel: SettingsViewModel) {
             ),
             onHelperClicked = {
                 if (it in autoStartRange) {
-                    viewModel.onAutoStartClicked(cont)
+                    viewModel.handle(SettingsEvent.AutoStartClicked)
                 }
                 if (it in backgroundRange) {
-                    viewModel.onBackgroundActivityClicked(cont)
+                    viewModel.handle(SettingsEvent.BackgroundActivityClicked)
                 }
                 if (it in whyRange){
-                    viewModel.dontKillMyApp(cont)
+                    viewModel.handle(SettingsEvent.DontKillMyApp)
                 }
             },
-            checked = viewModel.notificationsEnabled.value,
-            onChanged = viewModel::setNotificationsEnabled
+            checked = state.notificationsEnabled,
+            onChanged = {
+                viewModel.handle(SettingsEvent.NotificationsEnabled(it))
+            }
         )
 
         GroupName(name = stringResource(id = R.string.other))
         TogglePreference(
             title = R.string.setting_collect_statistics,
             helper = stringResource(R.string.setting_collect_statistics_helper).toAnnotatedString(),
-            checked = viewModel.collectStatistics.value,
-            onChanged = viewModel::setCollectStatistics
+            checked = state.collectStatistic,
+            onChanged = {
+                viewModel.handle(SettingsEvent.CollectStatistic(it))
+            }
         )
         TogglePreference(
             title = R.string.setting_collect_crashlytics,
             helper = stringResource(R.string.setting_collect_crashlytics_helper).toAnnotatedString(),
-            checked = viewModel.collectCrashlytics.value,
-            onChanged = viewModel::setCollectCrashlytics
+            checked = state.collectCrashlytics,
+            onChanged = {
+                viewModel.handle(SettingsEvent.CollectCrashlytics(it))
+            }
         )
 
-        val context = LocalContext.current
         ButtonPreference(
             title = R.string.share_logs,
             helper = R.string.share_logs_helper
         ) {
-            viewModel.shareLogs(context)
+            viewModel.handle(SettingsEvent.ShareLogs)
         }
         Text(
             text = BuildConfig.VERSION_NAME,
@@ -270,7 +280,8 @@ fun ButtonPreference(
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            backgroundColor = MaterialTheme.colors.secondary,
+            backgroundColor = animateColorAsState(
+                MaterialTheme.colors.secondary).value,
             shape = RectangleShape,
             enabled = enabled,
             onClick = onClick
@@ -304,7 +315,8 @@ fun TogglePreference(
     Column(Modifier.fillMaxWidth()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            backgroundColor = MaterialTheme.colors.secondary,
+            backgroundColor = animateColorAsState(
+                MaterialTheme.colors.secondary).value,
             shape = RectangleShape,
             enabled = enabled,
             onClick = {
@@ -329,11 +341,15 @@ fun TogglePreference(
                     onCheckedChange = onChanged,
                     enabled = enabled,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colors.primary,
+                        checkedThumbColor = animateColorAsState(
+                            MaterialTheme.colors.primary).value,
                         checkedTrackAlpha = .5f,
-                        uncheckedThumbColor = MaterialTheme.colors.background,
-                        disabledCheckedThumbColor = MaterialTheme.colors.primary.copy(alpha = .5f),
-                        disabledUncheckedThumbColor = MaterialTheme.colors.background.copy(alpha = .5f),
+                        uncheckedThumbColor = animateColorAsState(
+                            MaterialTheme.colors.background).value,
+                        disabledCheckedThumbColor = animateColorAsState(
+                            MaterialTheme.colors.primary.copy(alpha = .5f)).value,
+                        disabledUncheckedThumbColor = animateColorAsState(
+                            MaterialTheme.colors.background.copy(alpha = .5f)).value,
                     )
                 )
             }

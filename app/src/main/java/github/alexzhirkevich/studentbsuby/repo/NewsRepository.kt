@@ -8,7 +8,6 @@ import github.alexzhirkevich.studentbsuby.data.models.NewsContent
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Tag
-import org.jsoup.select.Elements
 import javax.inject.Inject
 
 class NewsRepository @Inject constructor(
@@ -75,7 +74,7 @@ class NewsRepository @Inject constructor(
         }
     }
 
-    suspend fun getNewsItem(id: Int, dataSource: DataSource) = NewsContentRepository(
+    fun getNewsItem(id: Int, dataSource: DataSource) = NewsContentRepository(
         id, dao, api
     ).get(dataSource)
 }

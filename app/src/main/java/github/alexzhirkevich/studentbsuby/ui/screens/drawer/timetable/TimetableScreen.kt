@@ -11,13 +11,11 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,16 +24,18 @@ import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.*
 import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
-import github.alexzhirkevich.studentbsuby.ui.common.*
+import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
+import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBarSwipeRefreshIndicator
+import github.alexzhirkevich.studentbsuby.ui.common.ErrorWidget
+import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.*
-import kotlin.math.roundToInt
 
 private const val TabsHeight = 40
 
@@ -45,38 +45,13 @@ private const val TabsHeight = 40
 
 @Composable
 fun TimetableScreen(
+    isTablet: Boolean,
     timetableViewModel: TimetableViewModel = hiltViewModel(),
-    onMenuClicked : () -> Unit = {}
+    onMenuClicked : () -> Unit = {},
 ) {
 
-    val timetable by timetableViewModel.timetable.collectAsState()
-
-    when(timetable){
-        is DataState.Error-> ErrorScreen(
-            toolbarText = stringResource(id = R.string.timetable),
-            error = stringResource(id = (timetable as DataState.Error).message),
-            updater = timetableViewModel,
-            onMenuClicked = onMenuClicked
-        )
-        else -> SuccessTimetableScreen(timetableViewModel,onMenuClicked)
-    }
-
-}
-
-
-@ExperimentalToolbarApi
-@ExperimentalPagerApi
-@ExperimentalMaterialApi
-@Composable
-fun SuccessTimetableScreen(
-    timetableViewModel: TimetableViewModel,
-    onMenuClicked : () -> Unit = {}
-) {
     val scaffoldState = rememberCollapsingToolbarScaffoldState(
         toolbarState = rememberCollapsingToolbarState(0)
-    )
-    val swipeRefreshState = rememberSwipeRefreshState(
-        isRefreshing = timetableViewModel.isUpdating.value
     )
 
     val pagerState = rememberPagerState()
@@ -94,10 +69,10 @@ fun SuccessTimetableScreen(
                 true
             ),
         state = scaffoldState,
-        enabled = swipeRefreshState.indicatorOffset == 0f,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbar = {
             Toolbar(
+                isTablet = isTablet,
                 toolbarState = scaffoldState.toolbarState,
                 viewModel = timetableViewModel,
                 onMenuClicked = onMenuClicked,
@@ -105,19 +80,24 @@ fun SuccessTimetableScreen(
             )
         }
     ) {
+        val swipeDownEnabled by remember {
+            derivedStateOf {
+                scaffoldState.toolbarState.progress >= 1f - Float.MIN_VALUE
+            }
+        }
         Body(
             viewModel = timetableViewModel,
-            refreshState = swipeRefreshState,
-            swipeEnabled = scaffoldState.toolbarState.progress == 1f,
-            pagerState = pagerState
+            pagerState = pagerState,
+            swipeDownEnabled = swipeDownEnabled
         )
     }
 }
 
-@ExperimentalPagerApi
 
+@ExperimentalPagerApi
 @Composable
 private fun CollapsingToolbarScope.Toolbar(
+    isTablet : Boolean,
     toolbarState: CollapsingToolbarState,
     pagerState: PagerState,
     viewModel: TimetableViewModel,
@@ -126,7 +106,7 @@ private fun CollapsingToolbarScope.Toolbar(
 
     val scope = rememberCoroutineScope()
 
-    val timetable by viewModel.timetable.collectAsState()
+    val timetable by viewModel.timetableCommunication.collectAsState()
 
     TopAppBar(
         elevation = 0.dp,
@@ -136,14 +116,20 @@ private fun CollapsingToolbarScope.Toolbar(
         backgroundColor = Color.Transparent
     ) {
         val status = LocalWindowInsets.current.statusBars.bottom
-        with(LocalDensity.current) {
-            AnimatedVisibility(
-                visible = toolbarState.height > 3 * TabsHeight.dp.roundToPx() + status,
-                enter = slideInVertically { -2 * it },
-                exit = slideOutVertically { -2 * it }
-            ) {
+        val density = LocalDensity.current
 
-               NavigationMenuButton(onClick = onMenuClicked)
+        val iconVisible by remember {
+            derivedStateOf {
+                toolbarState.height > 3 * TabsHeight * density.density + status
+            }
+        }
+        AnimatedVisibility(
+            visible = iconVisible,
+            enter = slideInVertically { -2 * it },
+            exit = slideOutVertically { -2 * it }
+        ) {
+            if (!isTablet) {
+                NavigationMenuButton(onClick = onMenuClicked)
             }
         }
     }
@@ -153,7 +139,9 @@ private fun CollapsingToolbarScope.Toolbar(
             .fillMaxWidth()
             .parallax(.5f)
             .background(MaterialTheme.colors.secondary)
-            .alpha(toolbarState.progress)
+            .graphicsLayer {
+                alpha = toolbarState.progress
+            }
             .animatedSquaresBackground(
                 color = MaterialTheme.colors.primary.copy(alpha = .05f),
                 count = 10,
@@ -168,7 +156,7 @@ private fun CollapsingToolbarScope.Toolbar(
         ) {
 
             Text(
-                text = viewModel.currentDay.toString(),
+                text = viewModel.dayOfMonth.toString(),
                 style = MaterialTheme.typography.h1,
                 modifier = Modifier.padding(10.dp),
                 color = MaterialTheme.colors.primary
@@ -176,13 +164,13 @@ private fun CollapsingToolbarScope.Toolbar(
             Column {
                 Text(
                     text = stringArrayResource(id = R.array.weekdays)
-                            [viewModel.currentDayOfWeek],
+                            [viewModel.dayOfWeek],
                     style = MaterialTheme.typography.h2,
                     color = MaterialTheme.colors.primary
 
                 )
                 Text(
-                    text = "${stringArrayResource(id = R.array.months)[viewModel.currentMonth]} ${viewModel.currentYear}".uppercase(),
+                    text = "${stringArrayResource(id = R.array.months)[viewModel.month]} ${viewModel.year}".uppercase(),
                     style = MaterialTheme.typography.subtitle1,
                     color = MaterialTheme.colors.primary
 
@@ -248,34 +236,44 @@ private fun CollapsingToolbarScope.Toolbar(
 
 @Composable
 private fun Body(
-    swipeEnabled: Boolean,
-    refreshState: SwipeRefreshState,
     viewModel: TimetableViewModel,
     pagerState: PagerState,
+    swipeDownEnabled: Boolean,
 ) {
 
-    val timetable by viewModel.timetable.collectAsState()
+    val timetable by viewModel.timetableCommunication.collectAsState()
+
+    val refreshState = rememberSwipeRefreshState(
+        isRefreshing = viewModel.isUpdating.collectAsState().value
+    )
 
 
-    Column {
+    SwipeRefresh(
+        state = refreshState,
+        onRefresh = viewModel::update,
+        indicator = { state, trigger ->
+            BsuProgressBarSwipeRefreshIndicator(state, trigger)
+        },
+        swipeEnabled = swipeDownEnabled && timetable !is DataState.Loading,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         when (val tt = timetable) {
-            is DataState.Success,is DataState.Empty -> {
-                SwipeRefresh(
-                    state = refreshState,
-                    onRefresh = viewModel::update,
-                    indicator = { state, trigger ->
-                        BsuProgressBarSwipeRefreshIndicator(state, trigger)
-                    },
-                    swipeEnabled = swipeEnabled,
-                    modifier = Modifier
-                        .fillMaxSize()
-
+            is DataState.Success -> {
+                HorizontalPager(
+                    modifier = Modifier.fillMaxSize(),
+                    state = pagerState,
+                    count = tt.value.size
                 ) {
-                    if (tt is DataState.Success) {
-                        Pager(
-                            offset = refreshState.indicatorOffset,
-                            pagerState = pagerState,
-                            timetable = tt.value
+
+                    if (tt.value[it].isNotEmpty()) {
+                        TimetableWidget(
+                            list = tt.value[it],
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer {
+                                    translationY = refreshState.indicatorOffset
+                                }
                         )
                     } else {
                         Box(
@@ -285,69 +283,55 @@ private fun Body(
                         ) {
                             ErrorWidget(
                                 modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 70.dp),
+                                    .padding(top = 70.dp)
+                                    .align(Alignment.TopCenter),
                                 title = stringResource(id = R.string.empty),
-                                error = stringResource(id = R.string.timetable_empty)
+                                error = stringResource(id = R.string.timetable_empty_for_day)
                             )
                         }
                     }
                 }
             }
-            is DataState.Loading -> Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                BsuProgressBar(
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 100.dp),
-                    size = 100.dp,
-                    tint = MaterialTheme.colors.primary
-                )
-            }
-        }
-    }
-}
-
-
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
-@Composable
-private fun Pager(
-    pagerState: PagerState,
-    timetable: Timetable,
-    offset : Float,
-) {
-
-    HorizontalPager(
-        modifier = Modifier.fillMaxSize(),
-        state = pagerState,
-        count = timetable.size
-    ) {
-
-        if (timetable[it].isNotEmpty()) {
-            TimetableWidget(
-                list = timetable[it],
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        translationY = offset
-                    }
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                ErrorWidget(
+            DataState.Empty -> {
+                Box(
                     modifier = Modifier
-                        .padding(top = 70.dp)
-                        .align(Alignment.TopCenter),
-                    title = stringResource(id = R.string.empty),
-                    error = stringResource(id = R.string.timetable_empty_for_day)
-                )
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    ErrorWidget(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 70.dp),
+                        title = stringResource(id = R.string.empty),
+                        error = stringResource(id = R.string.timetable_empty)
+                    )
+                }
+            }
+            is DataState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    ErrorWidget(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 70.dp),
+                        title = stringResource(id = R.string.something_gone_wrong),
+                        error = stringResource(id = tt.message)
+                    )
+                }
+            }
+            DataState.Loading -> {
+                Box(Modifier.fillMaxSize()) {
+                    BsuProgressBar(
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 100.dp),
+                        size = 100.dp,
+                        tint = MaterialTheme.colors.primary
+                    )
+                }
             }
         }
     }

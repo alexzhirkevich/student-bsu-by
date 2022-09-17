@@ -4,10 +4,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.reflect.KProperty
 
-sealed interface DataSource {
-    object Local : DataSource
-    object Remote : DataSource
-    object All : DataSource
+enum class DataSource {
+    Local, Remote , All
 }
 
 sealed interface Repository<out T> {
@@ -27,13 +25,13 @@ sealed class CacheWebRepository<T> : Repository<T>{
         replaceCacheIf: (cached: T?, new: T) -> Boolean
     ) : Flow<T> = flow {
         val cached = getFromCache()?.also {
-            if (dataSource is DataSource.All || dataSource is DataSource.Local)
+            if (dataSource == DataSource.All || dataSource == DataSource.Local)
                 if (it !is Collection<*>  || it.isNotEmpty()) {
                     emit(it)
                 }
 
         }
-        if (dataSource is DataSource.All || dataSource is DataSource.Remote) {
+        if (dataSource == DataSource.All || dataSource == DataSource.Remote) {
             getFromWeb()?.also {
                 emit(it)
                 if (replaceCacheIf(cached,it))

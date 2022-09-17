@@ -10,13 +10,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import com.google.accompanist.insets.ProvideWindowInsets
-import github.alexzhirkevich.studentbsuby.R
-import github.alexzhirkevich.studentbsuby.ui.theme.values.*
 import github.alexzhirkevich.studentbsuby.ui.theme.values.Colors
+import github.alexzhirkevich.studentbsuby.ui.theme.values.Shapes
+import github.alexzhirkevich.studentbsuby.ui.theme.values.typography
 
 @SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
@@ -58,9 +55,6 @@ fun StudentbsubyTheme(
     val activity = LocalContext.current as Activity
 
     fun update() {
-        val navBarColor = if (isDark)
-            android.R.color.transparent
-        else R.color.blue_transparent
 
         activity.window.apply {
           //  navigationBarColor = ContextCompat.getColor(activity, navBarColor)
@@ -83,7 +77,7 @@ fun StudentbsubyTheme(
     CompositionLocalProvider(
         LocalThemeSelector provides themeSelector,
     ) {
-        ProvideWindowInsets() {
+        ProvideWindowInsets {
             ProvideTextStyle(LocalTextStyle.current.copy(
                 color = if (isDark) Color.White else Color.Black
             )) {

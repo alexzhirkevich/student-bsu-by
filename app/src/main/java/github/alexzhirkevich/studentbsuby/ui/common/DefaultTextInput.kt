@@ -27,6 +27,7 @@ fun DefaultTextInput(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    textInputModifier : Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
@@ -39,7 +40,6 @@ fun DefaultTextInput(
     singleLine: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-
 ) {
     Row(
         modifier = modifier
@@ -76,7 +76,7 @@ fun DefaultTextInput(
                 keyboardOptions = keyboardOptions,
                 maxLines = maxLines,
                 interactionSource = interactionSource,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = textInputModifier.fillMaxWidth(),
                 cursorBrush = SolidColor(MaterialTheme.colors.onBackground)
             )
 

@@ -1,10 +1,9 @@
 package github.alexzhirkevich.studentbsuby.util
 
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import android.content.SharedPreferences
 import com.franmontiel.persistentcookiejar.cache.CookieCache
-import okhttp3.*
+import okhttp3.Cookie
+import okhttp3.HttpUrl
 
 interface LoginCookieManager {
 
@@ -15,14 +14,13 @@ interface LoginCookieManager {
     fun canRestoreSession() : Boolean
 }
 
-class PreferencesCookieCache(context: Context)
+class PreferencesCookieCache(private val preferences: SharedPreferences)
     : CookieCache, LoginCookieManager {
 
-    private val prefs = context.getSharedPreferences(PREF_COOKIES, MODE_PRIVATE)
 
     override fun iterator(): MutableIterator<Cookie> = object : MutableIterator<Cookie> {
 
-        private val iterator = prefs.cookies.iterator()
+        private val iterator = preferences.cookies.iterator()
 
         private var last: Cookie? = null
 
@@ -34,22 +32,22 @@ class PreferencesCookieCache(context: Context)
 
         override fun remove() {
             last?.let {
-                prefs.removeCookie(it)
+                preferences.removeCookie(it)
             }
         }
 
     }
 
     override fun addAll(cookies: MutableCollection<Cookie>) {
-        prefs.saveCookies(cookies)
+        preferences.saveCookies(cookies)
     }
 
     override fun clear() {
-        prefs.clearCookies()
+        preferences.clearCookies()
     }
 
     override fun getCookies(): String {
-        return prefs.cookies.joinToString(separator = ";") { "${it.name}=${it.value}" }
+        return preferences.cookies.joinToString(separator = ";") { "${it.name}=${it.value}" }
     }
 
     override fun cleanCookies() {
@@ -57,16 +55,13 @@ class PreferencesCookieCache(context: Context)
     }
 
     override fun canRestoreSession(): Boolean {
-        return prefs.all.values.mapNotNull {
+        return preferences.all.values.mapNotNull {
             it as? Set<*>
         }.flatten().any {
             (it as? String)?.contains("AuthCookie") == true
         }
     }
 }
-
-private val PREF_COOKIES = "PREF_COOKIES"
-
 
 private val SharedPreferences.cookies: List<Cookie>
     get() = all.mapNotNull { entry ->

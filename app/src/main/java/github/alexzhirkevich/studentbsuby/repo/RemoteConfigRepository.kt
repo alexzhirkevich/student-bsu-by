@@ -5,13 +5,13 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import github.alexzhirkevich.studentbsuby.BuildConfig
-import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.util.sharedPreferences
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONObject
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
 private const val G_PLAY = "google_play"
 private const val TELEGRAM = "telegram"
 private const val MAIL = "mail"
@@ -20,6 +20,7 @@ private const val LATEST_VER = "latest_version"
 private const val VER_CODE = "code"
 private const val VER_NAME = "name"
 private const val VER_DESC = "desc"
+private const val API = "api"
 
 private const val UPDATE_PROP_DELAY =  3 * 24 * 60 * 60 * 1000L
 
@@ -33,10 +34,9 @@ class RemoteConfigRepository @Inject constructor(
     preferences: SharedPreferences
 ) {
 
-
     private var lastUpdateProp by sharedPreferences(preferences, 0L)
 
-    fun init() {
+    init {
         val config = FirebaseRemoteConfig.getInstance()
 
         val settings = FirebaseRemoteConfigSettings.Builder()
@@ -46,10 +46,13 @@ class RemoteConfigRepository @Inject constructor(
         config.setConfigSettingsAsync(settings)
     }
 
-    private suspend fun getVersion(name: String) : ApplicationVersion? = kotlin.runCatching {
+    suspend fun update(){
         FirebaseRemoteConfig.getInstance().fetchAndActivate().await()
-        val version = JSONObject(FirebaseRemoteConfig.getInstance().getString(name))
+    }
 
+    private suspend fun getVersion(name: String) : ApplicationVersion? = kotlin.runCatching {
+        val version = JSONObject(FirebaseRemoteConfig.getInstance().getString(name))
+        update()
         return ApplicationVersion(
             code = version.getInt(VER_CODE),
             name = version.getString(VER_NAME),
@@ -75,10 +78,9 @@ class RemoteConfigRepository @Inject constructor(
         FirebaseRemoteConfig.getInstance().getString(MAIL)
     }.getOrNull().orEmpty()
 
-    fun googlePlay()= kotlin.runCatching {
-        FirebaseRemoteConfig.getInstance().getString(G_PLAY)
+    fun api() = kotlin.runCatching {
+        FirebaseRemoteConfig.getInstance().getString(API)
     }.getOrNull().orEmpty()
-
 }
 
 suspend fun <T> Task<T>.await() : T = suspendCancellableCoroutine { cont ->

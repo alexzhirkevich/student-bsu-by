@@ -1,6 +1,7 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
@@ -30,69 +31,74 @@ fun HostelAdWidget(
         backgroundColor = MaterialTheme.colors.secondary,
         elevation = 3.dp,
     ) {
-        Column(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()
-        ) {
-            Row(Modifier.fillMaxWidth()) {
 
-                Text(
-                    text = ad.address ?: stringResource(id = R.string.unknown_adress),
-                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
-                    modifier = Modifier.weight(1f)
-                )
+        SelectionContainer {
 
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = ad.publishDate,
-                    style = MaterialTheme.typography.caption
-                )
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .fillMaxWidth()
             ) {
-                Column {
-                    ad.conditions?.let {
-                        InfoText(stringResource(id = R.string.conditions), it)
-                    }
 
-                    ad.price?.let {
-                        InfoText(stringResource(id = R.string.price), it)
-                    }
+                Row(Modifier.fillMaxWidth()) {
 
-                    ad.note?.let {
-                        InfoText(stringResource(id = R.string.note), it)
-                    }
-                    ad.phone?.let {
-                        InfoText(stringResource(id = R.string.phone), it)
-                    }
+                    Text(
+                        text = ad.address ?: stringResource(id = R.string.unknown_adress),
+                        fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                        modifier = Modifier.weight(1f)
+                    )
 
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = ad.publishDate,
+                        style = MaterialTheme.typography.caption
+                    )
                 }
-                Spacer(modifier = Modifier.width(10.dp))
-                Row {
-                    if (!ad.phone.isNullOrBlank()) {
-                        IconButton(
-                            onClick = onCallClicked,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Call,
-                                tint = MaterialTheme.colors.primary,
-                                contentDescription = "Call"
-                            )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column {
+                        ad.conditions?.let {
+                            InfoText(stringResource(id = R.string.conditions), it)
                         }
+
+                        ad.price?.let {
+                            InfoText(stringResource(id = R.string.price), it)
+                        }
+
+                        ad.note?.let {
+                            InfoText(stringResource(id = R.string.note), it)
+                        }
+                        ad.phone?.let {
+                            InfoText(stringResource(id = R.string.phone), it)
+                        }
+
                     }
-                    if (!ad.address.isNullOrBlank()) {
-                        IconButton(
-                            onClick = onLocateClicked,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                tint = MaterialTheme.colors.primary,
-                                contentDescription = "Locate"
-                            )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Row {
+                        if (!ad.phone.isNullOrBlank()) {
+                            IconButton(
+                                onClick = onCallClicked,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Call,
+                                    tint = MaterialTheme.colors.primary,
+                                    contentDescription = "Call"
+                                )
+                            }
+                        }
+                        if (!ad.address.isNullOrBlank()) {
+                            IconButton(
+                                onClick = onLocateClicked,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    tint = MaterialTheme.colors.primary,
+                                    contentDescription = "Locate"
+                                )
+                            }
                         }
                     }
                 }

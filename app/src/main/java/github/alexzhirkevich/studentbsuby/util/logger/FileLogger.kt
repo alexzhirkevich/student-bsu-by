@@ -7,16 +7,12 @@ import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Build
 import android.util.Log
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
-import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.BuildConfig
 import github.alexzhirkevich.studentbsuby.R
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
 
 abstract class DefaultLogger : Logger {
 
@@ -58,7 +54,7 @@ class FileLogger constructor(
                     buildString {
                         append(timestampDateFormat.format(Date()))
                         append(" \\\\ ${logLevel.name.take(1)}\n")
-                        append("$tag: $msg")
+                        append("$tag: $msg\n")
                         if (cause != null && logLevel == Logger.LogLevel.Error)
                             append(cause.stackTraceToString())
                         append("\n")
@@ -100,9 +96,11 @@ class FileLogger constructor(
                     Intent.createChooser(
                         it,
                         context.getString(R.string.share_logs)
-                    )
+                    ).apply {
+                        flags = FLAG_ACTIVITY_NEW_TASK
+                    }
                 )
             }
-        }.getOrThrow()
+        }
     }
 }

@@ -1,6 +1,5 @@
 package github.alexzhirkevich.studentbsuby.util
 
-import android.service.autofill.Dataset
 import androidx.annotation.StringRes
 
 sealed interface DataState<out T> {

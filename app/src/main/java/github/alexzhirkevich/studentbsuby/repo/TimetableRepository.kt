@@ -5,8 +5,9 @@ import github.alexzhirkevich.studentbsuby.api.dayOfWeek
 import github.alexzhirkevich.studentbsuby.dao.LessonsDao
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
 import github.alexzhirkevich.studentbsuby.util.exceptions.UsernameNotFoundException
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import okhttp3.internal.toImmutableList
 import org.jsoup.Jsoup
 import javax.inject.Inject
@@ -19,6 +20,7 @@ class TimetableRepository @Inject constructor(
 ) : CacheWebRepository<List<List<Lesson>>>() {
 
     override suspend fun getFromWeb(): List<List<Lesson>> {
+
         val username = usernameProvider.username.takeIf(String::isNotBlank)
             ?: throw UsernameNotFoundException()
         // TODO: refactor

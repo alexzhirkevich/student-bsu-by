@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import github.alexzhirkevich.studentbsuby.ui.common.ErrorWidget
-import github.alexzhirkevich.studentbsuby.util.Updatable
 
 @Composable
 fun PaidServicesErrorPage(

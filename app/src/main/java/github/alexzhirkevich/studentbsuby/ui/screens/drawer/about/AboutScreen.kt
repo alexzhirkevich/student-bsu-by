@@ -34,6 +34,7 @@ import me.onebone.toolbar.*
 @ExperimentalToolbarApi
 @Composable
 fun AboutScreen(
+    isTablet : Boolean,
     aboutViewModel: AboutViewModel = hiltViewModel(),
                 onMenuClicked : () -> Unit) {
 
@@ -61,7 +62,10 @@ fun AboutScreen(
                     elevation = 0.dp,
                     backgroundColor = Color.Transparent
                 ) {
-                    NavigationMenuButton(onClick = onMenuClicked)
+
+                    if (!isTablet) {
+                        NavigationMenuButton(onClick = onMenuClicked)
+                    }
                     AnimatedVisibility(visible = scaffoldState.toolbarState.progress == 0f) {
                         Text(
                             text = stringResource(id = R.string.about),
@@ -131,7 +135,11 @@ fun AboutScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                IconButton(onClick = aboutViewModel::onEmailClicked) {
+                IconButton(
+                    onClick = {
+                        aboutViewModel.handle(AboutEvent.EmailClicked)
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "E-mail",
@@ -140,7 +148,11 @@ fun AboutScreen(
                     )
                 }
 
-                IconButton(onClick = aboutViewModel::onTgClicked) {
+                IconButton(
+                    onClick = {
+                        aboutViewModel.handle(AboutEvent.TgClicked)
+                    }
+                ) {
                     Image(
                         painter = painterResource(R.drawable.ic_telegram),
                         contentDescription = "Telegram",

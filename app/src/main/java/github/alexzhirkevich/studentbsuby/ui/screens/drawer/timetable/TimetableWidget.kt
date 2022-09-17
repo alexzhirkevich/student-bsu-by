@@ -1,7 +1,7 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable
 
-import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -19,10 +19,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsHeight
-import com.google.accompanist.insets.navigationBarsWithImePadding
 import github.alexzhirkevich.studentbsuby.data.models.Lesson
 import github.alexzhirkevich.studentbsuby.util.applyIf
 
@@ -69,7 +67,7 @@ fun TimetableWidget(
                 }
             }
     ) {
-        items(list.size, key = { list[it].first.number }){ idx ->
+        items(list.size){ idx ->
             LessonWidget(
                 lesson = list[idx].first,
                 state = list[idx].second,

@@ -25,9 +25,7 @@
     <style name="Theme.Studentbsuby.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@drawable/splash</item>
     </style>
 
-    <style name="Theme.Studentbsuby.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.Studentbsuby.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

@@ -1,12 +1,17 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer
 
-import android.app.Activity
 import androidx.activity.ComponentActivity
-import androidx.annotation.StringRes
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.DraggableState
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,23 +21,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -40,8 +44,6 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.User
-import github.alexzhirkevich.studentbsuby.navigation.Route
-import github.alexzhirkevich.studentbsuby.navigation.navigate
 import github.alexzhirkevich.studentbsuby.ui.common.animatedComposable
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutScreen
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel.HostelScreen
@@ -51,26 +53,19 @@ import github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects.SubjectsScr
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.TimetableScreen
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.ExperimentalToolbarApi
+import kotlin.math.absoluteValue
 
 private val AvatarWidth = 150.dp
 private val AvatarHeight = 200.dp
 private val AvatarOffset  = AvatarHeight/3.5f
-private val CardTopPadding = 60.dp
 private val CardPaddings = 12.dp
 
-private sealed class DrawerRoute(
-    val icon: ImageVector, @StringRes val title : Int, val  route: Route){
-    object Subjects : DrawerRoute(Icons.Default.Dashboard, R.string.subjects, Route.DrawerScreen.Subjects)
-    object Timetable : DrawerRoute(Icons.Default.FormatListBulleted, R.string.timetable, Route.DrawerScreen.Timetable)
-    object About : DrawerRoute(Icons.Default.Info, R.string.about, Route.DrawerScreen.About)
-    object Hostel : DrawerRoute(Icons.Default.House, R.string.hostel, Route.DrawerScreen.Hostel)
-    object PaidServices : DrawerRoute(Icons.Default.Payment, R.string.paidservices, Route.DrawerScreen.PaidServices)
-    object News : DrawerRoute(Icons.Default.Campaign, R.string.news, Route.DrawerScreen.News)
-}
+
 
 @ExperimentalComposeUiApi
 @ExperimentalToolbarApi
@@ -95,40 +90,54 @@ fun DrawerScreen(
 
     val activity = LocalContext.current as ComponentActivity
 
-    LaunchedEffect(Unit) {
-        profileViewModel.provideActivity(activity)
+    val isTablet = rememberSaveable {
+        activity.resources.getBoolean(R.bool.is_tablet)
     }
+
+    val routes = remember {
+        listOf(
+            DrawerRoute.News,
+            DrawerRoute.Subjects,
+            DrawerRoute.Timetable,
+            DrawerRoute.Hostel,
+            DrawerRoute.PaidServices,
+            DrawerRoute.About,
+        )
+    }
+
+    val connection by profileViewModel.connectivityCommunication
+        .collectAsState(initial = ConnectivityUi.Connected)
 
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier.background(MaterialTheme.colors.secondary),
-        drawerShape = remember { DrawerShape() },
+        drawerShape = DrawerShape,
         drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+        snackbarHost = {
+           ConnectivitySnackBar(
+               connection = connection
+           ) {
+               profileViewModel.handle(ProfileEvent.Logout(navController))
+           }
+        },
         drawerContent = {
-
-            DrawerContent(
-                navController = navController,
-                childNavController = childNavController,
-                routes = listOf(
-                    DrawerRoute.News,
-                    DrawerRoute.Subjects,
-                    DrawerRoute.Timetable,
-                    DrawerRoute.Hostel,
-                    DrawerRoute.PaidServices,
-                    DrawerRoute.About,
-                    ),
-                initial = initial,
-                profileViewModel = profileViewModel
-            ){
-                scope.launch {
-                    scaffoldState.drawerState.close()
+            if (!isTablet) {
+                DrawerContent(
+                    navController = navController,
+                    childNavController = childNavController,
+                    routes = routes,
+                    profileViewModel = profileViewModel
+                ) {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
                 }
             }
-
         },
     ) {
 
-        val onMenuClicked : () -> Unit = remember {{
+
+        fun onMenuClicked() {
             scope.launch {
                 scaffoldState.drawerState.let {
                     if (it.isClosed)
@@ -136,66 +145,157 @@ fun DrawerScreen(
                     else it.close()
                 }
             }
-        }}
-        AnimatedNavHost(
-            navController = childNavController,
-            startDestination = initial.route.route
-        ) {
+        }
 
-            val animIn = scaleIn(initialScale = .95f) + fadeIn()
-            val animOut = scaleOut(targetScale = .95f) + fadeOut()
-
-
-            animatedComposable(
-                DrawerRoute.News.route,
-                enterTransition = { animIn },
-                exitTransition = {animOut}
+        Row {
+            if (isTablet){
+                Card(
+                    elevation = 5.dp,
+                    shape = RectangleShape
+                ) {
+                    DrawerContent(
+                        navController = navController,
+                        childNavController = childNavController,
+                        routes = routes,
+                        profileViewModel = profileViewModel
+                    )
+                }
+            }
+            AnimatedNavHost(
+                navController = childNavController,
+                startDestination = initial.route.route
             ) {
-                NewsScreen(onMenuClicked = onMenuClicked)
-            }
-            animatedComposable(
-                DrawerRoute.Subjects.route,
-                enterTransition = { animIn },
-                exitTransition = {animOut}
-            ) {
-                SubjectsScreen(onMenuClicked = onMenuClicked)
-            }
 
-            animatedComposable(
-                DrawerRoute.Timetable.route,
-                enterTransition = { animIn },
-                exitTransition = {animOut}
-            ){
-                TimetableScreen(onMenuClicked = onMenuClicked)
-            }
+                val animIn = scaleIn(initialScale = .95f) + fadeIn()
+                val animOut = scaleOut(targetScale = .95f) + fadeOut()
 
-            animatedComposable(
-                DrawerRoute.Hostel.route,
-                enterTransition = { animIn },
-                exitTransition = {animOut}
-            ){
-                HostelScreen(onMenuClicked = onMenuClicked)
-            }
 
-            animatedComposable(
-                DrawerRoute.About.route,
-                enterTransition = { animIn },
-                exitTransition = {animOut}
-            ){
-                AboutScreen(onMenuClicked = onMenuClicked)
-            }
+                animatedComposable(
+                    DrawerRoute.News.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    NewsScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+                animatedComposable(
+                    DrawerRoute.Subjects.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    SubjectsScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
 
-            animatedComposable(
-                DrawerRoute.PaidServices.route,
-                enterTransition = { animIn },
-                exitTransition = {animOut}
-            ){
-                PaidServicesScreen(onMenuClicked = onMenuClicked)
+                animatedComposable(
+                    DrawerRoute.Timetable.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    TimetableScreen(isTablet,onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.Hostel.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    HostelScreen(isTablet,onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.About.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    AboutScreen(isTablet,onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.PaidServices.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    PaidServicesScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
             }
         }
     }
 }
 
+@ExperimentalAnimationApi
+@Composable
+fun ConnectivitySnackBar(
+    connection: ConnectivityUi,
+    onRelogin: () -> Unit
+) {
+    if (connection != ConnectivityUi.Connected) {
+        Box(
+            modifier = Modifier
+                .navigationBarsWithImePadding()
+                .fillMaxWidth()
+        ) {
+            Card(
+                elevation = 5.dp,
+                backgroundColor = MaterialTheme.colors.error,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(10.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .animateContentSize()
+                        .padding(3.dp)
+                ) {
+                    var expanded by rememberSaveable {
+                        mutableStateOf(true)
+                    }
+                    if (expanded) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(
+                                    vertical = 5.dp,
+                                    horizontal = 10.dp
+                                )
+                        ) {
+                            Text(
+                                text = stringResource(id = R.string.offline),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onError
+                            )
+                            Text(
+                                text = stringResource(id = if (connection == ConnectivityUi.Offline)
+                                    R.string.relogin else R.string.connecting),
+                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colors.onError
+                            )
+                        }
+                        if (connection == ConnectivityUi.Offline) {
+                            IconButton(onClick = onRelogin) {
+                                Icon(
+                                    imageVector = Icons.Default.Login,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                    IconButton(onClick = {
+                        expanded = !expanded
+                    }) {
+                        AnimatedContent(targetState = expanded) {
+                            Icon(
+                                imageVector = if (it)
+                                    Icons.Default.Close
+                                else Icons.Default.CloudOff,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @ExperimentalToolbarApi
 @ExperimentalPagerApi
@@ -209,17 +309,14 @@ private fun DrawerContent(
     navController: NavController,
     childNavController: NavController,
     routes: List<DrawerRoute>,
-    initial: DrawerRoute,
     profileViewModel: ProfileViewModel,
     onRouteSelected: () -> Unit = {}
 ) {
 
-    var currentRoute by rememberSaveable {
-        mutableStateOf(initial.route.route)
-    }
-
     Column(
-        Modifier.background(MaterialTheme.colors.secondary)
+        Modifier
+            .background(MaterialTheme.colors.secondary)
+            .widthIn(max = DrawerShape.width.dp)
     ) {
         Column(
             modifier = Modifier
@@ -238,12 +335,17 @@ private fun DrawerContent(
                     )
                     .statusBarsPadding()
             ) {
-                ProfileCard(
-                    photo = profileViewModel.photo.value,
-                    user = profileViewModel.user.value,
-                    modifier = Modifier
-                        .padding(CardPaddings)
-                )
+
+                SelectionContainer {
+                    ProfileCard(
+                        photo = profileViewModel.imageCommunication
+                            .collectAsState().value,
+                        user = profileViewModel.userCommunication
+                            .collectAsState().value,
+                        modifier = Modifier
+                            .padding(CardPaddings)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(5.dp))
 
@@ -254,22 +356,7 @@ private fun DrawerContent(
                         text = stringResource(id = it.title),
                         onClick = {
                             onRouteSelected()
-                            if (currentRoute != it.route.route) {
-                                currentRoute = it.route.route
-                                childNavController.navigate(it.route) {
-                                    val last =
-                                        childNavController.backQueue.lastOrNull()?.destination?.id
-                                            ?: childNavController.graph.findStartDestination().id
-                                    popUpTo(last) {
-                                        childNavController.backQueue.last().destination
-                                        saveState = true
-                                        inclusive = true
-                                    }
-
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
+                            profileViewModel.handle(ProfileEvent.RouteSelected(it, childNavController))
                         })
                 }
                 Spacer(
@@ -283,7 +370,7 @@ private fun DrawerContent(
                     text = stringResource(id = R.string.settings),
                     onClick = {
                         onRouteSelected()
-                        navController.navigate(Route.SettingsScreen)
+                        profileViewModel.handle(ProfileEvent.SettingsClicked(navController))
                     })
 
             }
@@ -293,13 +380,7 @@ private fun DrawerContent(
                 icon = Icons.Default.Logout,
                 text = stringResource(id = R.string.logout),
                 onClick = {
-                    profileViewModel.logout()
-                    navController.navigate(Route.AuthScreen) {
-                        launchSingleTop = true
-                        popUpTo(Route.DrawerScreen.route) {
-                            inclusive = true
-                        }
-                    }
+                    profileViewModel.handle(ProfileEvent.Logout(navController))
                 })
         }
     }
@@ -353,6 +434,7 @@ private fun ProfileCard(
     modifier: Modifier = Modifier
 ) {
 
+
     Box(modifier) {
         Row(modifier = Modifier.zIndex(2f)) {
             Card(
@@ -361,9 +443,62 @@ private fun ProfileCard(
                 elevation = 5.dp,
                 modifier = Modifier
             ) {
-
+                var dialogVisible by rememberSaveable {
+                    mutableStateOf(false)
+                }
                 val photoValue = photo.valueOrNull()
                 if (photoValue != null) {
+                    if (dialogVisible) {
+                        Dialog(onDismissRequest = {
+                            dialogVisible = false
+                        }) {
+                            var offsetY by remember {
+                                mutableStateOf(0f)
+                            }
+                            val dragState = remember {
+                                DraggableState {
+                                    offsetY+=it
+                                }
+                            }
+                            val dencity = LocalDensity.current
+
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(10.dp)
+
+                                    .draggable(
+                                        state = dragState,
+                                        orientation = Orientation.Vertical,
+                                        onDragStopped = {
+                                            if (offsetY.absoluteValue > 75 * dencity.density) {
+                                                dialogVisible = false
+                                            } else {
+                                                animate(offsetY, 0f) { a, _ ->
+                                                    offsetY = a
+                                                }
+                                            }
+                                        }
+                                    )
+                            ) {
+
+                                Image(
+                                    bitmap = photoValue,
+                                    contentScale = ContentScale.Crop,
+                                    contentDescription = "Photo",
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .aspectRatio(AvatarWidth / AvatarHeight)
+                                        .fillMaxSize()
+                                        .offset {
+                                            IntOffset(0, offsetY.toInt())
+                                        }
+
+                                )
+                            }
+                        }
+                    }
+
                     Image(
                         bitmap = photoValue,
                         contentScale = ContentScale.Crop,
@@ -371,6 +506,9 @@ private fun ProfileCard(
                         modifier = Modifier
                             .width(AvatarWidth)
                             .height(AvatarHeight)
+                            .clickable {
+                                dialogVisible = true
+                            }
                     )
                 } else Spacer(
                     modifier = Modifier

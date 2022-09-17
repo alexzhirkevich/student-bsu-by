@@ -5,7 +5,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -19,12 +21,12 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBarSwipeRefreshIndicator
 import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.util.applyIf
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.CollapsingToolbarScope
@@ -46,6 +48,7 @@ private sealed class PaidServicesPage(
 @ExperimentalPagerApi
 @Composable
 fun PaidServicesScreen(
+    isTablet : Boolean,
     viewModel: PaidServicesViewModel = hiltViewModel(),
     onMenuClicked : () -> Unit ={}
 ) {
@@ -61,8 +64,6 @@ fun PaidServicesScreen(
     }
 
     val scaffoldState = rememberCollapsingToolbarScaffoldState()
-    val refreshState = rememberSwipeRefreshState(
-        isRefreshing = viewModel.isUpdating.value)
 
     Column {
         Spacer(modifier = Modifier
@@ -74,17 +75,14 @@ fun PaidServicesScreen(
         CollapsingToolbarScaffold(
             modifier = Modifier.fillMaxSize(),
             state = scaffoldState,
-            enabled = refreshState.indicatorOffset==0f,
             scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
             toolbar = {
-                Toolbar(onMenuClicked = onMenuClicked)
+                Toolbar(isTablet = isTablet, onMenuClicked = onMenuClicked)
             }
         ) {
             Body(
                 viewModel = viewModel,
                 pages = pages,
-                swipeEnabled = scaffoldState.offsetY == 0,
-                refreshState = refreshState
             )
         }
     }
@@ -92,13 +90,15 @@ fun PaidServicesScreen(
 
 @ExperimentalPagerApi
 @Composable
-private fun CollapsingToolbarScope.Toolbar(onMenuClicked : () -> Unit, ) {
+private fun CollapsingToolbarScope.Toolbar(isTablet : Boolean ,onMenuClicked : () -> Unit, ) {
     TopAppBar(
         modifier = Modifier.zIndex(1f),
         elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.secondary
     ) {
-        NavigationMenuButton(onClick = onMenuClicked)
+        if (!isTablet) {
+            NavigationMenuButton(onClick = onMenuClicked)
+        }
         Text(
             text = stringResource(id = R.string.paidservices),
             color = MaterialTheme.colors.onSecondary,
@@ -115,11 +115,13 @@ private fun CollapsingToolbarScope.Toolbar(onMenuClicked : () -> Unit, ) {
 private fun Body(
     viewModel: PaidServicesViewModel,
     pages: List<PaidServicesPage>,
-    swipeEnabled : Boolean,
-    refreshState: SwipeRefreshState
-)  {
+) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
+
+    val refreshState = rememberSwipeRefreshState(
+        isRefreshing = viewModel.isUpdating.collectAsState().value
+    )
 
     Column(Modifier.fillMaxSize()) {
 
@@ -164,7 +166,6 @@ private fun Body(
 
 
         SwipeRefresh(
-            swipeEnabled = swipeEnabled,
             state = refreshState,
             onRefresh = viewModel::update,
             indicator = { state, offset ->
@@ -180,6 +181,7 @@ private fun Body(
                         translationY = refreshState.indicatorOffset
                     }
             ) { idx ->
+
                 when (pages[idx]) {
                     PaidServicesPage.Info -> InfoPage(viewModel)
                     PaidServicesPage.TuitionFee -> TuitionFeePage(viewModel)
@@ -187,18 +189,20 @@ private fun Body(
                         viewModel = viewModel,
                         emptyErrorMsg = stringResource(id = R.string.academ_debt_empty)
                     ) {
-                        viewModel.academDebtReceipts.value
+                        viewModel.academDebtReceiptsCommunication
+                            .collectAsState().value
                     }
                     PaidServicesPage.Common -> CommonReceiptsPage(
                         viewModel = viewModel,
-                        emptyErrorMsg = stringResource(id = R.string.common_receipts_empty)) {
-                        viewModel.commonReceipts.value
+                        emptyErrorMsg = stringResource(id = R.string.common_receipts_empty)
+                    ) {
+                        viewModel.commonReceiptsCommunication
+                            .collectAsState().value
                     }
                     PaidServicesPage.Hostel -> HostelBillsPage(viewModel)
                 }
             }
         }
-
     }
 }
 

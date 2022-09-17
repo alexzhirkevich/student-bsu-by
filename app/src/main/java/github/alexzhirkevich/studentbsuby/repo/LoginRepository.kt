@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import github.alexzhirkevich.studentbsuby.api.LoginApi
 import github.alexzhirkevich.studentbsuby.api.createLoginData
-import github.alexzhirkevich.studentbsuby.di.Encrypted
+import github.alexzhirkevich.studentbsuby.di.CredentialsPrefsQualifier
 import github.alexzhirkevich.studentbsuby.util.CaptchaRecognizer
 import github.alexzhirkevich.studentbsuby.util.LoginCookieManager
 import github.alexzhirkevich.studentbsuby.util.sharedPreferences
@@ -19,10 +19,10 @@ interface UsernameProvider {
 }
 
 open class UsernameProviderImpl @Inject constructor(
-    @Encrypted val encryptedPreferences: SharedPreferences
+    @CredentialsPrefsQualifier val credentialsPrefs: SharedPreferences
     ) : UsernameProvider {
 
-    override var username: String by sharedPreferences(encryptedPreferences,"")
+    override var username: String by sharedPreferences(credentialsPrefs,"")
         protected set
 
 }
@@ -33,11 +33,10 @@ operator fun UsernameProvider.getValue(thisObj: Any?, property: KProperty<*>): S
 @Singleton
 class LoginRepository @Inject constructor(
     private val api : LoginApi,
-    @Encrypted encryptedPreferences: SharedPreferences,
-    private val preferences: SharedPreferences,
+    @CredentialsPrefsQualifier credentialsPreferences: SharedPreferences,
     private val captchaRecognizer: CaptchaRecognizer,
     private val loginCookieManager: LoginCookieManager,
-    ) : UsernameProviderImpl(preferences) {
+    ) : UsernameProviderImpl(credentialsPreferences) {
 
     data class LoginResponse(
         val success: Boolean,
@@ -45,10 +44,10 @@ class LoginRepository @Inject constructor(
         val loginResult : String?
     )
 
-    var password by sharedPreferences(encryptedPreferences, "")
+    var password by sharedPreferences(credentialsPreferences, "")
         private set
 
-    var autoLogin by sharedPreferences(preferences,false)
+    var autoLogin by sharedPreferences(credentialsPreferences,false)
 
     suspend fun initialize(): LoginResponse {
         try {
@@ -98,28 +97,28 @@ class LoginRepository @Inject constructor(
             )
 
             val logged = res.code() == 302
+            val jsoup =  res.body()?.byteStream()?.readBytes()?.let {
+                Jsoup.parse(String(it))
+            }
+
             val loginResult = if (logged){
                 this.username = login
                 this.password = password
                 null
-            } else{
-                res.body()?.byteStream()?.readBytes()?.let {
-                    Jsoup.parse(String(it)).let {
-                        it.getElementById("ctl00_ContentPlaceHolder0_lbLoginResult")?.text()
-                            ?.takeIf(String::isNotBlank)
-                            ?: it.getElementsByClass("style1")
-                                ?.lastOrNull()
-                                ?.text()?.takeIf(String::isNotBlank)
-                    }
-                }
+            } else {
+                (jsoup?.getElementById("ctl00_ContentPlaceHolder0_lbLoginResult")?.text()
+                    ?.takeIf(String::isNotBlank)
+                        ?: jsoup?.getElementsByClass("style1")
+                            ?.lastOrNull()
+                            ?.text()?.takeIf(String::isNotBlank))
             }
+
             return LoginResponse(res.isSuccessful, logged,loginResult)
 
         } catch (t: Throwable) {
             LoginResponse(false,false,null)
         }
     }
-
 
     suspend fun updateCaptcha(keepText: Boolean): Bitmap? {
         return kotlin.runCatching {
@@ -132,11 +131,8 @@ class LoginRepository @Inject constructor(
         }.getOrNull()
     }
 
-    fun canRestoreSession() = loginCookieManager.canRestoreSession()
-
     private val overflowCount = 5
     private var currentUpdateCount = 0
-    private var updatedBitmap: Bitmap? = null
 
     tailrec suspend fun getCaptchaText(bitmap: Bitmap): String {
         return kotlin.runCatching {
@@ -149,19 +145,16 @@ class LoginRepository @Inject constructor(
             if (text.length != 6) {
                 if (currentUpdateCount < overflowCount) {
                     currentUpdateCount++
-                    updatedBitmap?.recycle()
-                    updatedBitmap = updateCaptcha(true)
+                    val bitmap = updateCaptcha(true)
                         ?: return@runCatching ""
-                    return getCaptchaText(updatedBitmap!!)
+                    return getCaptchaText(bitmap)
                 } else currentUpdateCount = 0
             } else {
-                updatedBitmap?.recycle()
                 currentUpdateCount = 0
                 return text
             }
             return@runCatching ""
         }.onFailure {
-            updatedBitmap?.recycle()
             currentUpdateCount = 0
 
         }.getOrDefault("")

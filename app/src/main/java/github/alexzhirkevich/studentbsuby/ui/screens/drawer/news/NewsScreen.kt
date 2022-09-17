@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +32,7 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @ExperimentalAnimationApi
 @Composable
 fun NewsScreen(
+    isTablet: Boolean,
     viewModel: NewsViewModel = hiltViewModel(),
     onMenuClicked : () -> Unit,
 ) {
@@ -70,7 +70,10 @@ fun NewsScreen(
             state = scaffoldState,
             scrollStrategy = ScrollStrategy.EnterAlways,
             toolbar = {
-                Toolbar(inDetail = currentRoute !=Route.DrawerScreen.News.NewsList.route, onMenuClicked)
+                Toolbar(
+                    isTablet = isTablet,
+                    inDetail = currentRoute !=Route.DrawerScreen.News.NewsList.route, onMenuClicked
+                )
             }
         ) {
             AnimatedNavHost(navController = navController, startDestination = items[0].route) {
@@ -101,12 +104,13 @@ fun NewsScreen(
 @ExperimentalAnimationApi
 @Composable
 private fun Toolbar(
+    isTablet : Boolean,
     inDetail : Boolean,
     onMenuClicked: () -> Unit
 ) {
     val activity = LocalContext.current as Activity
 
-    Column() {
+    Column {
         TopAppBar(
             modifier = Modifier.zIndex(1f),
             elevation = 0.dp,
@@ -125,7 +129,9 @@ private fun Toolbar(
                         onClick = activity::onBackPressed
                     )
                 } else {
-                    NavigationMenuButton(onClick = onMenuClicked)
+                    if (!isTablet) {
+                        NavigationMenuButton(onClick = onMenuClicked)
+                    }
                 }
             }
             Text(

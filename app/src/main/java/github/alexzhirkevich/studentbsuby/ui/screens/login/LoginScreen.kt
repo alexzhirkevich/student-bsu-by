@@ -1,12 +1,9 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.login
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,22 +12,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VpnKey
-import androidx.compose.material.icons.rounded.Person
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -50,27 +46,19 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import de.charlex.compose.HtmlText
 import github.alexzhirkevich.studentbsuby.R
-import github.alexzhirkevich.studentbsuby.navigation.Route
-import github.alexzhirkevich.studentbsuby.navigation.navigate
 import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBar
 import github.alexzhirkevich.studentbsuby.ui.common.DefaultTextInput
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutViewModel
-import github.alexzhirkevich.studentbsuby.ui.theme.LocalThemeSelector
-import github.alexzhirkevich.studentbsuby.ui.theme.values.Colors
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
-import github.alexzhirkevich.studentbsuby.util.exceptions.LoginException
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 private const val ButtonWidth = 200
 
@@ -87,104 +75,14 @@ fun LoginScreen(
     aboutViewModel: AboutViewModel = hiltViewModel()
 ) {
 
-    val loggedIn = loginViewModel.loggedIn.value
-
-
-    LaunchedEffect(key1 = loggedIn) {
-        if (loggedIn.valueOrNull() == true) {
-            navController.navigate(Route.DrawerScreen) {
-                launchSingleTop = true
-                popUpTo(Route.AuthScreen.route) {
-                    inclusive = true
-                    saveState = false
-                }
-            }
-        }
-    }
-
-
-    LoginWidget(
-        loginViewModel = loginViewModel,
-        aboutViewModel =  aboutViewModel,
-    )
-    AnimatedVisibility(
-        visible = loginViewModel.shouldShowSplashScreen.value,
-        enter = EnterTransition.None,
-        exit = fadeOut()
-    ) {
-        SplashScreen(loginViewModel.splashText.value)
-    }
-}
-
-@Composable
-fun SplashScreen(text : String = "") {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colors.primaryVariant)
-    ){
-
-        Box(
-            Modifier
-                .align(Alignment.Center)
-        ) {
-
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo",
-                modifier = Modifier
-                    .size(dimensionResource(id = R.dimen.logo_size))
-
-            )
-        }
-
-        var dots by remember {
-            mutableStateOf("")
-        }
-
-        LaunchedEffect(key1 = Unit) {
-            while (true) {
-                delay(500)
-                if (dots =="...")
-                    dots=""
-                else dots+='.'
-            }
-        }
-
-
-        Text(
-            text = text+dots,
-            color = Color.White,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 50.dp)
-                .navigationBarsPadding()
-        )
-    }
-}
-
-
-@ExperimentalCoroutinesApi
-@ExperimentalPagerApi
-@ExperimentalFoundationApi
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
-@ExperimentalComposeUiApi
-@Composable
-private fun LoginWidget(
-    loginViewModel: LoginViewModel,
-    aboutViewModel: AboutViewModel
-) {
-
-    val loginState by loginViewModel.loggedIn
+    val controlsEnabled by loginViewModel.controlsEnabled.collectAsState()
 
     val scaffoldState = rememberScaffoldState()
-    val context = LocalContext.current
 
-    LaunchedEffect(key1 = loginState) {
-        (loginState as? DataState.Error)?.let {
-            val message = (it.error as? LoginException)?.message
-                ?: context.getString(it.message)
-            scaffoldState.snackbarHostState.showSnackbar(message)
+    LaunchedEffect(key1 = Unit) {
+        loginViewModel.error.collect {
+            if (it.isNotBlank())
+                scaffoldState.snackbarHostState.showSnackbar(it)
         }
     }
 
@@ -287,8 +185,9 @@ private fun LoginWidget(
                                         density: Density
                                     ): Outline {
                                         val cr = CornerRadius(
-                                            (size.width-ButtonWidth*density.density*0.75f)/2,
-                                            size.height/2)
+                                            (size.width - ButtonWidth * density.density * 0.75f) / 2,
+                                            size.height / 2
+                                        )
                                         return Outline.Rounded(
                                             RoundRect(
                                                 top = 0f, left = 0f,
@@ -328,9 +227,11 @@ private fun LoginWidget(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Checkbox(
-                                            checked = loginViewModel.autoLogin.value,
-                                            enabled = loginViewModel.loggedIn.value !is DataState.Loading,
-                                            onCheckedChange = loginViewModel::setAutoLogin,
+                                            checked = loginViewModel.autoLogin.collectAsState().value,
+                                            enabled = controlsEnabled,
+                                            onCheckedChange = {
+                                                loginViewModel.handle(LoginEvent.AutoLoginChanged(it))
+                                            },
                                             colors = CheckboxDefaults.colors(
                                                 checkedColor = MaterialTheme.colors.primary,
                                                 checkmarkColor = MaterialTheme.colors.onPrimary
@@ -345,11 +246,10 @@ private fun LoginWidget(
                                 val keyboard = LocalSoftwareKeyboardController.current
                                 Button(
                                     onClick = {
-                                        loginViewModel.login()
+                                        loginViewModel.handle(LoginEvent.LoginClicked(navController))
                                         keyboard?.hide()
-
                                     },
-                                    enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+                                    enabled = controlsEnabled,
                                     modifier = Modifier
                                         .width(ButtonWidth.dp)
                                         .clip(MaterialTheme.shapes.medium)
@@ -401,7 +301,11 @@ private fun LoginWidget(
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
 
-                                                    IconButton(onClick = aboutViewModel::onEmailClicked) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            aboutViewModel.handle(AboutEvent.EmailClicked)
+                                                        }
+                                                    ) {
                                                         Icon(
                                                             imageVector = Icons.Default.Email,
                                                             contentDescription = "E-mail",
@@ -410,7 +314,11 @@ private fun LoginWidget(
                                                         )
                                                     }
 
-                                                    IconButton(onClick = aboutViewModel::onTgClicked) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            aboutViewModel.handle(AboutEvent.TgClicked)
+                                                        }
+                                                    ) {
                                                         Image(
                                                             painter = painterResource(R.drawable.ic_telegram),
                                                             contentDescription = "Telegram",
@@ -418,7 +326,7 @@ private fun LoginWidget(
                                                         )
                                                     }
 
-                                                    IconButton(onClick ={showDialog = false}) {
+                                                    IconButton(onClick = { showDialog = false }) {
                                                         Icon(
                                                             imageVector = Icons.Default.Close,
                                                             tint = MaterialTheme.colors.onSecondary,
@@ -443,7 +351,6 @@ private fun LoginWidget(
                 }
             }
         }
-
     }
 }
 
@@ -459,14 +366,18 @@ private fun LoginForm(
     loginViewModel: LoginViewModel
 ){
 
+    val controlsEnabled by loginViewModel.controlsEnabled.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         DefaultTextInput(
-            value = loginViewModel.loginText.value,
-            onValueChange = loginViewModel::setLoginText,
+            value = loginViewModel.login.collectAsState().value,
+            onValueChange = {
+                loginViewModel.handle(LoginEvent.LoginChanged(it))
+            },
             singleLine = true,
             maxLines = 1,
             leadingIcon = {
@@ -475,7 +386,7 @@ private fun LoginForm(
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
             ),
-            enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+            enabled = controlsEnabled,
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.login),
@@ -494,9 +405,12 @@ private fun LoginForm(
             mutableStateOf(false)
         }
         DefaultTextInput(
-            value = loginViewModel.passwordText.value,
-            onValueChange = loginViewModel::setPasswordText,
+            value = loginViewModel.password.collectAsState().value,
+            onValueChange = {
+                loginViewModel.handle(LoginEvent.PasswordChanged(it))
+            },
             singleLine = true,
+
             maxLines = 1,
             leadingIcon = {
                 Icon(imageVector = Icons.Outlined.VpnKey, contentDescription = "Password")
@@ -514,12 +428,13 @@ private fun LoginForm(
                         }
                 )
             },
-            enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+            enabled = controlsEnabled,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Next,
             ),
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
 
             placeholder = {
                 Text(
@@ -533,14 +448,14 @@ private fun LoginForm(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        val capcha by loginViewModel.captchaBitmap.collectAsState()
+        val captcha by loginViewModel.captchaImage.collectAsState()
 
         Box(Modifier
             .background(
                 color = MaterialTheme.colors.background,
                 shape = MaterialTheme.shapes.medium)
         ) {
-            if (capcha is DataState.Loading) {
+            if (captcha is DataState.Loading) {
                 BsuProgressBar(
                     Modifier.align(Alignment.Center),
                     tint = MaterialTheme.colors.primary,
@@ -561,9 +476,9 @@ private fun LoginForm(
 //
                 }
 
-                when (capcha) {
+                when (captcha) {
                     is DataState.Success<*> -> Image(
-                        bitmap = capcha.valueOrNull()!!,
+                        bitmap = captcha.valueOrNull()!!,
                         contentDescription = "captcha",
                         contentScale = ContentScale.Crop,
                         modifier = capchaModifier,
@@ -583,7 +498,9 @@ private fun LoginForm(
                 }
                 Box(
                     Modifier
-                        .clickable(onClick = loginViewModel::updateCaptcha)
+                        .clickable {
+                            loginViewModel.handle(LoginEvent.UpdateClicked())
+                        }
                         .padding(10.dp)
                 ) {
                     Icon(
@@ -600,10 +517,12 @@ private fun LoginForm(
 
         val keyboardController = LocalSoftwareKeyboardController.current
         DefaultTextInput(
-            value = loginViewModel.captchaText.collectAsState().value,
-            onValueChange = loginViewModel::setCaptchaText,
+            value = loginViewModel.captcha.collectAsState().value,
+            onValueChange = {
+                loginViewModel.handle(LoginEvent.CaptchaChanged(it))
+            },
             singleLine = true,
-            enabled = loginViewModel.loggedIn.value !is DataState.Loading,
+            enabled = controlsEnabled,
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.captcha),

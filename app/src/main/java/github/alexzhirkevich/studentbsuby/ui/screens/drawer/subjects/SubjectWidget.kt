@@ -1,31 +1,30 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.Absolute.SpaceEvenly
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.HighlightOff
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.TaskAlt
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import github.alexzhirkevich.studentbsuby.R
@@ -85,7 +84,7 @@ fun SubjectWidget(
 
 
             AnimatedVisibility(
-                modifier=  Modifier.zIndex(1f),
+                modifier = Modifier.zIndex(1f),
                 visible = isOpened,
             ) {
                 HoursPanel(subject = subject,modifier = Modifier
@@ -104,7 +103,7 @@ fun SubjectWidget(
                 ) {
                     if (subject.hasCredit) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -121,7 +120,7 @@ fun SubjectWidget(
                                 else -> Icons.Default.Schedule to MaterialTheme.colors.onSecondary
                             }
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(verticalAlignment = CenterVertically) {
 
                                 if (subject.creditRetakes != 0) {
                                     Box {
@@ -165,7 +164,7 @@ fun SubjectWidget(
 
                     if (subject.hasExam) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
+                            verticalAlignment = CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -177,7 +176,7 @@ fun SubjectWidget(
 
                             Spacer(modifier = Modifier.width(5.dp))
 
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(verticalAlignment = CenterVertically) {
 
                                 if (subject.examRetakes != 0) {
                                     Box {
@@ -262,34 +261,34 @@ private fun HoursPanel(subject: Subject,modifier: Modifier = Modifier) {
 
 
 @Composable
-private fun HoursItem(name : String, hrs : Int){
+private fun HoursItem(name : String, hrs : Int) {
 
-    with (LocalDensity.current) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Card(
+            shape = CircleShape,
+            backgroundColor = MaterialTheme.colors.background,
+            elevation = 5.dp
         ) {
-            Card(
-                shape = CircleShape,
-                backgroundColor = MaterialTheme.colors.background,
-                elevation = 5.dp
-            ) {
-                Box(
-                    modifier = Modifier.size(
+            Box(
+                modifier = Modifier.size(
+                    with(LocalDensity.current) {
                         MaterialTheme.typography.body1
                             .fontSize.toDp() * 2.5f
-                    )
-                ) {
+                    }
+                )
+            ) {
 
-                    Text(
-                        text = hrs.toString(),
-                        style = MaterialTheme.typography.body1,
-                        modifier = Modifier
-                            .align(Center)
-                    )
-                }
-
+                Text(
+                    text = hrs.toString(),
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier
+                        .align(Center)
+                )
             }
-            Text(text = name, style = MaterialTheme.typography.caption)
+
         }
+        Text(text = name, style = MaterialTheme.typography.caption)
     }
 }

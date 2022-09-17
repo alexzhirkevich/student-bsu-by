@@ -3,7 +3,6 @@ package github.alexzhirkevich.studentbsuby.workers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
@@ -18,7 +17,10 @@ import github.alexzhirkevich.studentbsuby.data.models.Lesson
 import github.alexzhirkevich.studentbsuby.repo.*
 import github.alexzhirkevich.studentbsuby.util.NotificationCreator
 import github.alexzhirkevich.studentbsuby.util.WorkerManager
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import me.onebone.toolbar.ExperimentalToolbarApi
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

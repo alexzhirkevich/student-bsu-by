@@ -1,6 +1,10 @@
+
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,39 +12,43 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.insets.*
+import com.google.accompanist.insets.navigationBarsHeight
+import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Subject
 import github.alexzhirkevich.studentbsuby.ui.common.*
 import github.alexzhirkevich.studentbsuby.util.*
-import kotlinx.coroutines.*
-import me.onebone.toolbar.*
-import kotlin.math.ceil
-import kotlin.math.roundToInt
-
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import me.onebone.toolbar.CollapsingToolbarScaffold
+import me.onebone.toolbar.ScrollStrategy
+import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 
 @ExperimentalAnimationApi
@@ -50,35 +58,46 @@ import kotlin.math.roundToInt
 @ExperimentalCoroutinesApi
 @Composable
 fun SubjectsScreen(
+    isTablet: Boolean,
     subjectsViewModel: SubjectsViewModel = hiltViewModel(),
     onMenuClicked : () -> Unit
 ) {
 
-    val subjects by subjectsViewModel.subjects.collectAsState()
+    val data by subjectsViewModel.subjectsCommunication
+        .collectAsState()
 
-    when (subjects) {
+    when (val subjects = data) {
         is DataState.Success<*>, is DataState.Loading -> {
            SuccessSubjectsScreen(
+               isTablet = isTablet,
                subjectsViewModel = subjectsViewModel,
                subjects = subjects,
                onMenuClicked = onMenuClicked,
            )
         }
-        is DataState.Empty, is DataState.Error -> Box(
+        is DataState.Empty ->  Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            ErrorScreen(
+                isTablet = isTablet,
+                toolbarText = stringResource(id = R.string.subjects),
+                title = stringResource(id = R.string.empty),
+                error = stringResource(R.string.subjects_empty),
+                updater = subjectsViewModel,
+                onMenuClicked = onMenuClicked
+            )
+        }
+        is DataState.Error -> Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
 
             ErrorScreen(
+                isTablet = isTablet,
                 toolbarText = stringResource(id = R.string.subjects),
-                title = stringResource(
-                    id = if (subjects is DataState.Empty)
-                        R.string.empty else R.string.something_gone_wrong
-                ),
-                error = stringResource(
-                    id = if (subjects is DataState.Empty)
-                        R.string.subjects_empty else (subjects as DataState.Error).message
-                ),
+                title = stringResource(R.string.something_gone_wrong),
+                error = stringResource(id = subjects.message),
                 updater = subjectsViewModel,
                 onMenuClicked = onMenuClicked
             )
@@ -94,20 +113,15 @@ fun SubjectsScreen(
 
 @Composable
 private fun SuccessSubjectsScreen(
+    isTablet: Boolean,
     subjectsViewModel: SubjectsViewModel,
     subjects: DataState<List<List<Subject>>>,
     onMenuClicked: () -> Unit,
 ) {
-
     val scaffoldState = rememberCollapsingToolbarScaffoldState()
-    val refreshState = rememberSwipeRefreshState(
-        isRefreshing = subjectsViewModel.isUpdating.value
-    )
 
-    val visibleSubjects by subjectsViewModel.visibleSubjects.collectAsState()
-    val currentSemester by subjectsViewModel.currentSemester
+    
     Column {
-
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,32 +137,50 @@ private fun SuccessSubjectsScreen(
                     color = MaterialTheme.colors.primary.copy(alpha = .05f)
                 ),
             state = scaffoldState,
-            enabled = refreshState.indicatorOffset == 0f,
             scrollStrategy = ScrollStrategy.EnterAlwaysCollapsed,
             toolbarModifier = Modifier
                 .background(MaterialTheme.colors.primary),
             toolbar = {
                 Toolbar(
+                    isTablet = isTablet,
                     viewModel = subjectsViewModel,
                     onMenuClicked = onMenuClicked
                 )
             })
         {
+            val searchText by subjectsViewModel.searchCommunication
+                .collectAsState()
+            val isUpdating by subjectsViewModel.isUpdating
+                .collectAsState()
+
+            val visibleSubjects by subjectsViewModel.visibleSubjectsCommunication
+                .collectAsState()
+
             if (subjects is DataState.Success) {
-                Body(
-                    initialSemester = currentSemester,
-                    visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
-                    subjects = subjects.valueOrNull()!!,
-                    updater = subjectsViewModel,
-                    refreshState = refreshState,
-                    searchText = subjectsViewModel.searchText.value,
-                    onSemesterChanged = subjectsViewModel::setCurrentSemester
-                )
+                if (searchText.isNotBlank())
+                    SearchSubjects(
+                        visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
+                        searchText = searchText
+                    )
+                else {
+                    val currentSemester by subjectsViewModel.semesterCommunication
+                        .collectAsState()
+
+                    AllSemesters(
+                        initialSemester = currentSemester,
+                        visibleSubjects = visibleSubjects.valueOrNull().orEmpty(),
+                        subjects = subjects.valueOrNull().orEmpty(),
+                        updater = subjectsViewModel,
+                        isRefreshing = isUpdating
+                    ) {
+                        subjectsViewModel
+                            .handle(SubjectsEvent.SelectedSemesterChanged(it))
+                    }
+                }
             } else {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-
                 ) {
                     BsuProgressBar(
                         Modifier.align(Alignment.Center),
@@ -166,6 +198,7 @@ private fun SuccessSubjectsScreen(
 
 @Composable
 private fun Toolbar(
+    isTablet : Boolean,
     viewModel: SubjectsViewModel,
     onMenuClicked: () -> Unit
 ) {
@@ -173,6 +206,9 @@ private fun Toolbar(
     var filtersVisible by rememberSaveable {
         mutableStateOf(false)
     }
+
+    val searchText by viewModel.searchCommunication
+        .collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -185,11 +221,23 @@ private fun Toolbar(
             elevation = 0.dp,
             backgroundColor = Color.Transparent
         ) {
-            NavigationMenuButton(onClick = onMenuClicked)
-            DefaultTextInput(value = viewModel.searchText.value,
-                onValueChange = viewModel::search,
+
+            val focusRequester = remember {
+                FocusRequester()
+            }
+
+            if (!isTablet) {
+                NavigationMenuButton(onClick = onMenuClicked)
+            }
+            DefaultTextInput(
+                value = searchText,
+                onValueChange = {
+                    viewModel.handle(SubjectsEvent.SubjectsSearchChanged(it))
+                },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.body1,
+                textInputModifier = Modifier
+                    .focusRequester(focusRequester),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(end = 5.dp),
@@ -197,7 +245,7 @@ private fun Toolbar(
                     capitalization = KeyboardCapitalization.Sentences
                 ),
                 leadingIcon = {
-                    if (viewModel.searchText.value.isEmpty()) {
+                    if (searchText.isEmpty()) {
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = "Search",
@@ -210,7 +258,11 @@ private fun Toolbar(
                             modifier = Modifier
                                 .clip(CircleShape)
                                 .clickable {
-                                    viewModel.search("")
+                                    viewModel.handle(
+                                        SubjectsEvent.CancelSearchCliched(
+                                            focusRequester
+                                        )
+                                    )
                                 }
                         )
                     }
@@ -234,7 +286,6 @@ private fun Toolbar(
             )
         }
         AnimatedVisibility(visible = filtersVisible) {
-
             Row(
                 modifier = Modifier
                     .animateEnterExit(
@@ -242,29 +293,31 @@ private fun Toolbar(
                         exit = slideOutVertically()
                 )
             ) {
+
+                val withCredit by viewModel.withCreditCommunication
+                    .collectAsState()
+                val withExam by viewModel.withExamCommunication
+                    .collectAsState()
+
                 Row(
                     Modifier
                         .weight(1f)
                         .padding(horizontal = 5.dp)
                         .clip(CircleShape)
                         .clickable {
-                            viewModel.setFilter(
-                                withCredit = viewModel.withCredit.value.not(),
-                                withExam = viewModel.withExam.value
-                            )
-
+                            viewModel.handle(SubjectsEvent.SubjectsWithCreditFilterPressed)
                         },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
-                        checked = viewModel.withCredit.value,
+                        checked = withCredit,
                         colors = CheckboxDefaults.colors(
                             checkedColor = MaterialTheme.colors.primary,
                             checkmarkColor = MaterialTheme.colors.onPrimary
                         ),
                         onCheckedChange = {
-                            viewModel.setFilter(it, viewModel.withExam.value)
+                            viewModel.handle(SubjectsEvent.SubjectsWithCreditFilterPressed)
                         })
                     Text(text = stringResource(id = R.string.with_credit))
                 }
@@ -274,23 +327,20 @@ private fun Toolbar(
                         .padding(horizontal = 5.dp)
                         .clip(CircleShape)
                         .clickable {
-                            viewModel.setFilter(
-                                withCredit = viewModel.withCredit.value,
-                                withExam = viewModel.withExam.value.not()
-                            )
+                            viewModel.handle(SubjectsEvent.SubjectsWithExamFilterPressed)
                         },
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
 
                 ) {
                     Checkbox(
-                        checked = viewModel.withExam.value,
+                        checked = withExam,
                         colors = CheckboxDefaults.colors(
                             checkedColor = MaterialTheme.colors.primary,
                             checkmarkColor = MaterialTheme.colors.onPrimary
                         ),
                         onCheckedChange = {
-                            viewModel.setFilter(viewModel.withCredit.value, it)
+                            viewModel.handle(SubjectsEvent.SubjectsWithExamFilterPressed)
                         })
                     Text(text = stringResource(id = R.string.with_exam))
                 }
@@ -301,95 +351,70 @@ private fun Toolbar(
 
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
-@ExperimentalPagerApi
-@ExperimentalFoundationApi
-@ExperimentalCoroutinesApi
-@Composable
-private fun Body(
-    initialSemester : Int,
-    visibleSubjects: List<List<Subject>>,
-    subjects : List<List<Subject>>,
-    updater: Updatable,
-    refreshState: SwipeRefreshState,
-    searchText : String,
-    onSemesterChanged: (Int) -> Unit
-) {
-
-    if (searchText.isNotBlank())
-        SearchSubjectsBody(
-            visibleSubjects = visibleSubjects,
-            searchText = searchText
-        )
-    else
-        AllSemestersBody(
-            initialSemester = initialSemester,
-            visibleSubjects = visibleSubjects ,
-            subjects = subjects,
-            updater = updater,
-            refreshState = refreshState,
-            onSemesterChanged = onSemesterChanged
-        )
-}
-
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
 @ExperimentalFoundationApi
 @Composable
-private fun SearchSubjectsBody(
+private fun SearchSubjects(
     visibleSubjects: List<List<Subject>>,
     searchText: String
 ){
 
-    if (visibleSubjects.isNotEmpty()) {
-        val openedSubject = remember {
-            mutableStateListOf<Subject>()
-        }
+    Column(Modifier.fillMaxSize()) {
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(Color.Gray.copy(alpha = .3f))
+        )
+        if (visibleSubjects.any { it.isNotEmpty() }) {
+            val openedSubject = remember {
+                mutableStateListOf<Subject>()
+            }
 
-        LazyColumn(Modifier.fillMaxSize()) {
-            visibleSubjects.forEachIndexed { idx, list ->
-                if (list.isNotEmpty()) {
-                    stickyHeader {
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(5.dp)
+            LazyColumn(Modifier.weight(1f)
+                .navigationBarsWithImePadding()) {
+                visibleSubjects.forEachIndexed { idx, list ->
+                    if (list.isNotEmpty()) {
+                        stickyHeader {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.semester, idx + 1),
+                                    style = MaterialTheme.typography.body1,
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .background(MaterialTheme.colors.background.copy(.9f))
+                                        .padding(vertical = 5.dp, horizontal = 10.dp)
+                                        .align(Alignment.TopCenter)
+                                )
+                            }
+                        }
 
-                        ) {
-                            Text(
-                                text = stringResource(id = R.string.semester, idx + 1),
-                                style = MaterialTheme.typography.body1,
-                                modifier = Modifier
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .background(MaterialTheme.colors.background.copy(.9f))
-                                    .padding(vertical = 5.dp, horizontal = 10.dp)
-                                    .align(Alignment.TopCenter)
+                        item {
+                            Page(
+                                subjects = list,
+                                opened = openedSubject,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }
-
-                    item {
-                        Page(
-                            subjects = list,
-                            opened = openedSubject,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.navigationBarsHeight(10.dp))
                 }
             }
-            item { 
-                Spacer(modifier = Modifier.navigationBarsWithImePadding())
-            }
-        }
-    } else {
-        Box(Modifier.fillMaxSize()) {
+        } else {
+            Box(Modifier.fillMaxSize()) {
 
-            ErrorWidget(
-                title = stringResource(id = R.string.empty),
-                error = stringResource(id = R.string.subjects_not_found_search,searchText),
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 100.dp)
-            )
+                ErrorWidget(
+                    title = stringResource(id = R.string.empty),
+                    error = stringResource(id = R.string.subjects_not_found_search, searchText),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 100.dp)
+                )
+            }
         }
     }
 }
@@ -399,13 +424,13 @@ private fun SearchSubjectsBody(
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @Composable
-private fun AllSemestersBody(
-    initialSemester : Int,
+private fun AllSemesters(
+    initialSemester: Int,
     visibleSubjects: List<List<Subject>>,
-    subjects : List<List<Subject>>,
+    subjects: List<List<Subject>>,
     updater: Updatable,
-    refreshState: SwipeRefreshState,
-    onSemesterChanged : (Int) -> Unit
+    isRefreshing: Boolean,
+    onSemesterChanged: (Int) -> Unit
 ) {
     val state = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -463,6 +488,8 @@ private fun AllSemestersBody(
             }
         }
     ) {
+        val refreshState = rememberSwipeRefreshState(
+            isRefreshing = isRefreshing)
 
         val openedSubjects = remember {
             mutableStateListOf<Subject>()
@@ -479,30 +506,25 @@ private fun AllSemestersBody(
             HorizontalPager(
                 count = subjects.size,
                 state = state,
+                verticalAlignment = Alignment.Top,
                 modifier = Modifier
                     .fillMaxSize()
-
-
             ) { page ->
-
                 if (visibleSubjects.getOrNull(page)?.isNotEmpty() == true) {
                     Page(
                         modifier = Modifier
-                            .graphicsLayer {
-                                translationY = refreshState.indicatorOffset
-                            }
-                            .fillMaxSize()
+                        .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .navigationBarsWithImePadding()
-                            .padding(bottom = 10.dp),
-
+                            .graphicsLayer {
+                                translationY = refreshState.indicatorOffset
+                            },
                         subjects = visibleSubjects[page],
                         opened = openedSubjects,
+                        withBottomPadding = true,
                     )
                 } else {
-                    Box(Modifier
-                        .fillMaxSize()) {
-
+                    Box(Modifier.fillMaxSize()) {
                         ErrorWidget(
                             title = stringResource(id = R.string.empty),
                             error = stringResource(id = R.string.subjects_not_found),
@@ -525,183 +547,31 @@ private fun AllSemestersBody(
 private fun Page(
     subjects: List<Subject>,
     opened : SnapshotStateList<Subject>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    withBottomPadding : Boolean = false,
 ) {
-    val mutableSubjects = remember {
-        mutableStateListOf(*subjects.toTypedArray())
-    }
-
-    val subjectsInFirstColumn = remember {
-        mutableStateOf(ceil(subjects.size/2f).roundToInt())
-    }
-
-    var shrinkAnimationEnabled by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    val lastElemHeight = listOf(
-        remember { mutableStateOf(0) },
-        remember { mutableStateOf(0) }
-    )
-
-
-    val columnHeight = listOf(
-        remember { mutableStateOf(0) },
-        remember { mutableStateOf(0) }
-    )
-
-    val scope = rememberCoroutineScope()
-
-    val firstColumnItems = remember {
-        mutableStateListOf<Subject>()
-    }
-    val secondColumnItems = remember {
-        mutableStateListOf<Subject>()
-    }
-
-    LaunchedEffect(subjects) {
-        if (mutableSubjects.toList() != subjects) {
-            mutableSubjects.clear()
-            mutableSubjects.addAll(subjects)
-            subjectsInFirstColumn.value = mutableSubjects.size / 2
-        }
-        delay(100)
-        shrinkAnimationEnabled = true
-        suspendRepeat {
-            shrink(
-                columnHeight[0].value,
-                columnHeight[1].value,
-                lastElemHeight[0].value,
-                lastElemHeight[1].value,
-                mutableSubjects,
-                subjectsInFirstColumn
-            )
-        }
-        delay(100)
-        shrinkAnimationEnabled = false
-    }
-
-    LaunchedEffect(key1 = subjectsInFirstColumn.value) {
-        firstColumnItems.clear()
-        firstColumnItems.addAll(mutableSubjects.subList(0, subjectsInFirstColumn.value))
-        secondColumnItems.clear()
-        secondColumnItems.addAll(
-            mutableSubjects.subList(subjectsInFirstColumn.value, mutableSubjects.size))
-    }
-
-    Row(
+    FlowBox(
+        elementWidth = 180.dp,
         modifier = modifier
     ) {
-        listOf(firstColumnItems,secondColumnItems).forEachIndexed { columnIndex, list ->
-            Column(
-                Modifier
-                    .weight(1f)
-                    .onSizeChanged {
-                        columnHeight[columnIndex].value = it.height
-                    }
-            ) {
-                list.forEachIndexed { idx, subj ->
-                    key(subj.name) {
-
-                        var visible by rememberSaveable {
-                            mutableStateOf(false)
-                        }
-                        LaunchedEffect(Unit){
-                            visible = true
-                        }
-                        AnimatedVisibility(
-                            modifier = Modifier.padding(7.dp),
-                            visible = visible,
-                            enter = if (shrinkAnimationEnabled) slideInHorizontally {
-                                if (columnIndex == 0) it else -it
-                            }
-                            else EnterTransition.None,
-                            exit = ExitTransition.None
-
-                        ) {
-
-                            SubjectWidget(
-                                subject = subj,
-                                isOpened = subj in opened,
-                                modifier = Modifier
-                                    .applyIf(idx == list.lastIndex) {
-                                        it.onSizeChanged {
-                                            lastElemHeight[columnIndex].value = it.height
-                                        }
-                                    }
-                            ) {
-                                scope.launch(Dispatchers.Default) {
-                                    if (!opened.remove(subj)) {
-                                        opened.add(subj)
-                                    }
-                                    delay(300)
-                                    shrinkAnimationEnabled = true
-                                    suspendRepeat {
-                                        shrink(
-                                            columnHeight[0].value,
-                                            columnHeight[1].value,
-                                            lastElemHeight[0].value,
-                                            lastElemHeight[1].value,
-                                            mutableSubjects,
-                                            subjectsInFirstColumn
-                                        )
-                                    }
-                                    delay(200)
-                                    shrinkAnimationEnabled = false
-                                }
-                            }
-                        }
-                    }
-                }
+        subjects.forEach {
+            val isOpened by derivedStateOf {
+                it in opened
+            }
+            SubjectWidget(
+                subject = it,
+                isOpened = isOpened,
+                modifier = Modifier
+                    .padding(5.dp)
+            ){
+                if (isOpened){
+                    opened.remove(it)
+                } else opened.add(it)
             }
         }
-    }
-}
-
-private suspend fun suspendRepeat(delay:Long = 100, max:Int = 3, shrink : () ->Boolean){
-    var cur = 0
-    while (shrink() && cur<max){
-        delay(delay)
-        cur++
-    }
-}
-
-private fun shrink(
-    firstColumnHeight : Int,
-    secondColumnHeight : Int,
-    lastElemInFirstColumnHeight : Int,
-    lastElemInSecondColumnHeight : Int,
-    subjects : SnapshotStateList<Subject>,
-    subjectsInFirstColumn : MutableState<Int>
-) : Boolean {
-    return when {
-
-        subjects.size == 1 -> false
-
-        (firstColumnHeight - secondColumnHeight).let {
-            it > 0 && lastElemInFirstColumnHeight*1.1 < it &&
-                    subjects.size > subjectsInFirstColumn.value - 1 &&
-                    subjects.size >1 &&
-                    subjectsInFirstColumn.value >0
-        } -> {
-            subjects.add(subjects.removeAt(subjectsInFirstColumn.value - 1))
-            subjectsInFirstColumn.value--
-            true
+        if (withBottomPadding){
+            Spacer(modifier = Modifier.navigationBarsHeight(10.dp))
+            Spacer(modifier = Modifier.navigationBarsHeight(10.dp))
         }
-
-        (secondColumnHeight - firstColumnHeight).let {
-            it > 0 && lastElemInSecondColumnHeight*1.1  < it &&
-                    subjects.size > subjectsInFirstColumn.value &&
-                    subjects.size >1 &&
-                    subjectsInFirstColumn.value >= 0
-        } -> {
-            subjects.add(
-                subjectsInFirstColumn.value,
-                subjects.removeLast()
-            )
-            subjectsInFirstColumn.value++
-            true
-        }
-        else -> false
     }
 }

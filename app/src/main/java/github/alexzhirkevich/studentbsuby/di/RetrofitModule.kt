@@ -1,8 +1,8 @@
 package github.alexzhirkevich.studentbsuby.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import dagger.Module
@@ -10,18 +10,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import github.alexzhirkevich.studentbsuby.BuildConfig
 import github.alexzhirkevich.studentbsuby.api.LoginApi
 import github.alexzhirkevich.studentbsuby.api.PaidServicesApi
 import github.alexzhirkevich.studentbsuby.api.ProfileApi
 import github.alexzhirkevich.studentbsuby.api.TimetableApi
 import github.alexzhirkevich.studentbsuby.util.LoginCookieManager
 import github.alexzhirkevich.studentbsuby.util.PreferencesCookieCache
-import io.harkema.retrofitcurlprinter.Logger
-import io.harkema.retrofitcurlprinter.RetrofitCurlPrinterInterceptor
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -37,8 +33,11 @@ class RetrofitModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(@ApplicationContext context: Context) : OkHttpClient {
-        val cache = PreferencesCookieCache(context)
+    fun provideHttpClient(
+        @ApplicationContext context: Context,
+        @CookiesPrefsQualifier preferences: SharedPreferences
+    ) : OkHttpClient {
+        val cache = PreferencesCookieCache(preferences)
         val cookieJar = PersistentCookieJar(cache, SharedPrefsCookiePersistor(context))
         loginCookieManager = cache
 
@@ -66,23 +65,23 @@ class RetrofitModule {
                     .addHeader("Connection", "close").build()
                 it.proceed(request)
             })
-            .let {
-                if (BuildConfig.DEBUG) {
-                    it.addInterceptor(HttpLoggingInterceptor(
-                        object : HttpLoggingInterceptor.Logger {
-                            override fun log(message: String) {
-                                Log.e("log", message)
-                            }
-
-                        }
-                    ).apply { level = HttpLoggingInterceptor.Level.HEADERS }
-                    ).addInterceptor(RetrofitCurlPrinterInterceptor(object : Logger {
-                        override fun log(message: String) {
-                            Log.e("CURL", message)
-                        }
-                    }))
-                } else it
-            }
+//            .let {
+//                if (BuildConfig.DEBUG) {
+//                    it.addInterceptor(HttpLoggingInterceptor(
+//                        object : HttpLoggingInterceptor.Logger {
+//                            override fun log(message: String) {
+//                                Log.e("log", message)
+//                            }
+//
+//                        }
+//                    ).apply { level = HttpLoggingInterceptor.Level.HEADERS }
+//                    ).addInterceptor(RetrofitCurlPrinterInterceptor(object : Logger {
+//                        override fun log(message: String) {
+//                            Log.e("CURL", message)
+//                        }
+//                    }))
+//                } else it
+//            }
             .build()
     }
 

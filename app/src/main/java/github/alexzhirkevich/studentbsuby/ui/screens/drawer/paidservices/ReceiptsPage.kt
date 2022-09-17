@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Receipt
 import github.alexzhirkevich.studentbsuby.util.DataState
-import github.alexzhirkevich.studentbsuby.util.Updatable
 import java.text.DateFormat
 import java.util.*
 

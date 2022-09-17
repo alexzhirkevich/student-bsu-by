@@ -1,13 +1,9 @@
 package github.alexzhirkevich.studentbsuby.api
 
-import androidx.annotation.IntRange
 import okhttp3.ResponseBody
-import okhttp3.internal.http.RealResponseBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 import java.nio.charset.Charset
-import kotlin.math.log
 
 fun LoginApi.createLoginData(
     login: String,

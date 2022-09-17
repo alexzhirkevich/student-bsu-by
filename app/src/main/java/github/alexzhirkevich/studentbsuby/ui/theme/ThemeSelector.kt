@@ -1,6 +1,5 @@
 package github.alexzhirkevich.studentbsuby.ui.theme
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 
 interface ThemeSelector {

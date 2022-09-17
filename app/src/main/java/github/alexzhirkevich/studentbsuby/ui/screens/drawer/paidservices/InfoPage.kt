@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -33,12 +34,14 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import de.charlex.compose.HtmlText
 import github.alexzhirkevich.studentbsuby.R
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import github.alexzhirkevich.studentbsuby.util.valueOrNull
 
 @Composable
 internal fun InfoPage(
     viewModel: PaidServicesViewModel
 ) {
+
 
     @Composable
     fun ColumnScope.InfoBlock(
@@ -100,84 +103,90 @@ internal fun InfoPage(
 
     val scrollstate = rememberScrollState()
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollstate)
-    ) {
+    SelectionContainer {
 
-        Column(
+        Box(
             Modifier
-                .padding(10.dp)
-                .animateContentSize()
+                .fillMaxSize()
+                .verticalScroll(scrollstate)
         ) {
 
-            val paidInfo by viewModel.paidInfo
+            Column(
+                Modifier
+                    .padding(10.dp)
+                    .animateContentSize()
+            ) {
 
-            paidInfo.valueOrNull()?.let {
+                val paidInfo by viewModel.paidInfoCommunication
+                    .collectAsState()
 
-                listOf(
-                    R.string.contract_number to it.contractNumber,
-                    R.string.debt to it.debt,
-                    R.string.fine to it.fine
-                ).forEach {
-                    val title = stringResource(it.first)
-                    val value = it.second.toString()
-                    Text(
-                        modifier = Modifier.padding(horizontal = 5.dp),
-                        text = AnnotatedString(
-                            text = "$title: $value",
-                            spanStyles = listOf(
-                                AnnotatedString.Range(
-                                    item = SpanStyle(fontWeight = FontWeight.SemiBold),
-                                    start = 0,
-                                    end = title.length + 1
-                                )
-                            )
-                        ),
-                        style = MaterialTheme.typography.subtitle1
-                            .copy(fontWeight = FontWeight.Normal),
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                }
-                Spacer(
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .height(.5.dp)
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colors.onBackground)
-                )
-            }
+                paidInfo.valueOrNull()?.let {
 
-            blocks.forEach {
-                InfoBlock(
-                    title = it.first,
-                    text = it.second
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-            }
-
-            Box(Modifier.fillMaxWidth()) {
-                Button(
-                    onClick = viewModel::onEripHelpClicked,
-                    modifier = Modifier.align(Alignment.Center)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.HelpOutline,
-                            tint = MaterialTheme.colors.onPrimary,
-                            contentDescription = "Payment help"
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
+                    listOf(
+                        R.string.contract_number to it.contractNumber,
+                        R.string.debt to it.debt,
+                        R.string.fine to it.fine
+                    ).forEach {
+                        val title = stringResource(it.first)
+                        val value = it.second.toString()
                         Text(
-                            text = stringResource(id = R.string.erip_help),
-                            color = MaterialTheme.colors.onPrimary
+                            modifier = Modifier.padding(horizontal = 5.dp),
+                            text = AnnotatedString(
+                                text = "$title: $value",
+                                spanStyles = listOf(
+                                    AnnotatedString.Range(
+                                        item = SpanStyle(fontWeight = FontWeight.SemiBold),
+                                        start = 0,
+                                        end = title.length + 1
+                                    )
+                                )
+                            ),
+                            style = MaterialTheme.typography.subtitle1
+                                .copy(fontWeight = FontWeight.Normal),
                         )
+                        Spacer(modifier = Modifier.height(5.dp))
+                    }
+                    Spacer(
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .height(.5.dp)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colors.onBackground)
+                    )
+                }
+
+                blocks.forEach {
+                    InfoBlock(
+                        title = it.first,
+                        text = it.second
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
+                Box(Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = {
+                              viewModel.handle(PaidServicesEvent.EripHelpClicked)
+                        },
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.HelpOutline,
+                                tint = MaterialTheme.colors.onPrimary,
+                                contentDescription = "Payment help"
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = stringResource(id = R.string.erip_help),
+                                color = MaterialTheme.colors.onPrimary
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.navigationBarsWithImePadding())
+                Spacer(modifier = Modifier.navigationBarsWithImePadding())
+            }
         }
     }
 }

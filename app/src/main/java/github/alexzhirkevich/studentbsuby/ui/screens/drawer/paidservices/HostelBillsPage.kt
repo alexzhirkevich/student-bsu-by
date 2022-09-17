@@ -2,6 +2,7 @@ package github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProvideTextStyle
@@ -15,12 +16,13 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.Bill
 import github.alexzhirkevich.studentbsuby.util.DataState
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 import java.text.DateFormat
 import java.util.*
 
 @Composable
 fun HostelBillsPage(viewModel : PaidServicesViewModel){
-    val bills by viewModel.hostelBills
+    val bills by viewModel.hostelBillsCommunication.collectAsState()
 
     when (val b = bills) {
         is DataState.Success -> SuccessHostelBillsPage(
@@ -44,18 +46,21 @@ private fun SuccessHostelBillsPage(
     bills: List<Bill>,
     dateFormat: DateFormat
 ) {
-    LazyColumn(
-        Modifier
-            .fillMaxSize()
-    ) {
-        items(bills.size) {
-            HostelBillWidget(
-                bill = bills[it],
-                dateFormat = dateFormat,
-                modifier = Modifier.padding(5.dp)
-            )
+    SelectionContainer {
+
+        LazyColumn(
+            Modifier
+                .fillMaxSize()
+        ) {
+            items(bills.size) {
+                HostelBillWidget(
+                    bill = bills[it],
+                    dateFormat = dateFormat,
+                    modifier = Modifier.padding(5.dp)
+                )
+            }
+            item { Spacer(modifier = Modifier.navigationBarsWithImePadding()) }
         }
-        item { Spacer(modifier = Modifier.navigationBarsWithImePadding()) }
     }
 }
 

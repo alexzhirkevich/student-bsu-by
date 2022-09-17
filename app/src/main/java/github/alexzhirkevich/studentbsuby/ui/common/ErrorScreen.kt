@@ -5,8 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,9 +25,11 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.util.Updatable
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 
 @Composable
 fun ErrorScreen(
+    isTablet : Boolean,
     toolbarText: String,
     error: String,
     updater: Updatable,
@@ -41,7 +46,9 @@ fun ErrorScreen(
             elevation = 0.dp,
             backgroundColor = Color.Transparent
         ) {
-            NavigationMenuButton(onClick = onMenuClicked)
+            if (!isTablet) {
+                NavigationMenuButton(onClick = onMenuClicked)
+            }
             Text(
                 text = toolbarText,
                 color = MaterialTheme.colors.onSecondary,
@@ -52,9 +59,12 @@ fun ErrorScreen(
 
     val status = LocalWindowInsets.current.statusBars.bottom
     with(LocalDensity.current) {
+
+        val isUpdating by updater.isUpdating.collectAsState()
+
         SwipeRefresh(
             state = rememberSwipeRefreshState(
-                isRefreshing = updater.isUpdating.value
+                isRefreshing = isUpdating
             ),
             indicator = { state,offset->
                 BsuProgressBarSwipeRefreshIndicator(state = state, trigger = offset)

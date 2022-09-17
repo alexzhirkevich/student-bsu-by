@@ -2,13 +2,12 @@ package github.alexzhirkevich.studentbsuby.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.migration.AutoMigrationSpec
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import github.alexzhirkevich.studentbsuby.dao.*
+import github.alexzhirkevich.studentbsuby.dao.AppDatabase
 import javax.inject.Singleton
 
 @Module

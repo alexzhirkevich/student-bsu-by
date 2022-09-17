@@ -7,7 +7,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,11 +15,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.News
@@ -31,6 +28,7 @@ import github.alexzhirkevich.studentbsuby.ui.common.BsuProgressBarSwipeRefreshIn
 import github.alexzhirkevich.studentbsuby.ui.common.ErrorWidget
 import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
 import github.alexzhirkevich.studentbsuby.util.DataState
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
 
 @ExperimentalMaterialApi
 @Composable
@@ -38,10 +36,13 @@ fun NewsListScreen(
     viewModel: NewsViewModel,
     navController: NavController
 ) {
-    val refreshState = rememberSwipeRefreshState(isRefreshing = viewModel.isUpdating.value)
+    val refreshState = rememberSwipeRefreshState(
+        isRefreshing = viewModel.isUpdating.collectAsState().value
+    )
 
 
-    val news by viewModel.news
+    val news by viewModel.newsCommunication
+        .collectAsState()
 
     SwipeRefresh(
         state = refreshState,
@@ -73,14 +74,16 @@ fun NewsListScreen(
 }
 
 @Composable
-private fun Toolbar(onMenuClicked: () -> Unit) {
-    Column() {
+private fun Toolbar(isTablet : Boolean, onMenuClicked: () -> Unit) {
+    Column {
         TopAppBar(
             modifier = Modifier.zIndex(1f),
             elevation = 0.dp,
             backgroundColor = MaterialTheme.colors.secondary
         ) {
-            NavigationMenuButton(onClick = onMenuClicked)
+            if (!isTablet) {
+                NavigationMenuButton(onClick = onMenuClicked)
+            }
             Text(
                 text = stringResource(id = R.string.news),
                 color = MaterialTheme.colors.onSecondary,

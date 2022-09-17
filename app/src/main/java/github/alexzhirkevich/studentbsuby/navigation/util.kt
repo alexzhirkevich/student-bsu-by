@@ -2,8 +2,6 @@ package github.alexzhirkevich.studentbsuby.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
-import okhttp3.Interceptor
-import okhttp3.Response
 
 fun NavController.navigate(
     route: Route,
