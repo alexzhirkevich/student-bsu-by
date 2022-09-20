@@ -122,7 +122,6 @@ private class UpdateRequestedHandler(
 
         connectivityManager.isNetworkConnected.collect {
 
-            Log.e("QWE", it.toString())
             val logged = if (values < 2) true else
                 kotlin.runCatching {
                 loginRepository.initialize().loggedIn

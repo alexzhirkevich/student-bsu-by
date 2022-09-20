@@ -23,10 +23,18 @@ private class TgClickedHandler(
 ): BaseSuspendEventHandler<AboutEvent.TgClicked>(
     AboutEvent.TgClicked::class
 ){
-    @SuppressLint("IntentReset")
-    override suspend fun handle(event: AboutEvent.TgClicked) {
+
+    override suspend fun launch() {
         kotlin.runCatching {
-            Intent(Intent.ACTION_VIEW, Uri.parse(configRepository.telegram()))
+            configRepository.update()
+        }
+    }
+
+    override suspend fun handle(event: AboutEvent.TgClicked) {
+
+        kotlin.runCatching {
+            val uri = Uri.parse(configRepository.telegram())
+            Intent(Intent.ACTION_VIEW, uri)
                 .apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }.let {
@@ -41,6 +49,13 @@ private class EmailClickedHandler(
 ): BaseSuspendEventHandler<AboutEvent.EmailClicked>(
     AboutEvent.EmailClicked::class
 ){
+
+    override suspend fun launch() {
+        kotlin.runCatching {
+            configRepository.update()
+        }
+    }
+
     @SuppressLint("IntentReset")
     override suspend fun handle(event: AboutEvent.EmailClicked) {
         kotlin.runCatching {

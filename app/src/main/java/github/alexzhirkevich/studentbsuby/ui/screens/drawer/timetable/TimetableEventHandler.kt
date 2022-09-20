@@ -38,9 +38,6 @@ private class UpdateRequestedHandler(
     TimetableEvent.UpdateRequested::class
 ){
 
-    override fun release() {
-        Log.e("QWE","RELEASE")
-    }
 
     override suspend fun launch() {
         isUpdatingMapper.map(false)
@@ -58,6 +55,9 @@ private class UpdateRequestedHandler(
     }
 
     private suspend fun update(dataSource: DataSource){
+        if (dataSource == DataSource.Remote || dataSource == DataSource.All){
+            timetableRepository.init()
+        }
         timetableRepository.get(dataSource)
             .onEach {
                 val state = if (it.any { it.isNotEmpty() })

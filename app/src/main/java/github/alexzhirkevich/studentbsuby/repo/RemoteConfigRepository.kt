@@ -20,7 +20,6 @@ private const val LATEST_VER = "latest_version"
 private const val VER_CODE = "code"
 private const val VER_NAME = "name"
 private const val VER_DESC = "desc"
-private const val API = "api"
 
 private const val UPDATE_PROP_DELAY =  3 * 24 * 60 * 60 * 1000L
 
@@ -78,9 +77,6 @@ class RemoteConfigRepository @Inject constructor(
         FirebaseRemoteConfig.getInstance().getString(MAIL)
     }.getOrNull().orEmpty()
 
-    fun api() = kotlin.runCatching {
-        FirebaseRemoteConfig.getInstance().getString(API)
-    }.getOrNull().orEmpty()
 }
 
 suspend fun <T> Task<T>.await() : T = suspendCancellableCoroutine { cont ->

@@ -68,6 +68,7 @@ fun SubjectWidget(
                     )
                     .padding(vertical = 10.dp, horizontal = 5.dp)
                     .zIndex(2f)
+                    .animateContentSize()
             ) {
 
                 Text(
@@ -75,7 +76,8 @@ fun SubjectWidget(
                     color = MaterialTheme.colors.surface,
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Center,
-                    maxLines = 3,
+                    maxLines = if (isOpened)
+                        Int.MAX_VALUE else 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .fillMaxWidth()

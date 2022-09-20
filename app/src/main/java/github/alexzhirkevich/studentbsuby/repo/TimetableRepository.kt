@@ -19,6 +19,10 @@ class TimetableRepository @Inject constructor(
     private val lessonsDao : LessonsDao
 ) : CacheWebRepository<List<List<Lesson>>>() {
 
+    suspend fun init(){
+        timetableApi.init()
+    }
+
     override suspend fun getFromWeb(): List<List<Lesson>> {
 
         val username = usernameProvider.username.takeIf(String::isNotBlank)
