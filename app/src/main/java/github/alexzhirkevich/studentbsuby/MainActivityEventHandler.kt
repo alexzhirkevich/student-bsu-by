@@ -1,30 +1,39 @@
 package github.alexzhirkevich.studentbsuby
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import android.os.Build
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import github.alexzhirkevich.studentbsuby.repo.RemoteConfigRepository
 import github.alexzhirkevich.studentbsuby.repo.ReviewRepository
 import github.alexzhirkevich.studentbsuby.repo.UpdateRepository
 import github.alexzhirkevich.studentbsuby.util.BaseSuspendEventHandler
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
 import github.alexzhirkevich.studentbsuby.util.communication.Mapper
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import ru.mintrocket.lib.mintpermissions.MintPermissionsController
+import ru.mintrocket.lib.mintpermissions.ext.isDenied
 
 class MainActivityEventHandler(
     private val dispatchers: Dispatchers,
     private val remoteConfigRepository: RemoteConfigRepository,
     private val updateRepository: UpdateRepository,
     private val reviewRepository: ReviewRepository,
-    private val showUpdateRequired : Mapper<Boolean>
+    private val showUpdateRequired : Mapper<Boolean>,
+    private val mintPermissionsController: MintPermissionsController
 ) : SuspendEventHandler<MainActivityEvent> by SuspendEventHandler.from(
-    TestForAppUpdateHandler(
+    InitializedHandler(
         dispatchers = dispatchers,
         remoteConfigRepository = remoteConfigRepository,
         updateRepository = updateRepository,
         reviewRepository = reviewRepository,
-        showUpdateRequired = showUpdateRequired
+        showUpdateRequired = showUpdateRequired,
+        mintPermissionsController = mintPermissionsController
     ),
     ExitClickedHandler(),
     UpdateClickedHandler()
@@ -46,31 +55,51 @@ private class UpdateClickedHandler
     }
 }
 
-private class TestForAppUpdateHandler(
+private class InitializedHandler(
     private val dispatchers: Dispatchers,
     private val remoteConfigRepository: RemoteConfigRepository,
     private val updateRepository: UpdateRepository,
     private val reviewRepository: ReviewRepository,
-    private val showUpdateRequired : Mapper<Boolean>
-) : BaseSuspendEventHandler<MainActivityEvent.TestForAppUpdate>(
-    MainActivityEvent.TestForAppUpdate::class
+    private val showUpdateRequired : Mapper<Boolean>,
+    private val mintPermissionsController: MintPermissionsController
+) : BaseSuspendEventHandler<MainActivityEvent.Initialized>(
+    MainActivityEvent.Initialized::class
 ){
 
     override suspend fun launch() {
-        if (remoteConfigRepository.getMinimumStableVersionIfNeeded() != null){
-            showUpdateRequired.map(true)
-        }
 
+        coroutineScope {
+            launch {
+                kotlin.runCatching {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (mintPermissionsController.get(Manifest.permission.POST_NOTIFICATIONS)
+                                .isDenied()
+                        ) {
+                            mintPermissionsController.request(Manifest.permission.POST_NOTIFICATIONS)
+                        }
+                    }
+                }
+            }
+
+            kotlin.runCatching {
+                remoteConfigRepository.update()
+            }
+            if (remoteConfigRepository.getMinimumStableVersionIfNeeded() != null) {
+                showUpdateRequired.map(true)
+            }
+        }
     }
 
-    override suspend fun handle(event: MainActivityEvent.TestForAppUpdate) {
+    override suspend fun handle(event: MainActivityEvent.Initialized) {
         val immediate = remoteConfigRepository.getMinimumStableVersionIfNeeded() != null
         dispatchers.runOnUI {
             reviewRepository.tryShowReviewDialog(event.activity)
             updateRepository.tryUpdate(
                 event.activity,
                 immediate,
-                onFailedToInAppUpdate = { openGooglePlay(event.activity) })
+                onFailedToInAppUpdate = {
+                    openGooglePlay(event.activity)
+                })
         }
     }
 }

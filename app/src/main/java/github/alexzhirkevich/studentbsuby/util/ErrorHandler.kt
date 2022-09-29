@@ -9,15 +9,11 @@ interface ErrorHandler {
     fun handle(error : Throwable)
 
     class Ignore : ErrorHandler {
-        override fun handle(error: Throwable) {
-
-        }
+        override fun handle(error: Throwable) = Unit
     }
 
     class ReThrow : ErrorHandler {
-        override fun handle(error: Throwable) {
-            throw error
-        }
+        override fun handle(error: Throwable) = throw error
     }
 
     class Log(private val logger: Logger) : ErrorHandler {
@@ -25,6 +21,7 @@ interface ErrorHandler {
             val (tag,cause) = if (error is TaggedException)
                 error.message.orEmpty() to error.cause
             else "" to error
+
             logger.log(
                 msg = "Unhandled error occurred",
                 tag = tag,

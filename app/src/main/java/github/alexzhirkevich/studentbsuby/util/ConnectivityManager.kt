@@ -11,14 +11,14 @@ import github.alexzhirkevich.studentbsuby.util.communication.Releasable
 import github.alexzhirkevich.studentbsuby.util.communication.StateCommunication
 import github.alexzhirkevich.studentbsuby.util.communication.StateFlowCommunication
 
-interface ConnectivityManager {
+interface ConnectivityManager : Releasable {
 
     val isNetworkConnected: StateCommunication<Boolean>
 
     class Internet(
         context: Context,
         override val isNetworkConnected: MutableStateCommunication<Boolean>,
-    ) : ConnectivityManager, Releasable {
+    ) : ConnectivityManager {
 
         private var wifiAvailable = false
         private var cellAvailable = false

@@ -4,6 +4,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import github.alexzhirkevich.studentbsuby.di.IsTimetableUpdatingQualifier
 import github.alexzhirkevich.studentbsuby.util.*
 import github.alexzhirkevich.studentbsuby.util.communication.StateCommunication
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import javax.inject.Inject
 
 @HiltViewModel

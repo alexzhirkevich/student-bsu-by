@@ -5,7 +5,7 @@ import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.News
 import github.alexzhirkevich.studentbsuby.repo.DataSource

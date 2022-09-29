@@ -28,9 +28,9 @@ class SettingsRepository @Inject constructor(
     private val synchronizationWorkerManager: SyncWorkerManager,
 ) {
     var synchronizationEnabled by sharedPreferences(preferences,true){
-        with(synchronizationWorkerManager){
-            if (it) run() else stop()
-        }
+//        with(synchronizationWorkerManager){
+//            if (it) run() else stop()
+//        }
     }
 
     var collectStatistics by sharedPreferences(preferences,true){

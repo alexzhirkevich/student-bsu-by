@@ -1,73 +1,14 @@
-package github.alexzhirkevich.studentbsuby.util
+package github.alexzhirkevich.studentbsuby.util.dispatchers
 
 import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.CoroutineContext
 
+
 /**
  * Coroutine dispatchers wrapper for simplifying testing
  * */
-interface Dispatchers {
-
-    /**
-     * Launches given [block] in [scope] with dispatcher defined as Main.
-     * Launching with non-null [key] cancels previous job with the same [key] if it is in progress.
-     * @return [Job] of the launched coroutine.
-     * */
-    fun launchUI(
-        scope: CoroutineScope,
-        key: Any? = null,
-        exceptionHandler: CoroutineExceptionHandler? = null,
-        block: suspend CoroutineScope.() -> Unit
-    ): Job
-
-    /**
-     * Launches given [block] in [scope] with dispatcher defined as Computation.
-     * Launching with non-null [key] cancels previous job with the same [key] if it is in progress.
-     * @return [Job] of the launched coroutine.
-     * */
-    fun launchComputation(
-        scope: CoroutineScope,
-        key: Any? = null,
-        exceptionHandler: CoroutineExceptionHandler? = null,
-        block: suspend CoroutineScope.() -> Unit,
-    ): Job
-
-    /**
-     * Launches given [block] in [scope] with dispatcher defined as Input-Output.
-     * Launching with non-null [key] cancels previous job with the same [key] if it is in progress.
-     * @return [Job] of the launched coroutine.
-     * */
-    fun launchIO(
-        scope: CoroutineScope,
-        key: Any? = null,
-        exceptionHandler: CoroutineExceptionHandler? = null,
-        block: suspend CoroutineScope.() -> Unit,
-    ): Job
-
-    /**
-     * Switches dispatcher to Main.
-     * */
-    suspend fun <T> runOnUI(
-        exceptionHandler: CoroutineExceptionHandler? = null,
-        block: suspend CoroutineScope.() -> T
-    ): T
-
-    /**
-     * Switches dispatcher to Main.
-     * */
-    suspend fun <T> runOnComputational(
-        exceptionHandler: CoroutineExceptionHandler? = null,
-        block: suspend CoroutineScope.() -> T
-    ): T
-
-    /**
-     * Switches dispatcher to Main.
-     * */
-    suspend fun <T> runOnIO(
-        exceptionHandler: CoroutineExceptionHandler? = null,
-        block: suspend CoroutineScope.() -> T
-    ): T
+interface Dispatchers : UIDispatcher, IODispatcher, ComputationalDispatcher {
 
     /**
      * Uses default [kotlinx.coroutines.Dispatchers]
@@ -143,7 +84,6 @@ interface Dispatchers {
                     it + exceptionHandler else it
             }, block = block
         )
-
 
         private val runningJobs: MutableMap<Any?, Job> = ConcurrentHashMap()
 

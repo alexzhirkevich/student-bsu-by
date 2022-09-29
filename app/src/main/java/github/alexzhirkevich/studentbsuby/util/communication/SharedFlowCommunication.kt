@@ -1,6 +1,7 @@
 package github.alexzhirkevich.studentbsuby.util.communication
 
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
 
@@ -16,5 +17,5 @@ class SharedFlowCommunication<T> : MutableCommunication<T> {
     }
 
     override suspend fun collect(collector: suspend (T) -> Unit) =
-        flow.collect(collector)
+        flow.collect { collector(it) }
 }

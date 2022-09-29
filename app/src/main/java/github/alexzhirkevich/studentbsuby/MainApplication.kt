@@ -14,9 +14,10 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import ru.mintrocket.lib.mintpermissions.ext.initMintPermissions
+import javax.inject.Inject
 
 @HiltAndroidApp
-
 @ExperimentalCoroutinesApi
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
@@ -24,6 +25,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 class MainApplication : Application(), Configuration.Provider {
+
+    override fun onCreate() {
+        super.onCreate()
+        initMintPermissions()
+    }
 
     override fun getWorkManagerConfiguration() =
         Configuration.Builder()

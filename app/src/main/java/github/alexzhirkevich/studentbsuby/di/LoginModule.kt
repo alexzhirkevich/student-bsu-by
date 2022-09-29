@@ -5,7 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ImageBitmap
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import com.google.accompanist.pager.ExperimentalPagerApi
 import dagger.Module
 import dagger.Provides

@@ -1,6 +1,6 @@
 package github.alexzhirkevich.studentbsuby.di
 
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

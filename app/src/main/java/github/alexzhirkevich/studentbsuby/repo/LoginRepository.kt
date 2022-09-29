@@ -20,7 +20,7 @@ interface UsernameProvider {
 
 open class UsernameProviderImpl @Inject constructor(
     @CredentialsPrefsQualifier val credentialsPrefs: SharedPreferences
-    ) : UsernameProvider {
+) : UsernameProvider {
 
     override var username: String by sharedPreferences(credentialsPrefs,"")
         protected set
@@ -72,12 +72,17 @@ class LoginRepository @Inject constructor(
                 return initialize()
             }
             return LoginResponse(
-                successful,
-            result?.contains("вошли",true) == true ||
-                    logout?.contains("logout",true) == true,
-                result)
+                success = successful,
+                loggedIn = result?.contains("вошли",true) == true ||
+                        logout?.contains("logout",true) == true,
+                loginResult = result
+            )
         } catch (t: Throwable) {
-            return LoginResponse(false,false,null)
+            return LoginResponse(
+                success = false,
+                loggedIn = false,
+                loginResult = null
+            )
         }
     }
 
@@ -113,10 +118,18 @@ class LoginRepository @Inject constructor(
                             ?.text()?.takeIf(String::isNotBlank))
             }
 
-            return LoginResponse(res.isSuccessful, logged,loginResult)
+            return LoginResponse(
+                success = res.isSuccessful,
+                loggedIn = logged,
+                loginResult = loginResult
+            )
 
         } catch (t: Throwable) {
-            LoginResponse(false,false,null)
+            LoginResponse(
+                success = false,
+                loggedIn = false,
+                loginResult = null
+            )
         }
     }
 

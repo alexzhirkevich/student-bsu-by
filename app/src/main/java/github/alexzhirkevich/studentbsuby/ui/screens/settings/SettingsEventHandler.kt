@@ -32,11 +32,11 @@ class SettingsEventHandler(
 
     private val notificationsEnabledHandler = NotificationsEnabledHandler(settingsRepository, mapper)
     private val collectStatisticHandler = CollectStatisticHandler(settingsRepository, mapper)
-    private val collectCrashlyticsHandler = CollectCrashlyticsHandler(settingsRepository, mapper,context)
+    private val collectCrashlyticsHandler = CollectCrashlyticsHandler(settingsRepository, mapper)
     private val shareLogsHandler = ShareLogsHandler(context, logger)
     private val dontKillMyAppHandler = DontKillMyAppHandler(context)
-    private val backgroundActivityClickedHandler = BackgroundActivityClickedHandler(context)
-    private val autoStartClickedHandler = AutoStartClickedHandler(context)
+    private val backgroundActivityClickedHandler = BackgroundActivityClickedHandler()
+    private val autoStartClickedHandler = AutoStartClickedHandler()
 
     override fun handle(event: SettingsEvent) = when(event){
         is SettingsEvent.CollectCrashlytics -> collectCrashlyticsHandler.handle(event)
@@ -92,8 +92,7 @@ private class CollectStatisticHandler(
 @ExperimentalMaterialApi
 private class CollectCrashlyticsHandler(
     private val settingsRepository: SettingsRepository,
-    private val mapper : StateMapper<SettingsState>,
-    private val context: Context
+    private val mapper: StateMapper<SettingsState>
 ) : EventHandler<SettingsEvent.CollectCrashlytics> {
 
     override fun handle(event: SettingsEvent.CollectCrashlytics) {
@@ -106,41 +105,46 @@ private class ShareLogsHandler(
     private val context: Context,
     private val logger: Logger
 ) : EventHandler<SettingsEvent.ShareLogs> {
-    override fun handle(event: SettingsEvent.ShareLogs) =
-        logger.share(context)
+    override fun handle(event: SettingsEvent.ShareLogs) {
+        kotlin.runCatching {
+            logger.share(context)
+        }
+    }
 }
 
 private class DontKillMyAppHandler(
     private val context: Context
 ) : EventHandler<SettingsEvent.DontKillMyApp> {
     override fun handle(event: SettingsEvent.DontKillMyApp) {
-        context.startActivity(
-            Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://dontkillmyapp.com/")
-            ).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-        )
+        kotlin.runCatching {
+            context.startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://dontkillmyapp.com/")
+                ).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            )
+        }
     }
 }
 
-private class AutoStartClickedHandler(
-    private val context: Context
-) : EventHandler<SettingsEvent.AutoStartClicked>{
+private class AutoStartClickedHandler : EventHandler<SettingsEvent.AutoStartClicked>{
     override fun handle(event: SettingsEvent.AutoStartClicked) {
-        if (AppWhitelist.hasAutoStartSetting(context))
-            AppWhitelist.settingForAutoStart(context)
-        else Toast.makeText(context, R.string.no_need, Toast.LENGTH_SHORT).show()
+        kotlin.runCatching {
+            if (AppWhitelist.hasAutoStartSetting(event.activity))
+                AppWhitelist.settingForAutoStart(event.activity)
+            else Toast.makeText(event.activity, R.string.no_need, Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
-private class BackgroundActivityClickedHandler(
-    private val context: Context
-) : EventHandler<SettingsEvent.BackgroundActivityClicked>{
+private class BackgroundActivityClickedHandler : EventHandler<SettingsEvent.BackgroundActivityClicked>{
     override fun handle(event: SettingsEvent.BackgroundActivityClicked) {
-        if (AppWhitelist.hasBatterySaverSetting(context))
-            AppWhitelist.settingForBatterySaver(context)
-        else Toast.makeText(context, R.string.no_need,Toast.LENGTH_SHORT).show()
+        kotlin.runCatching {
+            if (AppWhitelist.hasBatterySaverSetting(event.activity))
+                AppWhitelist.settingForBatterySaver(event.activity)
+            else Toast.makeText(event.activity, R.string.no_need, Toast.LENGTH_SHORT).show()
+        }
     }
 }

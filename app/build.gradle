@@ -9,14 +9,14 @@ plugins {
 
 android {
 
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "github.alexzhirkevich.studentbsuby"
         minSdk 23
-        targetSdk 32
-        versionCode 10
-        versionName "1.0.1"
+        targetSdk 33
+        versionCode 11
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -134,5 +134,6 @@ dependencies {
     implementation 'com.google.android.play:core-ktx:1.8.1'
 
     implementation 'io.github.wanghonglin:crom-app-whitelist:0.1.2'
+    implementation 'com.github.mintrocket.MintPermissions:mintpermissions:1.1.1'
 
 }

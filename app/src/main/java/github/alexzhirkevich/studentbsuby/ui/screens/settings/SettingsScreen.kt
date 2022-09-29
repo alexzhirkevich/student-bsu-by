@@ -149,78 +149,79 @@ private fun Body(viewModel: SettingsViewModel) {
             )
         }
 
-        GroupName(name = stringResource(id = R.string.notifications))
-        val helper = stringResource(R.string.settings_update_notifications_helper)
-        val whyRange =
-            stringResource(id = R.string.settings_update_notifications_helper_why).let { text ->
-            helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
-        }
-        val autoStartRange =
-            stringResource(id = R.string.settings_update_notifications_helper_autostart).let { text ->
-                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
-            }
-        val backgroundRange =
-            stringResource(id = R.string.settings_update_notifications_helper_background).let { text ->
-                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
-            }
-        val attentionRange =
-            stringResource(id = R.string.settings_update_notifications_helper_attention).let { text ->
-                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
-            }
+//        GroupName(name = stringResource(id = R.string.notifications))
+//        val helper = stringResource(R.string.settings_update_notifications_helper)
+//        val whyRange =
+//            stringResource(id = R.string.settings_update_notifications_helper_why).let { text ->
+//            helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
+//        }
+//        val autoStartRange =
+//            stringResource(id = R.string.settings_update_notifications_helper_autostart).let { text ->
+//                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
+//            }
+//        val backgroundRange =
+//            stringResource(id = R.string.settings_update_notifications_helper_background).let { text ->
+//                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
+//            }
+//        val attentionRange =
+//            stringResource(id = R.string.settings_update_notifications_helper_attention).let { text ->
+//                helper.indexOf(text, ignoreCase = true).let { it..it + text.length }
+//            }
 
         val state by viewModel.state.collectAsState()
-        TogglePreference(
-            title = R.string.settings_update_notifications,
-            helper = AnnotatedString(
-                text = helper,
-                spanStyles = listOf(
-                    AnnotatedString.Range(
-                        SpanStyle(fontWeight = FontWeight.Bold),
-                      start = attentionRange.first,
-                      end = attentionRange.last
-                    ),
-                    AnnotatedString.Range(
-                        SpanStyle(
-                            color = MaterialTheme.colors.primary,
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        start = autoStartRange.first,
-                        end = autoStartRange.last,
-                    ),
-                    AnnotatedString.Range(
-                        SpanStyle(
-                            color = MaterialTheme.colors.primary,
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        start = backgroundRange.first,
-                        end = backgroundRange.last
-                    ),
-                    AnnotatedString.Range(
-                        SpanStyle(
-                            color = MaterialTheme.colors.primary,
-                            textDecoration = TextDecoration.Underline
-                        ),
-                        start = whyRange.first,
-                        end = whyRange.last
-                    )
-                ),
-            ),
-            onHelperClicked = {
-                if (it in autoStartRange) {
-                    viewModel.handle(SettingsEvent.AutoStartClicked)
-                }
-                if (it in backgroundRange) {
-                    viewModel.handle(SettingsEvent.BackgroundActivityClicked)
-                }
-                if (it in whyRange){
-                    viewModel.handle(SettingsEvent.DontKillMyApp)
-                }
-            },
-            checked = state.notificationsEnabled,
-            onChanged = {
-                viewModel.handle(SettingsEvent.NotificationsEnabled(it))
-            }
-        )
+//        val activity = LocalContext.current as Activity
+//        TogglePreference(
+//            title = R.string.settings_update_notifications,
+//            helper = AnnotatedString(
+//                text = helper,
+//                spanStyles = listOf(
+//                    AnnotatedString.Range(
+//                        SpanStyle(fontWeight = FontWeight.Bold),
+//                      start = attentionRange.first,
+//                      end = attentionRange.last
+//                    ),
+//                    AnnotatedString.Range(
+//                        SpanStyle(
+//                            color = MaterialTheme.colors.primary,
+//                            textDecoration = TextDecoration.Underline
+//                        ),
+//                        start = autoStartRange.first,
+//                        end = autoStartRange.last,
+//                    ),
+//                    AnnotatedString.Range(
+//                        SpanStyle(
+//                            color = MaterialTheme.colors.primary,
+//                            textDecoration = TextDecoration.Underline
+//                        ),
+//                        start = backgroundRange.first,
+//                        end = backgroundRange.last
+//                    ),
+//                    AnnotatedString.Range(
+//                        SpanStyle(
+//                            color = MaterialTheme.colors.primary,
+//                            textDecoration = TextDecoration.Underline
+//                        ),
+//                        start = whyRange.first,
+//                        end = whyRange.last
+//                    )
+//                ),
+//            ),
+//            onHelperClicked = {
+//                if (it in autoStartRange) {
+//                    viewModel.handle(SettingsEvent.AutoStartClicked(activity))
+//                }
+//                if (it in backgroundRange) {
+//                    viewModel.handle(SettingsEvent.BackgroundActivityClicked(activity))
+//                }
+//                if (it in whyRange){
+//                    viewModel.handle(SettingsEvent.DontKillMyApp)
+//                }
+//            },
+//            checked = state.notificationsEnabled,
+//            onChanged = {
+//                viewModel.handle(SettingsEvent.NotificationsEnabled(it))
+//            }
+//        )
 
         GroupName(name = stringResource(id = R.string.other))
         TogglePreference(

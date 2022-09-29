@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainActivityViewModel.handle(MainActivityEvent.TestForAppUpdate(this))
+        mainActivityViewModel.handle(MainActivityEvent.Initialized(this))
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
@@ -58,7 +58,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 
 
     @Composable

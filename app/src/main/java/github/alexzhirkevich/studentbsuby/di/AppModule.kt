@@ -7,7 +7,7 @@ import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import androidx.work.WorkManager
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,8 +22,13 @@ import github.alexzhirkevich.studentbsuby.util.*
 import github.alexzhirkevich.studentbsuby.util.communication.BroadcastMapper
 import github.alexzhirkevich.studentbsuby.util.communication.BroadcastReceiverMapper
 import github.alexzhirkevich.studentbsuby.util.communication.StateFlowCommunication
+import github.alexzhirkevich.studentbsuby.util.dispatchers.DispatchersImpl
+import github.alexzhirkevich.studentbsuby.util.dispatchers.CoroutineJobManagerImpl
 import github.alexzhirkevich.studentbsuby.util.logger.FileLogger
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
+import ru.mintrocket.lib.mintpermissions.MintPermissions
+import ru.mintrocket.lib.mintpermissions.MintPermissionsController
+import ru.mintrocket.lib.mintpermissions.MintPermissionsManager
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -39,6 +44,14 @@ class AppModule {
 
     @Provides
     fun provideCalendar() : Calendar = Calendar.Base()
+
+    @Provides
+    fun providePermController() : MintPermissionsController =
+        MintPermissions.controller
+
+    @Provides
+    fun providePermManager() : MintPermissionsManager =
+        MintPermissions.createManager()
 
     @Provides
     fun provideConnectivityManager(
@@ -115,7 +128,9 @@ class AppModule {
         ResourceManager.Base(context)
 
     @Provides
-    fun provideDispatchers() : Dispatchers = Dispatchers.Base()
+    fun provideDispatchers() : Dispatchers = DispatchersImpl(
+        CoroutineJobManagerImpl()
+    )
 
     @Provides
     fun provideErrorHandler(logger: Logger) : ErrorHandler = ErrorHandler.Log(logger)

@@ -1,6 +1,6 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.about
 
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import github.alexzhirkevich.studentbsuby.util.ErrorHandler
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler

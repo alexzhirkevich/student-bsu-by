@@ -7,7 +7,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.navigation.NavController
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.navigation.Route
@@ -141,12 +141,18 @@ private class InitLoginHandler(
     LoginEvent.InitLogin::class
 ) {
 
+    override suspend fun launch() {
+        kotlin.runCatching {
+            syncWorkerManager.stop()
+        }
+    }
+
     override suspend fun handle(event: LoginEvent.InitLogin) {
         if (loginRepository.autoLogin) {
-            while (true) {
+//            while (true) {
                 try {
                     if (!loginRepository.autoLogin)
-                        break
+                        return
 
                     val init = loginRepository.initialize()
 
@@ -164,7 +170,7 @@ private class InitLoginHandler(
 
                     val captchaText = kotlin.runCatching {
                         loginRepository.getCaptchaText(captcha)
-                    }.getOrNull() ?: break
+                    }.getOrNull() ?: return
 
                     if (login(
                             dispatchers, resourceManager, loginRepository, event.navController,
@@ -172,12 +178,12 @@ private class InitLoginHandler(
                         ).first
                     ) {
                         connectivityMapper.map(ConnectivityUi.Connected)
-                        kotlin.runCatching {
-                            if (!syncWorkerManager.isEnabled()) {
-                                syncWorkerManager.run()
-                            }
-                        }
-                        break
+//                        kotlin.runCatching {
+//                            if (!syncWorkerManager.isEnabled()) {
+//                                syncWorkerManager.run()
+//                            }
+//                        }
+                        return
                     } else {
                         connectivityMapper.map(ConnectivityUi.Offline)
                     }
@@ -186,7 +192,7 @@ private class InitLoginHandler(
                     delay(3000)
                 }
             }
-        }
+//        }
     }
 
     companion object {
@@ -270,8 +276,8 @@ private class LoginClickedHandler(
         kotlin.runCatching {
             if (logged.first) {
                 loginRepository.autoLogin = autoLoginMapper.current
-                if (!syncWorkerManager.isEnabled())
-                    syncWorkerManager.run()
+//                if (!syncWorkerManager.isEnabled())
+//                    syncWorkerManager.run()
             } else {
                 updateHandler.handle(LoginEvent.UpdateClicked(false))
                 errorMapper.map(logged.second)

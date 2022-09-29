@@ -1,10 +1,9 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer
 
-import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.User
 import github.alexzhirkevich.studentbsuby.navigation.Route

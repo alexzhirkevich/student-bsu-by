@@ -1,6 +1,6 @@
 package github.alexzhirkevich.studentbsuby.di
 
-import github.alexzhirkevich.studentbsuby.util.Dispatchers
+import github.alexzhirkevich.studentbsuby.util.dispatchers.Dispatchers
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,6 +13,7 @@ import github.alexzhirkevich.studentbsuby.repo.UpdateRepository
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
 import github.alexzhirkevich.studentbsuby.util.communication.StateCommunication
 import github.alexzhirkevich.studentbsuby.util.communication.StateFlowCommunication
+import ru.mintrocket.lib.mintpermissions.MintPermissionsController
 import javax.inject.Qualifier
 
 @Qualifier
@@ -32,6 +33,7 @@ class MainActivityModule {
     @Provides
     fun provideEventHandler(
         dispatchers: Dispatchers,
+        permissionsController: MintPermissionsController,
         remoteConfigRepository: RemoteConfigRepository,
         updateRepository: UpdateRepository,
         reviewRepository: ReviewRepository
@@ -41,6 +43,7 @@ class MainActivityModule {
             remoteConfigRepository = remoteConfigRepository,
             updateRepository = updateRepository,
             reviewRepository = reviewRepository,
-            showUpdateRequired = showUpdate
+            showUpdateRequired = showUpdate,
+            mintPermissionsController = permissionsController
         )
 }

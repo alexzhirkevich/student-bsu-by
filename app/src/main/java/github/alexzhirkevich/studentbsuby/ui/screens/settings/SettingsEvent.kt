@@ -1,5 +1,6 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.settings
 
+import android.app.Activity
 import github.alexzhirkevich.studentbsuby.util.Event
 
 sealed interface SettingsEvent : Event {
@@ -8,6 +9,6 @@ sealed interface SettingsEvent : Event {
     class CollectCrashlytics(val enabled : Boolean) : SettingsEvent
     object ShareLogs : SettingsEvent
     object DontKillMyApp : SettingsEvent
-    object BackgroundActivityClicked : SettingsEvent
-    object AutoStartClicked : SettingsEvent
+    class BackgroundActivityClicked(val activity: Activity) : SettingsEvent
+    class AutoStartClicked(val activity: Activity) : SettingsEvent
 }
