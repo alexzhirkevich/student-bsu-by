@@ -18,13 +18,14 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onEmpty
 
-class HostelEventHandler(
+interface HostelEventHandler : SuspendEventHandler<HostelEvent>
+class HostelEventHandlerImpl(
     context: Context,
     hostelRepository: HostelRepository,
     connectivityManager: ConnectivityManager,
     isUpdatingMapper: Mapper<Boolean>,
     hostelStateMapper: StateMapper<DataState<HostelState>>
-) : SuspendEventHandler<HostelEvent> by SuspendEventHandler.from(
+) : HostelEventHandler, SuspendEventHandler<HostelEvent> by SuspendEventHandler.from(
     UpdateRequestedHandler(
         hostelRepository = hostelRepository,
         connectivityManager = connectivityManager,

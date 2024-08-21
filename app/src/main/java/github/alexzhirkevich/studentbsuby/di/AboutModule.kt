@@ -7,9 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.repo.RemoteConfigRepository
-import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutEvent
-import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutEventHandler
-import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutEventHandlerImpl
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.IAboutEventHandler
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -19,7 +18,7 @@ class AboutModule {
     fun provideEventHandler(
         @ApplicationContext context: Context,
         remoteConfigRepository: RemoteConfigRepository
-    ) : SuspendEventHandler<AboutEvent> = AboutEventHandler(
+    ) : IAboutEventHandler = AboutEventHandlerImpl(
         context = context, configRepository = remoteConfigRepository
     )
 }

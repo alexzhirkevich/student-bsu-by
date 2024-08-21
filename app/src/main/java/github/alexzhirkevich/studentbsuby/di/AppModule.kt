@@ -24,6 +24,7 @@ import github.alexzhirkevich.studentbsuby.util.communication.BroadcastReceiverMa
 import github.alexzhirkevich.studentbsuby.util.communication.StateFlowCommunication
 import github.alexzhirkevich.studentbsuby.util.dispatchers.DispatchersImpl
 import github.alexzhirkevich.studentbsuby.util.dispatchers.CoroutineJobManagerImpl
+import github.alexzhirkevich.studentbsuby.util.logger.DefaultLogger
 import github.alexzhirkevich.studentbsuby.util.logger.FileLogger
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import ru.mintrocket.lib.mintpermissions.MintPermissions
@@ -118,7 +119,7 @@ class AppModule {
     @Provides
     @Singleton
     fun provideLogger(@ApplicationContext context: Context)
-        : Logger = FileLogger(context)
+        : Logger = DefaultLogger()
 
     @Provides
     fun provideResources(@ApplicationContext context: Context) : Resources = context.resources

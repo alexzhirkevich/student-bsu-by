@@ -1,6 +1,5 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable
 
-import android.util.Log
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.repo.DataSource
 import github.alexzhirkevich.studentbsuby.repo.TimetableRepository
@@ -12,13 +11,15 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onEmpty
 
-class TimetableEventHandler(
-    private val timetableRepository: TimetableRepository,
-    private val connectivityManager: ConnectivityManager,
-    private val calendar: Calendar,
-    private val timetableMapper: StateMapper<DataState<Timetable>>,
-    private val isUpdatingMapper: Mapper<Boolean>
-) : SuspendEventHandler<TimetableEvent> by SuspendEventHandler.from(
+interface TimetableEventHandler : SuspendEventHandler<TimetableEvent>
+
+class TimetableEventHandlerImpl(
+    timetableRepository: TimetableRepository,
+    connectivityManager: ConnectivityManager,
+    calendar: Calendar,
+    timetableMapper: StateMapper<DataState<Timetable>>,
+    isUpdatingMapper: Mapper<Boolean>
+) : TimetableEventHandler, SuspendEventHandler<TimetableEvent> by SuspendEventHandler.from(
     UpdateRequestedHandler(
         timetableRepository = timetableRepository,
         connectivityManager = connectivityManager,

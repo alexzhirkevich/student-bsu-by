@@ -37,10 +37,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import github.alexzhirkevich.studentbsuby.R
 import github.alexzhirkevich.studentbsuby.data.models.User
@@ -85,7 +85,7 @@ fun DrawerScreen(
     )
     val scope = rememberCoroutineScope()
 
-    val childNavController = rememberAnimatedNavController()
+    val childNavController = rememberNavController()
     val initial =  DrawerRoute.Timetable
 
     val activity = LocalContext.current as ComponentActivity
@@ -136,18 +136,17 @@ fun DrawerScreen(
         },
     ) {
 
-
         fun onMenuClicked() {
             scope.launch {
                 scaffoldState.drawerState.let {
                     if (it.isClosed)
-                        it.animateTo(DrawerValue.Open, tween())
+                        it.open()
                     else it.close()
                 }
             }
         }
 
-        Row {
+        Row(Modifier.padding(it)) {
             if (isTablet){
                 Card(
                     elevation = 5.dp,
@@ -161,7 +160,7 @@ fun DrawerScreen(
                     )
                 }
             }
-            AnimatedNavHost(
+            NavHost(
                 navController = childNavController,
                 startDestination = initial.route.route
             ) {

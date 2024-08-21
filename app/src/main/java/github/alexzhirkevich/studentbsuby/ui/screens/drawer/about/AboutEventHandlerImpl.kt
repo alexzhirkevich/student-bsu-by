@@ -9,10 +9,12 @@ import github.alexzhirkevich.studentbsuby.repo.RemoteConfigRepository
 import github.alexzhirkevich.studentbsuby.util.BaseSuspendEventHandler
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
 
-class AboutEventHandler(
+
+interface IAboutEventHandler : SuspendEventHandler<AboutEvent>
+class AboutEventHandlerImpl(
     context: Context,
     configRepository: RemoteConfigRepository
-) : SuspendEventHandler<AboutEvent> by SuspendEventHandler.from(
+) : IAboutEventHandler, SuspendEventHandler<AboutEvent> by SuspendEventHandler.from(
     TgClickedHandler(context, configRepository),
     EmailClickedHandler(context, configRepository)
 )

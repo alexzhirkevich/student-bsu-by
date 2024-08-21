@@ -11,7 +11,7 @@ import javax.inject.Inject
 class AboutViewModel @Inject constructor(
     errorHandler: ErrorHandler,
     dispatchers: Dispatchers,
-    eventHandler: SuspendEventHandler<AboutEvent>
+    eventHandler: IAboutEventHandler
 ) : SuspendHandlerViewModel<AboutEvent>(
     errorHandler =errorHandler,
     dispatchers = dispatchers,

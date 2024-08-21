@@ -14,13 +14,13 @@ class TimetableViewModel @Inject constructor(
     val timetableCommunication: StateCommunication<DataState<Timetable>>,
     dispatchers: Dispatchers,
     errorHandler: ErrorHandler,
-    eventHandler: SuspendEventHandler<TimetableEvent>,
+    eventHandler: TimetableEventHandler,
     calendar: Calendar
 ): SuspendHandlerViewModel<TimetableEvent>(
     dispatchers = dispatchers,
     suspendEventHandler = eventHandler,
     errorHandler = errorHandler
-), Updatable, Calendar by calendar{
+), Updatable, Calendar by calendar {
 
     override fun update() {
         handle(TimetableEvent.UpdateRequested)

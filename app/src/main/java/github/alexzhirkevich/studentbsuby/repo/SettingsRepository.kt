@@ -34,7 +34,8 @@ class SettingsRepository @Inject constructor(
     }
 
     var collectStatistics by sharedPreferences(preferences,true){
-        FirebaseAnalytics.getInstance(context).setAnalyticsCollectionEnabled(it)
+        FirebaseAnalytics.getInstance(context)
+            .setAnalyticsCollectionEnabled(it)
     }
 
     var collectCrashlytics by sharedPreferences(preferences,true){

@@ -9,6 +9,7 @@ import github.alexzhirkevich.studentbsuby.data.models.News
 import github.alexzhirkevich.studentbsuby.repo.NewsRepository
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.news.NewsEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.news.NewsEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.news.NewsEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.util.ConnectivityManager
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.LoginCookieManager
@@ -44,7 +45,7 @@ class NewsModule {
         newsRepository: NewsRepository,
         connectivityManager: ConnectivityManager,
         loginCookieManager: LoginCookieManager,
-    ) : SuspendEventHandler<NewsEvent> = NewsEventHandler(
+    ) : NewsEventHandler = NewsEventHandlerImpl(
         newsRepository = newsRepository,
         connectivityManager = connectivityManager,
         loginCookieManager = loginCookieManager,

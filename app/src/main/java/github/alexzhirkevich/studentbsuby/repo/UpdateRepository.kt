@@ -14,7 +14,6 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
 import com.google.android.play.core.ktx.requestAppUpdateInfo
-import com.google.android.play.core.tasks.Task
 import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.R
 import javax.inject.Inject
@@ -89,12 +88,4 @@ class UpdateRepository @Inject constructor(
                 }
             }
         }
-}
-
-suspend fun <T> Task<T>.await() = suspendCoroutine<T> { cont ->
-    addOnSuccessListener {
-        cont.resume(it)
-    }.addOnFailureListener {
-        cont.resumeWithException(it)
-    }
 }

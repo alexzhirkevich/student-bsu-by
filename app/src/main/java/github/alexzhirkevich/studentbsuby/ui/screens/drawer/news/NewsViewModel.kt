@@ -16,7 +16,7 @@ class NewsViewModel @Inject constructor(
     val newsCommunication: StateCommunication<DataState<List<News>>>,
     errorHandler: ErrorHandler,
     dispatchers: Dispatchers,
-    eventHandler: SuspendEventHandler<NewsEvent>
+    eventHandler: NewsEventHandler
 ) : SuspendHandlerViewModel<NewsEvent>(
     errorHandler = errorHandler,
     dispatchers = dispatchers,

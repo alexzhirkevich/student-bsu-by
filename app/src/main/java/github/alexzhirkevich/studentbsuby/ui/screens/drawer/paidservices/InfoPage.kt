@@ -1,6 +1,7 @@
 package github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,7 +43,6 @@ internal fun InfoPage(
     viewModel: PaidServicesViewModel
 ) {
 
-
     @Composable
     fun ColumnScope.InfoBlock(
         @StringRes title: Int,
@@ -52,7 +52,8 @@ internal fun InfoPage(
         var visible by rememberSaveable {
             mutableStateOf(true)
         }
-        Column {
+        Column(
+        ) {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -79,18 +80,20 @@ internal fun InfoPage(
                     contentDescription = "More",
                 )
             }
-            if (visible) {
-                Spacer(modifier = Modifier.height(5.dp))
-                HtmlText(
-                    modifier = Modifier.padding(horizontal = 5.dp),
-                    textId = text,
-                    style = MaterialTheme.typography.body1,
-                    urlSpanStyle = SpanStyle(
-                        color = MaterialTheme.colors.primary,
-                        textDecoration = TextDecoration.Underline
+            AnimatedVisibility(visible = visible) {
+//                if (visible) {
+                    Spacer(modifier = Modifier.height(5.dp))
+                    HtmlText(
+                        modifier = Modifier.padding(horizontal = 5.dp),
+                        textId = text,
+                        style = MaterialTheme.typography.body1,
+                        urlSpanStyle = SpanStyle(
+                            color = MaterialTheme.colors.primary,
+                            textDecoration = TextDecoration.Underline
+                        )
                     )
-                )
-            }
+                }
+//            }
         }
     }
 
@@ -114,7 +117,6 @@ internal fun InfoPage(
             Column(
                 Modifier
                     .padding(10.dp)
-                    .animateContentSize()
             ) {
 
                 val paidInfo by viewModel.paidInfoCommunication

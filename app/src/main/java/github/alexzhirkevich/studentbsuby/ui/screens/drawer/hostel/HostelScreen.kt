@@ -79,6 +79,8 @@ fun HostelScreen(
                     viewModel = hostelViewModel,
                     onMenuClicked = onMenuClicked
                 )
+
+                else -> {}
             }
         }
         is DataState.Loading -> LoadingHostelScreen(

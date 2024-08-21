@@ -27,7 +27,6 @@ enum class ConnectivityUi {
     Connected,
     Connecting,
     Offline,
-
 }
 object ConnectivityUiSerializer : Serializer<ConnectivityUi> {
     override fun serialize(value: ConnectivityUi): Bundle {

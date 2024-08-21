@@ -18,7 +18,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class PaidServicesEventHandler(
+interface PaidServicesEventHandler : SuspendEventHandler<PaidServicesEvent>
+
+class PaidServicesEventHandlerImpl(
     private val context: Context,
     private val paidServicesRepository: PaidServicesRepository,
     private val connectivityManager: ConnectivityManager,
@@ -29,7 +31,7 @@ class PaidServicesEventHandler(
     private val commonReceiptsMapper : StateMapper<DataState<List<Receipt>>>,
     private val tutionFeePaymentsMapper: StateMapper<DataState<List<TuitionFeePayment>>>,
     private val paidInfoMapper : StateMapper<DataState<PaidServicesInfo>>
-) : SuspendEventHandler<PaidServicesEvent> by SuspendEventHandler.from(
+) : PaidServicesEventHandler, SuspendEventHandler<PaidServicesEvent> by SuspendEventHandler.from(
     UpdateRequestedHandler(
         paidServicesRepository = paidServicesRepository,
         connectivityManager = connectivityManager,

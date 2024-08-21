@@ -16,8 +16,7 @@ class CaptchaRecognizerImpl : CaptchaRecognizer {
     override suspend fun recognize(bitmap: Bitmap): String {
         return kotlin.runCatching {
             val image = InputImage.fromBitmap(bitmap, 0)
-//        return ""
-            suspendCoroutine<String> { cont ->
+            suspendCoroutine { cont ->
 
                 recognizer.process(image).addOnSuccessListener {
                     cont.resume(

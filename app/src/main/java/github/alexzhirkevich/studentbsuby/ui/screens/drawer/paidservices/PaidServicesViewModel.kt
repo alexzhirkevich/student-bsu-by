@@ -28,7 +28,7 @@ class PaidServicesViewModel @Inject constructor(
     @CommonReceiptsQualifier
     val commonReceiptsCommunication : StateCommunication<DataState<List<Receipt>>>,
     val tutionFeeCommunication: StateCommunication<DataState<List<TuitionFeePayment>>>,
-    eventHandler : SuspendEventHandler<PaidServicesEvent>,
+    eventHandler : PaidServicesEventHandler,
     errorHandler: ErrorHandler,
     dispatchers: Dispatchers,
 ) : SuspendHandlerViewModel<PaidServicesEvent>(

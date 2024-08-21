@@ -23,6 +23,8 @@ import kotlinx.coroutines.*
 import me.onebone.toolbar.ExperimentalToolbarApi
 import java.lang.Exception
 
+interface LoginEventHandler : SuspendEventHandler<LoginEvent>
+
 @ExperimentalCoroutinesApi
 @ExperimentalToolbarApi
 @ExperimentalPagerApi
@@ -30,7 +32,7 @@ import java.lang.Exception
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
-class LoginEventHandler(
+class LoginEventHandlerImpl(
     private val dispatchers: Dispatchers,
     private val resourceManager : ResourceManager,
     private val loginRepository: LoginRepository,
@@ -43,7 +45,7 @@ class LoginEventHandler(
     private val errorMapper : Mapper<String>,
     private val controlsEnabledMapper : Mapper<Boolean>,
     private val connectivityMapper: BroadcastMapper<ConnectivityUi>,
-) : SuspendEventHandler<LoginEvent> by SuspendEventHandler.from(
+) : LoginEventHandler, SuspendEventHandler<LoginEvent> by SuspendEventHandler.from(
     AutoLoginChangedHandler(autoLoginMapper),
     CaptchaChangedHandler(captchaMapper),
     LoginChangedHandler(loginMapper),

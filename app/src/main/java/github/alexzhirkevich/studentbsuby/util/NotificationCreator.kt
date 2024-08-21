@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
@@ -42,7 +43,8 @@ class NotificationCreator(
         PendingIntent.getActivity(
             context, 0, Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }, 0
+            },
+            FLAG_IMMUTABLE
         )
     }
 
@@ -84,6 +86,7 @@ class NotificationCreator(
                 .setContentTitle(title)
                 .setContentText(text)
                 .build()
+
             manager.notify(id, notification)
         }
     }

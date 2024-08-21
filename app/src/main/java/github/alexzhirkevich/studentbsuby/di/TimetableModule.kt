@@ -8,6 +8,7 @@ import github.alexzhirkevich.studentbsuby.repo.TimetableRepository
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.Timetable
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.TimetableEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.TimetableEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.TimetableEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.util.Calendar
 import github.alexzhirkevich.studentbsuby.util.ConnectivityManager
 import github.alexzhirkevich.studentbsuby.util.DataState
@@ -41,7 +42,7 @@ class TimetableModule {
         calendar: Calendar,
         timetableRepository: TimetableRepository,
         connectivityManager: ConnectivityManager
-    ) : SuspendEventHandler<TimetableEvent> = TimetableEventHandler(
+    ) : TimetableEventHandler = TimetableEventHandlerImpl(
         timetableRepository = timetableRepository,
         calendar = calendar,
         timetableMapper = timetableCommunication,

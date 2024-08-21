@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import github.alexzhirkevich.studentbsuby.repo.SettingsRepository
 import github.alexzhirkevich.studentbsuby.ui.screens.settings.SettingsEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.settings.SettingsEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.settings.SettingsEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.ui.screens.settings.SettingsState
 import github.alexzhirkevich.studentbsuby.util.EventHandler
 import github.alexzhirkevich.studentbsuby.util.communication.StateCommunication
@@ -62,7 +63,7 @@ class SettingsModule {
         repo : SettingsRepository,
         mapper: StateMapper<SettingsState>,
         logger: Logger
-    ) : EventHandler<SettingsEvent> = SettingsEventHandler(
+    ) : SettingsEventHandler = SettingsEventHandlerImpl(
         settingsRepository = repo,
         mapper = mapper,
         logger = logger,

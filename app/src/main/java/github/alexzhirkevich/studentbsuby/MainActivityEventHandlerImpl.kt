@@ -13,20 +13,21 @@ import github.alexzhirkevich.studentbsuby.repo.UpdateRepository
 import github.alexzhirkevich.studentbsuby.util.BaseSuspendEventHandler
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
 import github.alexzhirkevich.studentbsuby.util.communication.Mapper
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import ru.mintrocket.lib.mintpermissions.MintPermissionsController
 import ru.mintrocket.lib.mintpermissions.ext.isDenied
 
-class MainActivityEventHandler(
+interface MainActivityEventHandler : SuspendEventHandler<MainActivityEvent>
+
+class MainActivityEventHandlerImpl(
     private val dispatchers: Dispatchers,
     private val remoteConfigRepository: RemoteConfigRepository,
     private val updateRepository: UpdateRepository,
     private val reviewRepository: ReviewRepository,
     private val showUpdateRequired : Mapper<Boolean>,
     private val mintPermissionsController: MintPermissionsController
-) : SuspendEventHandler<MainActivityEvent> by SuspendEventHandler.from(
+) : MainActivityEventHandler, SuspendEventHandler<MainActivityEvent> by SuspendEventHandler.from(
     InitializedHandler(
         dispatchers = dispatchers,
         remoteConfigRepository = remoteConfigRepository,

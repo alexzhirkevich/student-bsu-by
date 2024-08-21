@@ -11,7 +11,9 @@ import github.alexzhirkevich.studentbsuby.util.communication.StateHolder
 import github.alexzhirkevich.studentbsuby.util.communication.StateMapper
 import kotlinx.coroutines.flow.*
 
-class SubjectsEventHandler(
+interface SubjectsEventHandler : SuspendEventHandler<SubjectsEvent>
+
+class SubjectsEventHandlerImpl(
     subjectRepository: SubjectsRepository,
     currentSemesterRepository: CurrentSemesterRepository,
     connectivityManager: ConnectivityManager,
@@ -24,7 +26,7 @@ class SubjectsEventHandler(
     visibleSubjectsMapper : StateMapper<DataState<List<List<Subject>>>>,
 ) : BaseSuspendEventHandler<SubjectsEvent>(
     SubjectsEvent::class
-) {
+), SubjectsEventHandler {
 
     private val searchChangedHandler : SuspendEventHandler<SubjectsEvent.SubjectsSearchChanged> =
         SubjectsSearchChangedHandler(

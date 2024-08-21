@@ -67,13 +67,13 @@ class HostelRepository @Inject constructor(
                 return HostelState.Provided(it)
             }
 
-        val table =    jsoup
+        val table = jsoup
             .getElementById("ctl00_ctl00_ContentPlaceHolder0_ContentPlaceHolder1_GridView1")
-        val numbers = table.getElementsByAttributeValue("align","center")
+        val numbers = table?.getElementsByAttributeValue("align","center")
             ?.filter { it.hasAttr("nowrap") }
             ?.map { it.text() }
 
-        val other = table.getElementsByAttributeValue("align","left")
+        val other = table?.getElementsByAttributeValue("align","left")
             ?.filter { !it.hasAttr("scope") }
             ?.map { it.text() }
             ?.chunked(8)

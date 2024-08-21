@@ -26,7 +26,7 @@ class SubjectsViewModel @Inject constructor(
     val subjectsCommunication : StateCommunication<DataState<List<List<Subject>>>>,
     @VisibleSubjectsQualifier
     val visibleSubjectsCommunication : StateCommunication<DataState<List<List<Subject>>>>,
-    eventHandler : SuspendEventHandler<SubjectsEvent>,
+    eventHandler : SubjectsEventHandler,
     errorHandler : ErrorHandler,
     dispatchers: Dispatchers
 ) : SuspendHandlerViewModel<SubjectsEvent>(

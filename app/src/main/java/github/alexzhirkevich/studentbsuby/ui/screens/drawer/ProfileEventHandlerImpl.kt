@@ -22,7 +22,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class ProfileEventHandler(
+interface ProfileEventHandler : SuspendEventHandler<ProfileEvent>
+
+class ProfileEventHandlerImpl(
     private val dispatchers: Dispatchers,
     private val connectivityManager: ConnectivityManager,
     private val loginRepository: LoginRepository,
@@ -32,7 +34,7 @@ class ProfileEventHandler(
     private val connectivityMapper: Mapper<ConnectivityUi>,
     private val imageMapper: StateMapper<DataState<ImageBitmap>>,
     private val userMapper: StateMapper<DataState<User>>
-) : SuspendEventHandler<ProfileEvent> by SuspendEventHandler.from(
+) : ProfileEventHandler, SuspendEventHandler<ProfileEvent> by SuspendEventHandler.from(
     ProfileEvent::class,
     LogoutEventHandler(dispatchers, loginRepository),
     RouteSelectedHandler(routeMapper, dispatchers),
@@ -59,11 +61,9 @@ private class RouteSelectedHandler(
             if (routeMapper.current != event.route.route) {
                 routeMapper.map(event.route)
                 event.navController.navigate(event.route.route) {
-                    val last =
-                        event.navController.backQueue.lastOrNull()?.destination?.id
+                    val last = event.navController.currentDestination?.id
                             ?: event.navController.graph.findStartDestination().id
                     popUpTo(last) {
-                        event.navController.backQueue.last().destination
                         saveState = true
                         inclusive = true
                     }

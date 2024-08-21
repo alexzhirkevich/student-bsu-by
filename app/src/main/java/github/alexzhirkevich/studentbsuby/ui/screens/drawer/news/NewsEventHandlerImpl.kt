@@ -15,14 +15,16 @@ import github.alexzhirkevich.studentbsuby.util.communication.Mapper
 import github.alexzhirkevich.studentbsuby.util.communication.StateMapper
 import kotlinx.coroutines.flow.*
 
-class NewsEventHandler(
+interface NewsEventHandler : SuspendEventHandler<NewsEvent>
+
+class NewsEventHandlerImpl(
     dispatchers: Dispatchers,
     newsRepository: NewsRepository,
     connectivityManager: ConnectivityManager,
     loginCookieManager: LoginCookieManager,
     isUpdatingMapper: Mapper<Boolean>,
     newsMapper: StateMapper<DataState<List<News>>>
-) : SuspendEventHandler<NewsEvent> by
+) :NewsEventHandler,  SuspendEventHandler<NewsEvent> by
     SuspendEventHandler.from(
         SetupWebViewHandler(
             dispatchers = dispatchers,

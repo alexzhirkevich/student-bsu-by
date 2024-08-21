@@ -10,6 +10,7 @@ import github.alexzhirkevich.studentbsuby.repo.HostelRepository
 import github.alexzhirkevich.studentbsuby.repo.HostelState
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel.HostelEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel.HostelEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel.HostelEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.util.ConnectivityManager
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
@@ -41,8 +42,8 @@ class HostelModule {
         @ApplicationContext context: Context,
         hostelRepository: HostelRepository,
         connectivityManager: ConnectivityManager,
-    ) : SuspendEventHandler<HostelEvent> =
-        HostelEventHandler(
+    ) : HostelEventHandler =
+        HostelEventHandlerImpl(
             context = context,
             hostelRepository = hostelRepository,
             isUpdatingMapper = isUpdatingCommunication,

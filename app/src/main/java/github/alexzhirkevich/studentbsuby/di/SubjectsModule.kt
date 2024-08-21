@@ -9,6 +9,7 @@ import github.alexzhirkevich.studentbsuby.repo.CurrentSemesterRepository
 import github.alexzhirkevich.studentbsuby.repo.SubjectsRepository
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects.SubjectsEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects.SubjectsEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects.SubjectsEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.util.ConnectivityManager
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
@@ -95,7 +96,7 @@ class SubjectsModule {
         subjectsRepository: SubjectsRepository,
         currentSemesterRepository: CurrentSemesterRepository,
         connectivityManager: ConnectivityManager,
-    ) : SuspendEventHandler<SubjectsEvent> = SubjectsEventHandler(
+    ) : SubjectsEventHandler = SubjectsEventHandlerImpl(
         subjectRepository = subjectsRepository,
         currentSemesterRepository = currentSemesterRepository,
         connectivityManager = connectivityManager,

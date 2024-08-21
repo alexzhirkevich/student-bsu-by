@@ -31,7 +31,7 @@ class MainApplication : Application(), Configuration.Provider {
         initMintPermissions()
     }
 
-    override fun getWorkManagerConfiguration() =
+    override val workManagerConfiguration: Configuration by lazy {
         Configuration.Builder()
             .setWorkerFactory(
                 EntryPointAccessors
@@ -39,6 +39,7 @@ class MainApplication : Application(), Configuration.Provider {
                     .hiltWorkerFactory()
             )
             .build()
+    }
 
     @InstallIn(SingletonComponent::class)
     @EntryPoint

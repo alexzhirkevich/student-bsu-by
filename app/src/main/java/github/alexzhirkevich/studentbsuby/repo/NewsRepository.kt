@@ -25,35 +25,35 @@ class NewsRepository @Inject constructor(
     override suspend fun getFromWeb(): List<News>? {
         return Jsoup.parse(api.news().html())
             .getElementsByClass("LineMain")
-            .first()
-            .getElementsByTag("tbody")
-            .first()
-            .getElementsByTag("td")
-            .last()
-            .children()
-            .apply {
+            .firstOrNull()
+            ?.getElementsByTag("tbody")
+            ?.firstOrNull()
+            ?.getElementsByTag("td")
+            ?.last()
+            ?.children()
+            ?.apply {
                 removeAll {
                     it.tag() == Tag.valueOf("br")
                 }
             }
-            .drop(1)
-
-            .groupUnless {
+            ?.drop(1)
+            ?.groupUnless {
                 it.tag() == Tag.valueOf("h2")
             }
-            .filter {
+            ?.filter {
                 it.isNotEmpty() &&
                         it[0].getElementsByAttributeValueContaining("href", "id=")
                             .isNotEmpty()
             }
-            .map {
+            ?.mapNotNull {
+                val id = it[0]
+                    .getElementsByAttributeValueContaining("href", "id=")
+                    .firstOrNull()
+                    ?.attr("href")
+                    ?.substringAfter("=", "0")
+                    ?.toInt()  ?: return@mapNotNull null
                 News(
-                    id = it[0]
-                        .getElementsByAttributeValueContaining("href", "id=")
-                        .first()
-                        .attr("href")
-                        .substringAfter("=", "0")
-                        .toInt(),
+                    id = id,
                     title = it[0].text().trim(),
                     preview = it.filterNot {
                         it.allElements.any {
@@ -106,15 +106,15 @@ class NewsContentRepository constructor(
     override suspend fun getFromWeb(): NewsContent {
         return Jsoup.parse(profileApi.newsItem(id).html())
             .getElementById("ctl00_ctl00_ContentPlaceHolder0_ContentPlaceHolder1_frmNewsItem")
-            .apply {
+            ?.apply {
                 select("img").forEach {
                     it.attr("width", "100%")
                 }
             }
-            .html()
-            .let {
+            ?.html()
+            ?.let {
                 NewsContent(id, it)
-            }
+            }.let(::checkNotNull)
     }
 
     override suspend fun saveToCache(value: NewsContent) {

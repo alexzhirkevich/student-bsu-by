@@ -16,7 +16,7 @@ class MainActivityViewModel @Inject constructor(
     val showUpdateDialog : StateCommunication<Boolean>,
     dispatchers: Dispatchers,
     errorHandler: ErrorHandler,
-    eventHandler: SuspendEventHandler<MainActivityEvent>
+    eventHandler: MainActivityEventHandler
 ) : SuspendHandlerViewModel<MainActivityEvent>(
     dispatchers = dispatchers,
     suspendEventHandler = eventHandler,

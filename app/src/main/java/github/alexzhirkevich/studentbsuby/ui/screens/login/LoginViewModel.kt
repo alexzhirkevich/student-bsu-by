@@ -27,7 +27,7 @@ import javax.inject.Inject
 @ExperimentalPagerApi
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    eventHandler: SuspendEventHandler<LoginEvent>,
+    eventHandler: LoginEventHandler,
     dispatchers: Dispatchers,
     errorHandler: ErrorHandler,
     @LoginTextQualifier

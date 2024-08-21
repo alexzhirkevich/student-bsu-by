@@ -13,6 +13,7 @@ import github.alexzhirkevich.studentbsuby.data.models.TuitionFeePayment
 import github.alexzhirkevich.studentbsuby.repo.PaidServicesRepository
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices.PaidServicesEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices.PaidServicesEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices.PaidServicesEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.util.ConnectivityManager
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
@@ -101,8 +102,8 @@ class PaidServicesModule {
         @ApplicationContext context: Context,
         paidServicesRepository: PaidServicesRepository,
         connectivityManager: ConnectivityManager,
-    ) : SuspendEventHandler<PaidServicesEvent> =
-        PaidServicesEventHandler(
+    ) : PaidServicesEventHandler =
+        PaidServicesEventHandlerImpl(
             context = context,
             paidServicesRepository = paidServicesRepository,
             isUpdatingMapper  = isUpdatingCommunication,

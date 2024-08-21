@@ -34,7 +34,7 @@ class ProfileViewModel @Inject constructor(
     val imageCommunication: StateCommunication<DataState<ImageBitmap>>,
     dispatchers: Dispatchers,
     errorHandler: ErrorHandler,
-    eventHandler: SuspendEventHandler<ProfileEvent>
+    eventHandler: ProfileEventHandler
 ) : SuspendHandlerViewModel<ProfileEvent>(
     dispatchers = dispatchers,
     errorHandler = errorHandler,

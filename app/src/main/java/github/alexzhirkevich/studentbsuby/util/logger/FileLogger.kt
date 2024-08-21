@@ -14,13 +14,17 @@ import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-abstract class DefaultLogger : Logger {
+open class DefaultLogger : Logger {
 
     override fun log(msg: String, tag : String, logLevel: Logger.LogLevel, cause: Throwable?) {
         when (logLevel) {
             Logger.LogLevel.Warning -> Log.w(tag, msg, cause)
             Logger.LogLevel.Error -> Log.e(tag, msg, cause)
         }
+    }
+
+    override fun share(context: Context) {
+
     }
 }
 

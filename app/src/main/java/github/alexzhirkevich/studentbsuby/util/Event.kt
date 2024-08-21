@@ -14,25 +14,24 @@ interface EventHandler<T : Event>{
 }
 
 @JvmSuppressWildcards
-interface SuspendEventHandler<T : Event> : Launcher, Releasable {
+interface SuspendEventHandler<out T : Event> : Launcher, Releasable {
 
     val event: KClass<@UnsafeVariance T>
 
     suspend fun handle(event: @UnsafeVariance T)
 
-
     companion object {
         inline fun <reified T : Event> from(
-            vararg handlers: SuspendEventHandler<out T>
+            vararg handlers: SuspendEventHandler<T>
         ): SuspendEventHandler<T> = from(T::class, *handlers)
 
         fun <T : Event> from(
             clazz: KClass<T>,
-            vararg handlers: SuspendEventHandler<out T>
+            vararg handlers: SuspendEventHandler<T>
         ): SuspendEventHandler<T> = object : SuspendEventHandler<T> {
             override val event: KClass<T> get() = clazz
 
-            override suspend fun handle(event: T) {
+            override suspend fun handle(event: @UnsafeVariance T) {
                 val handler = requireNotNull(handlers.find {
                     it.event == event::class
                 }) {

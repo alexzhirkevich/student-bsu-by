@@ -7,6 +7,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import github.alexzhirkevich.studentbsuby.MainActivityEvent
 import github.alexzhirkevich.studentbsuby.MainActivityEventHandler
+import github.alexzhirkevich.studentbsuby.MainActivityEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.repo.RemoteConfigRepository
 import github.alexzhirkevich.studentbsuby.repo.ReviewRepository
 import github.alexzhirkevich.studentbsuby.repo.UpdateRepository
@@ -37,8 +38,8 @@ class MainActivityModule {
         remoteConfigRepository: RemoteConfigRepository,
         updateRepository: UpdateRepository,
         reviewRepository: ReviewRepository
-    ) : SuspendEventHandler<MainActivityEvent> =
-        MainActivityEventHandler(
+    ) : MainActivityEventHandler =
+        MainActivityEventHandlerImpl(
             dispatchers = dispatchers,
             remoteConfigRepository = remoteConfigRepository,
             updateRepository = updateRepository,

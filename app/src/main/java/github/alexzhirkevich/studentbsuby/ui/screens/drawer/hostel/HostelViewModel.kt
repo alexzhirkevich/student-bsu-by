@@ -17,16 +17,15 @@ class HostelViewModel @Inject constructor(
     private val hostelRepository: HostelRepository,
     dispatchers: Dispatchers,
     errorHandler: ErrorHandler,
-    suspendEventHandler: SuspendEventHandler<HostelEvent>
+    suspendEventHandler: HostelEventHandler
 ) : SuspendHandlerViewModel<HostelEvent>(
     dispatchers = dispatchers,
     errorHandler = errorHandler,
     suspendEventHandler = suspendEventHandler
 ), Updatable {
 
-    override fun update() {
-        handle(HostelEvent.UpdateRequested)
-    }
+
+    override fun update() = handle(HostelEvent.UpdateRequested)
 
     fun getHostelImage(value: HostelState.Provided): String =
         hostelRepository.getImageForHostel(

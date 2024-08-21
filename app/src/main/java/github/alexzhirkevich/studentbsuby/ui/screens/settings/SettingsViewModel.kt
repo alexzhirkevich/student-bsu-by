@@ -21,5 +21,5 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     val state : StateCommunication<SettingsState>,
-    handler : EventHandler<SettingsEvent>
+    handler : SettingsEventHandler
 ) : ViewModel(), EventHandler<SettingsEvent> by handler

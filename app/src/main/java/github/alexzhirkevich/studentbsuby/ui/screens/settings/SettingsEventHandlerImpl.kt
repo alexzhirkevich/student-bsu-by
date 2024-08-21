@@ -17,18 +17,20 @@ import github.alexzhirkevich.studentbsuby.util.communication.StateMapper
 import github.alexzhirkevich.studentbsuby.util.logger.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+interface SettingsEventHandler : EventHandler<SettingsEvent>
+
 @ExperimentalCoroutinesApi
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
-class SettingsEventHandler(
+class SettingsEventHandlerImpl(
     settingsRepository: SettingsRepository,
     mapper : StateMapper<SettingsState>,
     logger: Logger,
     context: Context
-) : EventHandler<SettingsEvent> {
+) : SettingsEventHandler {
 
     private val notificationsEnabledHandler = NotificationsEnabledHandler(settingsRepository, mapper)
     private val collectStatisticHandler = CollectStatisticHandler(settingsRepository, mapper)

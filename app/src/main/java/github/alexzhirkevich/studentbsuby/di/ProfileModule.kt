@@ -58,8 +58,8 @@ class ProfileModule  {
         userRepository: UserRepository,
         photoRepository: PhotoRepository,
         connectivityMapper : BroadcastMapper<ConnectivityUi>
-    ) : SuspendEventHandler<ProfileEvent> =
-        ProfileEventHandler(
+    ) : ProfileEventHandler =
+        ProfileEventHandlerImpl(
             dispatchers = dispatchers,
             connectivityManager = connectivityManager,
             loginRepository = loginRepository,

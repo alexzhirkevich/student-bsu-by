@@ -33,7 +33,10 @@ fun <T> Communication<T>.toStateCommunication(initial : T) : StateCommunication<
         override var current: T = initial
             private set
 
-        override suspend fun saveIn(savedStateHandle: SavedStateHandle, key: String) {
+        override suspend fun saveIn(
+            savedStateHandle: SavedStateHandle,
+            key: String,
+        ) {
 
             savedStateHandle.get<T>(key)?.let {
                 current = it

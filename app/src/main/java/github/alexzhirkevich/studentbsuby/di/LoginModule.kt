@@ -15,6 +15,7 @@ import github.alexzhirkevich.studentbsuby.repo.LoginRepository
 import github.alexzhirkevich.studentbsuby.ui.screens.drawer.ConnectivityUi
 import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginEvent
 import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginEventHandler
+import github.alexzhirkevich.studentbsuby.ui.screens.login.LoginEventHandlerImpl
 import github.alexzhirkevich.studentbsuby.util.DataState
 import github.alexzhirkevich.studentbsuby.util.ResourceManager
 import github.alexzhirkevich.studentbsuby.util.SuspendEventHandler
@@ -102,7 +103,7 @@ class LoginModule {
         loginRepository: LoginRepository,
         syncWorkerManager: SyncWorkerManager,
         connectivityMapper : BroadcastMapper<ConnectivityUi>
-    ) : SuspendEventHandler<LoginEvent> = LoginEventHandler(
+    ) : LoginEventHandler = LoginEventHandlerImpl(
         dispatchers = dispatchers,
         resourceManager = resourceManager,
         loginRepository = loginRepository,
