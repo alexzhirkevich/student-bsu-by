@@ -1,0 +1,546 @@
+package github.alexzhirkevich.studentbsuby.ui.screens.drawer
+
+import androidx.compose.animation.*
+import androidx.compose.animation.core.animate
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.DraggableState
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import github.alexzhirkevich.studentbsuby.resources.Res
+import github.alexzhirkevich.studentbsuby.resources.connecting
+import github.alexzhirkevich.studentbsuby.resources.logout
+import github.alexzhirkevich.studentbsuby.resources.offline
+import github.alexzhirkevich.studentbsuby.resources.relogin
+import github.alexzhirkevich.studentbsuby.resources.settings
+import github.alexzhirkevich.studentbsuby.resources.logo_text
+import github.alexzhirkevich.studentbsuby.resources.close
+import github.alexzhirkevich.studentbsuby.data.models.User
+import github.alexzhirkevich.studentbsuby.ui.common.animatedComposable
+import github.alexzhirkevich.studentbsuby.ui.common.isTablet
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.about.AboutScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.hostel.HostelScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.news.NewsScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.paidservices.PaidServicesScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.subjects.SubjectsScreen
+import github.alexzhirkevich.studentbsuby.ui.screens.drawer.timetable.TimetableScreen
+import github.alexzhirkevich.studentbsuby.util.DataState
+import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import github.alexzhirkevich.studentbsuby.util.communication.collectAsState
+import github.alexzhirkevich.studentbsuby.util.valueOrNull
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import kotlin.math.absoluteValue
+
+private val AvatarWidth = 150.dp
+private val AvatarHeight = 200.dp
+private val AvatarOffset  = AvatarHeight/3.5f
+private val CardPaddings = 12.dp
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
+@Composable
+fun DrawerScreen(
+    navController: NavController,
+    profileViewModel: ProfileViewModel = koinViewModel(),
+) {
+    val scaffoldState = rememberScaffoldState(
+        drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    )
+    val scope = rememberCoroutineScope()
+    val childNavController = rememberNavController()
+    val initial =  DrawerRoute.Timetable
+    val isTablet = isTablet()
+
+    val routes = remember {
+        listOf(
+            DrawerRoute.News,
+            DrawerRoute.Subjects,
+            DrawerRoute.Timetable,
+            DrawerRoute.Hostel,
+            DrawerRoute.PaidServices,
+            DrawerRoute.About,
+        )
+    }
+
+    val connection by profileViewModel.connectivityCommunication
+        .collectAsState(initial = ConnectivityUi.Connected)
+
+    Scaffold(
+        scaffoldState = scaffoldState,
+        modifier = Modifier.background(MaterialTheme.colors.secondary),
+        drawerShape = DrawerShape,
+        drawerGesturesEnabled = scaffoldState.drawerState.isOpen,
+        snackbarHost = {
+           ConnectivitySnackBar(
+               connection = connection
+           ) {
+               profileViewModel.handle(ProfileEvent.Logout(navController))
+           }
+        },
+        drawerContent = {
+            if (!isTablet) {
+                DrawerContent(
+                    navController = navController,
+                    childNavController = childNavController,
+                    routes = routes,
+                    profileViewModel = profileViewModel
+                ) {
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                }
+            }
+        },
+    ) { paddingValues ->
+
+        fun onMenuClicked() {
+            scope.launch {
+                scaffoldState.drawerState.let {
+                    if (it.isClosed)
+                        it.open()
+                    else it.close()
+                }
+            }
+        }
+
+        Row(Modifier.padding(paddingValues)) {
+            if (isTablet){
+                Card(
+                    elevation = 5.dp,
+                    shape = RectangleShape
+                ) {
+                    DrawerContent(
+                        navController = navController,
+                        childNavController = childNavController,
+                        routes = routes,
+                        profileViewModel = profileViewModel
+                    )
+                }
+            }
+            NavHost(
+                navController = childNavController,
+                startDestination = initial.route.route
+            ) {
+                val animIn = scaleIn(initialScale = .95f) + fadeIn()
+                val animOut = scaleOut(targetScale = .95f) + fadeOut()
+
+                animatedComposable(
+                    DrawerRoute.News.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    NewsScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+                animatedComposable(
+                    DrawerRoute.Subjects.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    SubjectsScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.Timetable.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    TimetableScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.Hostel.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    HostelScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.About.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    AboutScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+
+                animatedComposable(
+                    DrawerRoute.PaidServices.route,
+                    enterTransition = { animIn },
+                    exitTransition = { animOut }
+                ) {
+                    PaidServicesScreen(isTablet, onMenuClicked = ::onMenuClicked)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ConnectivitySnackBar(
+    connection: ConnectivityUi,
+    onRelogin: () -> Unit
+) {
+    if (connection != ConnectivityUi.Connected) {
+        Box(
+            modifier = Modifier
+                .navigationBarsPadding()
+                .fillMaxWidth()
+        ) {
+            Card(
+                elevation = 5.dp,
+                backgroundColor = MaterialTheme.colors.error,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(10.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .animateContentSize()
+                        .padding(3.dp)
+                ) {
+                    var expanded by rememberSaveable {
+                        mutableStateOf(true)
+                    }
+                    if (expanded) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(
+                                    vertical = 5.dp,
+                                    horizontal = 10.dp
+                                )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.offline),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onError
+                            )
+                            Text(
+                                text = stringResource(if (connection == ConnectivityUi.Offline)
+                                    Res.string.relogin else Res.string.connecting),
+                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colors.onError
+                            )
+                        }
+                        if (connection == ConnectivityUi.Offline) {
+                            IconButton(onClick = onRelogin) {
+                                Icon(
+                                    imageVector = Icons.Default.Login,
+                                    contentDescription = null
+                                )
+                            }
+                        }
+                    }
+                    IconButton(onClick = {
+                        expanded = !expanded
+                    }) {
+                        AnimatedContent(targetState = expanded) { isExpanded ->
+                            Icon(
+                                imageVector = if (isExpanded)
+                                    Icons.Default.Close
+                                else Icons.Default.CloudOff,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DrawerContent(
+    navController: NavController,
+    childNavController: NavController,
+    routes: List<DrawerRoute>,
+    profileViewModel: ProfileViewModel,
+    onRouteSelected: () -> Unit = {}
+) {
+    Column(
+        Modifier
+            .background(MaterialTheme.colors.secondary)
+            .widthIn(max = DrawerShape.width.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding(),
+        ) {
+            Box(
+                Modifier
+                    .clip(ProfileRoundShape())
+                    .background(MaterialTheme.colors.primaryVariant)
+                    .bsuBackgroundPattern(
+                        MaterialTheme.colors.onPrimary
+                            .copy(alpha = .1f)
+                    )
+                    .statusBarsPadding()
+            ) {
+                SelectionContainer {
+                    ProfileCard(
+                        photo = profileViewModel.imageCommunication
+                            .collectAsState().value,
+                        user = profileViewModel.userCommunication
+                            .collectAsState().value,
+                        modifier = Modifier
+                            .padding(CardPaddings)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(5.dp))
+
+            Column {
+                routes.forEach { route ->
+                    DrawerButton(
+                        icon = route.icon,
+                        text = stringResource(route.title),
+                        onClick = {
+                            onRouteSelected()
+                            profileViewModel.handle(ProfileEvent.RouteSelected(route, childNavController))
+                        })
+                }
+                Spacer(
+                    modifier = Modifier
+                        .height(.5.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.typography.caption.color)
+                )
+                DrawerButton(
+                    icon = Icons.Default.Settings,
+                    text = stringResource(Res.string.settings),
+                    onClick = {
+                        onRouteSelected()
+                        profileViewModel.handle(ProfileEvent.SettingsClicked(navController))
+                    })
+            }
+            Spacer(modifier = Modifier.weight(1f))
+
+            DrawerButton(
+                icon = Icons.Default.Logout,
+                text = stringResource(Res.string.logout),
+                onClick = {
+                    profileViewModel.handle(ProfileEvent.Logout(navController))
+                })
+        }
+    }
+}
+
+@Composable
+private fun DrawerButton(
+    icon : ImageVector,
+    text : String,
+    onClick : () -> Unit,
+    modifier: Modifier = Modifier,
+    content : @Composable RowScope.() -> Unit = {}
+){
+    CompositionLocalProvider(
+        LocalTextStyle provides LocalTextStyle.current.copy(
+            color = MaterialTheme.colors.primary,
+        )
+    ){
+        Row(
+            modifier
+                .clickable(onClick = onClick)
+                .heightIn(min = 45.dp)
+                .padding(
+                    horizontal = 15.dp,
+                    vertical = 5.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = "Menu Icon",
+                tint = MaterialTheme.colors.primary,
+            )
+            Spacer(modifier = Modifier.width(20.dp))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier.weight(1f)
+            )
+            content()
+        }
+    }
+}
+
+@Composable
+private fun ProfileCard(
+    photo : DataState<ImageBitmap>,
+    user: DataState<User>,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier) {
+        Row(modifier = Modifier.zIndex(2f)) {
+            Card(
+                shape = MaterialTheme.shapes.medium,
+                backgroundColor = MaterialTheme.colors.secondary,
+                elevation = 5.dp,
+                modifier = Modifier
+            ) {
+                var dialogVisible by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                val photoValue = photo.valueOrNull()
+                if (photoValue != null) {
+                    if (dialogVisible) {
+                        Dialog(onDismissRequest = {
+                            dialogVisible = false
+                        }) {
+                            var offsetY by remember {
+                                mutableStateOf(0f)
+                            }
+                            val dragState = remember {
+                                DraggableState {
+                                    offsetY+=it
+                                }
+                            }
+                            val density = LocalDensity.current
+
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(10.dp)
+                                    .draggable(
+                                        state = dragState,
+                                        orientation = Orientation.Vertical,
+                                        onDragStopped = {
+                                            if (offsetY.absoluteValue > 75 * density.density) {
+                                                dialogVisible = false
+                                            } else {
+                                                animate(offsetY, 0f) { a, _ ->
+                                                    offsetY = a
+                                                }
+                                            }
+                                        }
+                                    )
+                            ) {
+                                Image(
+                                    bitmap = photoValue,
+                                    contentScale = ContentScale.Crop,
+                                    contentDescription = "Photo",
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .aspectRatio(AvatarWidth / AvatarHeight)
+                                        .fillMaxSize()
+                                        .offset {
+                                            IntOffset(0, offsetY.toInt())
+                                        }
+                                )
+                            }
+                        }
+                    }
+
+                    Image(
+                        bitmap = photoValue,
+                        contentScale = ContentScale.Crop,
+                        contentDescription = "Photo",
+                        modifier = Modifier
+                            .width(AvatarWidth)
+                            .height(AvatarHeight)
+                            .clickable {
+                                dialogVisible = true
+                            }
+                    )
+                } else Spacer(
+                    modifier = Modifier
+                        .width(AvatarWidth)
+                        .height(AvatarHeight)
+                )
+            }
+            Box(
+                Modifier
+                    .height(AvatarOffset)
+                    .weight(1f)
+                    .padding(10.dp)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.logo_text),
+                    contentDescription = "Logo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                )
+            }
+        }
+
+        Card(
+            shape = MaterialTheme.shapes.medium,
+            elevation = 5.dp,
+            backgroundColor = MaterialTheme.colors.secondary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = AvatarOffset)
+                .zIndex(1f)
+        ) {
+            val userValue = user.valueOrNull() ?: User()
+            Column(
+                modifier = Modifier
+                    .padding(CardPaddings)
+            ) {
+                Column(
+                    Modifier.heightIn(min = AvatarHeight - AvatarOffset + 5.dp)
+                ) {
+                    Text(
+                        text = userValue.name,
+                        modifier = Modifier
+                            .padding(start = AvatarWidth),
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colors.onSecondary,
+                        style = MaterialTheme.typography.subtitle1
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Text(
+                        text = userValue.faculty,
+                        modifier = Modifier.padding(start = AvatarWidth),
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.caption
+                    )
+                }
+                Text(
+                    text = userValue.info,
+                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.body1,
+                )
+                Text(
+                    text = userValue.avgGrade,
+                    color = MaterialTheme.colors.onSecondary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
