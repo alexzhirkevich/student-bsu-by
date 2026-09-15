@@ -1,6 +1,6 @@
 # student-bsu-by
 
-Android client for [BSU student's personal account](https://student.bsu.by).<br>
+Multiplatform client for [BSU student's personal account](https://student.bsu.by).<br>
 Published in [Google Play](https://play.google.com/store/apps/details?id=github.alexzhirkevich.studentbsuby).
 
 ## Screenshots
@@ -15,15 +15,18 @@ Published in [Google Play](https://play.google.com/store/apps/details?id=github.
 </table>
 
 
-## Built with
+## Built with kotlin multiplatform (KMP)
 
-* UI - Jetpack Compose
-* Network - Retrofit2
+Works both on ios and android.
+
+* UI - Compose Multiplatform
+* Network - Ktor
 * Database - Room
-* DI - Hilt
+* DI - Koin
 * Concurrency - Coroutines, Flow
 * Architecture - MVVM
 
 ## Authors
 
 * **Alexander Zhirkevich** - [Telegram](https://t.me/alexzhirkevich)
+* **Pavel Sushko** - [Telegram](https://t.me/sushkpavel)

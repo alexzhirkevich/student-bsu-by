@@ -1,0 +1,163 @@
+package github.alexzhirkevich.studentbsuby.ui.screens.drawer.about
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import github.alexzhirkevich.studentbsuby.resources.Res
+import github.alexzhirkevich.studentbsuby.resources.about
+import github.alexzhirkevich.studentbsuby.resources.about_text
+import github.alexzhirkevich.studentbsuby.resources.app_name
+import github.alexzhirkevich.studentbsuby.resources.ic_telegram
+import github.alexzhirkevich.studentbsuby.ui.common.HtmlText
+import github.alexzhirkevich.studentbsuby.ui.common.NavigationMenuButton
+import github.alexzhirkevich.studentbsuby.ui.common.toolbar.CollapsingToolbarScaffold
+import github.alexzhirkevich.studentbsuby.ui.common.toolbar.ScrollStrategy
+import github.alexzhirkevich.studentbsuby.ui.common.toolbar.rememberCollapsingToolbarScaffoldState
+import github.alexzhirkevich.studentbsuby.ui.common.toolbar.rememberCollapsingToolbarState
+import github.alexzhirkevich.studentbsuby.util.animatedSquaresBackground
+import github.alexzhirkevich.studentbsuby.util.bsuBackgroundPattern
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun AboutScreen(
+    isTablet: Boolean,
+    aboutViewModel: AboutViewModel = koinViewModel(),
+    onMenuClicked: () -> Unit
+) {
+    val scaffoldState = rememberCollapsingToolbarScaffoldState(
+        toolbarState = rememberCollapsingToolbarState()
+    )
+
+    LaunchedEffect(Unit) {
+        scaffoldState.toolbarState.collapse(0)
+        scaffoldState.toolbarState.expand(500)
+    }
+
+    CollapsingToolbarScaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background),
+        toolbarModifier = Modifier
+            .background(MaterialTheme.colors.secondary),
+        state = scaffoldState,
+        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+        toolbar = {
+            Column {
+                Spacer(modifier = Modifier.windowInsetsTopHeight(WindowInsets.statusBars))
+                TopAppBar(
+                    elevation = 0.dp,
+                    backgroundColor = Color.Transparent
+                ) {
+                    if (!isTablet) {
+                        NavigationMenuButton(onClick = onMenuClicked)
+                    }
+                    AnimatedVisibility(visible = scaffoldState.toolbarState.progress == 0f) {
+                        Text(
+                            text = stringResource(Res.string.about),
+                            color = MaterialTheme.colors.onSecondary,
+                            style = MaterialTheme.typography.subtitle1
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = stringResource(Res.string.app_name),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h2,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .parallax(0.5f)
+                    .animatedSquaresBackground(
+                        color = MaterialTheme.colors.primary.copy(alpha = .05f),
+                        count = 10,
+                        size = 200.dp
+                    )
+                    .alpha(scaffoldState.toolbarState.progress)
+                    .padding(
+                        vertical = 60.dp,
+                        horizontal = 50.dp
+                    )
+            )
+        }) {
+
+        Column(
+            Modifier
+                .bsuBackgroundPattern(
+                    color = MaterialTheme.colors.primary.copy(alpha = .05f)
+                )
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp)
+        ) {
+            Card(
+                elevation = 3.dp,
+                backgroundColor = MaterialTheme.colors.secondary,
+            ) {
+                HtmlText(
+                    textId = Res.string.about_text,
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.padding(10.dp),
+                    urlSpanStyle = SpanStyle(
+                        color = MaterialTheme.colors.primary,
+                        textDecoration = TextDecoration.Underline
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        aboutViewModel.handle(AboutEvent.EmailClicked)
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "E-mail",
+                        tint = MaterialTheme.colors.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = {
+                        aboutViewModel.handle(AboutEvent.TgClicked)
+                    }
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_telegram),
+                        contentDescription = "Telegram",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        }
+    }
+}
